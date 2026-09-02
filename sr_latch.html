@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SR Latch Interactive Lab — Learn, Practice &amp; Assess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --radius-lg:24px; --radius-md:16px; --radius-sm:10px;
+  --font-display:'Space Grotesk',Inter,sans-serif;
+  --font-body:'Inter',Arial,sans-serif;
+  --font-mono:'JetBrains Mono',Consolas,monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0a0e18; --bg-grid:#151f33;
+  --surface:#111d2e; --surface-2:#1a2540; --surface-hover:#202d47;
+  --border:#2a3a52; --border-soft:#202d47;
+  --text:#f0f4fa; --text-muted:#9da8bf; --text-faint:#6b7a94;
+  --ink:#e8ecf6; --gate-fill:#162235;
+  --wire-off:#3d4d68;
+  --accent:#ff9500; --accent-strong:#ffa600; --accent-ink:#1a0a00;
+  --success:#48dda8; --danger:#ff6b6b; --warning:#ffd056;
+  --brand-a:#7c6cf0; --brand-b:#34d3c9; --brand-c:#ff8fb1;
+  --shadow:0 20px 50px -20px rgba(0,0,0,.8);
+  --shadow-sm:0 8px 24px -12px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+[data-theme="light"]{
+  --bg:#f0f4fa; --bg-grid:#e0e8f5;
+  --surface:#ffffff; --surface-2:#f5f9ff; --surface-hover:#ebf2ff;
+  --border:#d9e4f0; --border-soft:#e5ecf8;
+  --text:#0a1628; --text-muted:#4a5f7a; --text-faint:#7a8fa5;
+  --ink:#152d48; --gate-fill:#ffffff;
+  --wire-off:#9fb3d0;
+  --accent:#e67e22; --accent-strong:#ff9500; --accent-ink:#3a1a00;
+  --success:#089968; --danger:#e74c3c; --warning:#d4a700;
+  --brand-a:#4338ca; --brand-b:#0891b2; --brand-c:#c0388a;
+  --shadow:0 20px 50px -20px rgba(30,50,100,.15);
+  --shadow-sm:0 8px 24px -12px rgba(30,50,100,.1);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font-body);color:var(--text);background:var(--bg);
+  background-image:linear-gradient(var(--bg-grid) 1px,transparent 1px),linear-gradient(90deg,var(--bg-grid) 1px,transparent 1px);
+  background-size:50px 50px;min-height:100vh;transition:all .4s var(--ease)}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+header{position:relative;overflow:hidden;padding:45px 20px 35px;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2 40%,#f093fb);background-size:220% 220%;animation:bgshift 15s ease infinite}
+@keyframes bgshift{0%,100%{background-position:0% 40%}50%{background-position:100% 60%}}
+header .orb{position:absolute;border-radius:50%;background:#ffffff2a;filter:blur(3px);pointer-events:none}
+header .orb.o1{width:340px;height:340px;right:-110px;top:-160px;animation:float1 11s ease-in-out infinite}
+header .orb.o2{width:200px;height:200px;left:-80px;bottom:-110px;animation:float2 13s ease-in-out infinite}
+@keyframes float1{50%{transform:translate(-60px,60px) scale(1.18)}}
+@keyframes float2{50%{transform:translate(50px,-35px) scale(1.12)}}
+.wrap,main{max-width:1400px;margin:auto}
+.head{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:56px;height:56px;border-radius:16px;background:#ffffff26;border:1.5px solid #ffffff48;display:flex;align-items:center;justify-content:center;font-size:28px;backdrop-filter:blur(8px);box-shadow:0 0 28px #ffffff35;flex:none;animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.eyebrow{margin:0 0 4px;font:600 11.5px/1 var(--font-mono);letter-spacing:.16em;text-transform:uppercase;opacity:.9}
+h1{margin:0;font:700 clamp(28px,5vw,42px)/1.1 var(--font-display);letter-spacing:-.02em}
+header p.tagline{position:relative;line-height:1.8;opacity:.94;font-size:15.5px;max-width:920px;margin:18px 0 0}
+.theme-toggle{display:flex;align-items:center;gap:10px;border:1.5px solid #ffffff45;background:#ffffff20;color:#fff;padding:10px 18px;border-radius:999px;cursor:pointer;font:600 13.5px var(--font-body);backdrop-filter:blur(8px);transition:.3s var(--ease)}
+.theme-toggle:hover{background:#ffffff30;transform:translateY(-2px)}
+.stat-row{margin:22px 0 0;display:flex;gap:12px;flex-wrap:wrap}
+.stat{padding:10px 16px;border-radius:12px;background:#ffffff1e;border:1px solid #ffffff40;font:600 12px var(--font-mono);backdrop-filter:blur(8px)}
+
+.mode-tabs{display:flex;gap:10px;padding:12px 20px;background:var(--surface);border-bottom:2px solid var(--border-soft);flex-wrap:wrap;position:sticky;top:0;z-index:20}
+.mode-btn{padding:12px 24px;border:2px solid var(--border);background:transparent;color:var(--text-muted);border-radius:12px;font:600 14px var(--font-display);cursor:pointer;transition:.3s var(--ease)}
+.mode-btn:hover{border-color:var(--accent);color:var(--text)}
+.mode-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-strong));color:var(--accent-ink);border-color:transparent;box-shadow:0 8px 24px color-mix(in srgb, var(--accent) 50%, transparent)}
+.page{display:none}.page.active{display:block;animation:fadeIn .5s var(--ease)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+main{padding:20px}
+
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin:18px 0;box-shadow:var(--shadow-sm);transition:all .4s var(--ease);animation:cardIn .6s var(--ease) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:var(--shadow)}
+.card h2{margin-top:0;font-family:var(--font-display);font-size:22px;border-left:6px solid var(--accent);padding-left:14px;color:var(--text)}
+.card h3{margin:20px 0 12px;font-size:16px;color:var(--text);font-weight:600}
+.theory{line-height:1.85;color:var(--text-muted);font-size:15px;margin:12px 0}
+.theory b{color:var(--text)}
+.theory code{background:var(--surface-2);padding:3px 10px;border-radius:6px;font-family:var(--font-mono);color:var(--accent);font-weight:600}
+
+.note,.concept{background:var(--surface-2);border-left:5px solid var(--brand-b);border-radius:10px;padding:15px;line-height:1.8;margin:14px 0;font-size:14px;color:var(--text-muted)}
+.note b,.concept b{color:var(--text)}
+
+.result{background:linear-gradient(120deg,var(--brand-a),var(--brand-b));color:#fff;border-radius:12px;padding:16px;margin:16px 0;font-family:var(--font-mono);box-shadow:var(--shadow-sm);border:none;font-size:14px;font-weight:600}
+
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+.ctrl-btn{padding:12px 24px;background:var(--surface-2);border:2px solid var(--border);border-radius:10px;font:600 13.5px var(--font-mono);color:var(--text-muted);cursor:pointer;transition:.3s var(--ease);box-shadow:var(--shadow-sm)}
+.ctrl-btn:hover{border-color:var(--accent);color:var(--text);transform:translateY(-2px)}
+.ctrl-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-strong));color:var(--accent-ink);border:none;box-shadow:0 8px 20px color-mix(in srgb, var(--accent) 50%, transparent)}
+
+.state-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:20px 0}
+.state-card{background:var(--surface-2);border:2.5px solid var(--border);border-radius:12px;padding:18px;text-align:center;transition:all .4s var(--ease)}
+.state-card.high{border-color:var(--success);background:color-mix(in srgb, var(--success) 15%, transparent);box-shadow:0 0 20px color-mix(in srgb, var(--success) 35%, transparent)}
+.state-card.low{border-color:var(--danger);background:color-mix(in srgb, var(--danger) 15%, transparent);box-shadow:0 0 20px color-mix(in srgb, var(--danger) 35%, transparent)}
+.state-card.hold{border-color:var(--warning);background:color-mix(in srgb, var(--warning) 12%, transparent)}
+.state-label{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.state-value{font-size:36px;font-family:var(--font-mono);font-weight:900;letter-spacing:2px;color:var(--text)}
+.state-card.high .state-value{color:var(--success)}
+.state-card.low .state-value{color:var(--danger)}
+.state-card.hold .state-value{color:var(--warning)}
+
+.circuit-box{background:var(--surface-2);border:1.5px solid var(--border-soft);border-radius:14px;padding:14px;margin:18px 0;overflow:auto}
+.circuit-box svg{display:block;width:100%;height:auto;min-height:400px}
+
+.wire{fill:none;stroke:var(--wire-off);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;transition:all .25s;vector-effect:non-scaling-stroke}
+.wire.on{stroke:var(--accent);stroke-width:6;filter:drop-shadow(0 0 12px var(--accent));animation:flowGlow .5s ease-in-out}
+
+/* ===== Timing / Waveform Diagram ===== */
+.wave-legend{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 4px}
+.wave-legend-item{display:flex;align-items:center;gap:7px;font:600 12.5px var(--font-mono);color:var(--text-muted)}
+.wave-legend-swatch{width:22px;height:4px;border-radius:2px;flex:none}
+.wave-grid-v{stroke:var(--border);stroke-width:1;opacity:.55}
+.wave-grid-h{stroke:var(--border-soft);stroke-width:1;stroke-dasharray:3,4;opacity:.7}
+.wave-band{fill:var(--surface);opacity:.5}
+.wave-line{fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.wave-line.wave-s{stroke:var(--brand-b)}
+.wave-line.wave-r{stroke:var(--brand-c)}
+.wave-line.wave-q{stroke:var(--success)}
+.wave-line.wave-qbar{stroke:var(--danger)}
+.wave-dot{r:3.5}
+.wave-lvl-label{fill:var(--text-faint);font:600 9.5px var(--font-mono)}
+.wave-step-label{fill:var(--text-faint);font:600 10px var(--font-mono)}
+.wave-cursor{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4,3;opacity:.85}
+@keyframes flowGlow{0%{filter:drop-shadow(0 0 2px var(--accent))}50%{filter:drop-shadow(0 0 16px var(--accent))}100%{filter:drop-shadow(0 0 8px var(--accent))}}
+.gate-symbol{fill:var(--gate-fill);stroke:var(--ink);stroke-width:2.5;transition:all .3s}
+.gate-symbol:hover{stroke-width:3}
+.gate-label{fill:var(--ink);font:600 11px var(--font-mono);pointer-events:none;font-weight:700;font-family:monospace}
+.wire-label{fill:var(--text-faint);font:700 13px var(--font-mono);pointer-events:none;font-weight:700}
+
+.truth-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:var(--font-mono);font-size:14px}
+.truth-table th{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;padding:12px;text-align:center;font-weight:700;border:1.5px solid var(--border)}
+.truth-table td{padding:12px;text-align:center;border:1.5px solid var(--border);background:var(--surface-2);font-weight:600}
+.truth-table tr.active td{background:color-mix(in srgb, var(--accent) 25%, transparent);box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)}
+.truth-table .high{color:var(--success)}
+.truth-table .low{color:var(--danger)}
+.truth-table .hold{color:var(--warning)}
+
+.app-box{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow-sm)}
+.app-box h4{margin:0 0 8px;font:600 15px var(--font-display)}
+.app-box p{margin:6px 0;line-height:1.7;font-size:14px;opacity:.95}
+
+.quiz-question{background:var(--surface-2);border-left:5px solid var(--accent);border-radius:10px;padding:16px;margin:14px 0}
+.quiz-question h4{margin:0 0 12px;font:600 15px var(--font-display);color:var(--text)}
+.quiz-options{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.quiz-option{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:2px solid var(--border);border-radius:8px;cursor:pointer;transition:.3s var(--ease)}
+.quiz-option:hover{border-color:var(--accent);background:var(--surface-hover)}
+.quiz-option input[type="radio"]{width:18px;height:18px;cursor:pointer;accent-color:var(--accent)}
+.quiz-option label{flex:1;cursor:pointer;margin:0;font-weight:500}
+.quiz-feedback{padding:12px;border-radius:8px;margin-top:10px;font-weight:600;font-size:14px}
+.quiz-feedback.correct{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success);border-left:4px solid var(--success)}
+.quiz-feedback.incorrect{background:color-mix(in srgb, var(--danger) 20%, transparent);color:var(--danger);border-left:4px solid var(--danger)}
+
+.score-display{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;border-radius:14px;padding:24px;text-align:center;margin:18px 0}
+.score-display .big{font-size:48px;font-family:var(--font-mono);font-weight:900;margin:10px 0}
+.score-display .desc{font-size:14px;opacity:.9}
+
+.fabs{position:fixed;right:20px;bottom:20px;z-index:50}
+.fab{width:50px;height:50px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:var(--shadow);transition:.3s var(--ease);opacity:0;transform:translateY(15px);pointer-events:none}
+.fab.show{opacity:1;transform:none;pointer-events:auto}
+.fab:hover{transform:translateY(-4px);border-color:var(--accent);color:var(--accent)}
+
+footer{max-width:1400px;margin:20px auto 0;padding:28px 20px 50px;text-align:center;color:var(--text-faint);font-size:13px;border-top:1.5px solid var(--border-soft)}
+
+@media(max-width:768px){
+  .card{padding:16px}
+  .circuit-box svg{min-height:350px}
+  .state-grid{grid-template-columns:1fr}
+  .mode-tabs{flex-direction:column}
+  .mode-btn{width:100%}
+  header{padding:32px 16px 26px}
+}
+@media(prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body data-theme="dark">
+<header>
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <div class="wrap">
+    <div class="head">
+      <div class="brand">
+        <div class="brand-mark">🔐</div>
+        <div><p class="eyebrow">Sequential Logic · SR Latch</p><h1>Interactive Learning Lab</h1></div>
+      </div>
+      <button id="theme" class="theme-toggle"><span>🌙</span><span>Dark</span></button>
+    </div>
+    <p class="tagline">Complete SR latch mastery: Learn the fundamentals and applications, Practice with interactive simulations, and Test your understanding with comprehensive assessments. IEEE standard gates with live signal flow visualization.</p>
+    <div class="stat-row">
+      <span class="stat">📚 Learn</span>
+      <span class="stat">🧪 Practice</span>
+      <span class="stat">📝 Assess</span>
+      <span class="stat">🔌 Live Circuits</span>
+    </div>
+  </div>
+</header>
+
+<nav class="mode-tabs">
+  <button class="mode-btn active" onclick="switchMode('learn')">📚 Learn</button>
+  <button class="mode-btn" onclick="switchMode('practice')">🧪 Practice Sandbox</button>
+  <button class="mode-btn" onclick="switchMode('assess')">📝 Assessment</button>
+</nav>
+
+<main id="main">
+  <!-- LEARN PAGE -->
+  <div id="learn" class="page active">
+    
+    <!-- Theory Section -->
+    <div class="card">
+      <h2>📖 SR Latch Fundamentals</h2>
+      <div class="theory">
+        <b>What is an SR Latch?</b><br>
+        An SR (Set-Reset) latch is a bistable digital circuit that stores one bit of information. It can exist in one of two stable states: Q=1 or Q=0, and uses cross-coupled logic gates to maintain this state even after the input signals change. This property makes it the fundamental building block of memory elements in digital systems.
+      </div>
+      <div class="concept">
+        <b>Key Characteristics:</b><br>
+        • <b>Two outputs:</b> Q and Q̄ (complement) — always opposite<br>
+        • <b>Memory element:</b> Retains state without continuous input<br>
+        • <b>Asynchronous:</b> Responds immediately to input changes (no clock)<br>
+        • <b>Cross-coupled:</b> Each gate's output feeds back as input to the other gate<br>
+        • <b>Bistable:</b> Two stable states with distinct operating conditions
+      </div>
+    </div>
+
+    <!-- NOR Gate Based SR Latch -->
+    <div class="card">
+      <h2>⊕ SR Latch with NOR Gates</h2>
+      
+      <div class="theory">
+        <b>How NOR-based SR Latch Works:</b>
+      </div>
+      
+      <table class="truth-table">
+        <thead>
+          <tr><th>S</th><th>R</th><th>Q (next)</th><th>Q̄ (next)</th><th>Operation</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr id="nor_row_00"><td class="low">0</td><td class="low">0</td><td class="hold">Hold</td><td class="hold">Hold</td><td><b>Memory</b></td><td>Latch maintains previous state</td></tr>
+          <tr id="nor_row_10"><td class="high">1</td><td class="low">0</td><td class="high">1</td><td class="low">0</td><td><b>Set</b></td><td>Force Q to 1 (store 1)</td></tr>
+          <tr id="nor_row_01"><td class="low">0</td><td class="high">1</td><td class="low">0</td><td class="high">1</td><td><b>Reset</b></td><td>Force Q to 0 (store 0)</td></tr>
+          <tr id="nor_row_11"><td class="high">1</td><td class="high">1</td><td class="low">X</td><td class="high">X</td><td><b>Invalid</b></td><td>🚫 Forbidden state - avoid</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note" style="margin-top:16px">
+        <b>NOR Gate Logic:</b> Output is 1 only when <b>both</b> inputs are 0. A NOR gate truth: (0,0)→1 | (0,1)→0 | (1,0)→0 | (1,1)→0
+      </div>
+
+      <div class="note" id="nor_invalid_banner" style="margin-top:12px; border-left-color:var(--danger); display:none;">
+        <b>⚠ Invalid State:</b> S=1 and R=1 forces Q=0 <b>and</b> Q̄=0, breaking the rule that Q and Q̄ must always be opposite. Avoid this combination.
+      </div>
+
+      <!-- Interactive Circuit -->
+      <h3>⚡ Interactive SR Latch (NOR Gates)</h3>
+      
+      <div class="controls">
+        <button class="ctrl-btn" id="nor_s_btn" onclick="toggleNorInput(0)">S = 0</button>
+        <button class="ctrl-btn" id="nor_r_btn" onclick="toggleNorInput(1)">R = 0</button>
+        <button class="ctrl-btn" onclick="resetNorLatch()">⟲ Reset</button>
+      </div>
+
+      <div class="state-grid">
+        <div class="state-card low" id="nor_q_card">
+          <div class="state-label">Q Output</div>
+          <div class="state-value">0</div>
+        </div>
+        <div class="state-card high" id="nor_qbar_card">
+          <div class="state-label">Q̄ Output</div>
+          <div class="state-value">1</div>
+        </div>
+        <div class="state-card hold" id="nor_mode_card">
+          <div class="state-label">Mode</div>
+          <div class="state-value" style="font-size:18px;">HOLD</div>
+        </div>
+      </div>
+
+      <div class="result" id="nor_result">S=0, R=0 → Hold state (Memory mode)</div>
+
+      <div class="circuit-box">
+        <svg viewBox="0 0 1000 550" xmlns="http://www.w3.org/2000/svg">
+          <!-- Title -->
+          <text x="300" y="28" class="gate-label" font-size="16" font-weight="700">SR LATCH WITH NOR GATES (IEEE STANDARD)</text>
+
+          <!-- Input Labels -->
+          <text x="15" y="125" class="wire-label" font-size="18" font-weight="700">S</text>
+          <text x="15" y="445" class="wire-label" font-size="18" font-weight="700">R</text>
+
+          <!-- ===== S INPUT (outer pin of upper gate, y=120) — drawn under the gate so it terminates flush ===== -->
+          <line x1="45" y1="120" x2="150" y2="120" class="wire" id="nor_s_wire" stroke-width="5"/>
+          <line x1="150" y1="120" x2="150" y2="120" class="wire" id="nor_s_input" stroke-width="5"/>
+
+          <!-- ===== R INPUT (outer pin of lower gate, y=440) — drawn under the gate so it terminates flush ===== -->
+          <line x1="45" y1="440" x2="150" y2="440" class="wire" id="nor_r_wire" stroke-width="5"/>
+          <line x1="150" y1="440" x2="150" y2="440" class="wire" id="nor_r_input" stroke-width="5"/>
+
+          <!-- ===== CROSS-COUPLED FEEDBACK — diagonal run, then a clearly visible bend into a horizontal approach that matches the S/R input-wire orientation ===== -->
+          <!-- Q feeds the inner pin of the LOWER gate (y=420) -->
+          <path d="M 310 130 L 100 420 L 138 420" class="wire" id="nor_feedback_q" stroke-width="5"/>
+          <!-- Q̄ feeds the inner pin of the UPPER gate (y=140) -->
+          <path d="M 310 430 L 100 140 L 138 140" class="wire" id="nor_feedback_qbar" stroke-width="5"/>
+
+          <!-- ===== UPPER NOR GATE (produces Q) — IEEE shield shape, concave back, pointed front — drawn on top to occlude wire tails ===== -->
+          <path d="M 130 95 C 172.5 95 193.75 105.5 215 130 C 193.75 154.5 172.5 165 130 165 C 142.75 151 142.75 109 130 95 Z" class="gate-symbol" stroke-width="3"/>
+          <circle cx="224" cy="130" r="9" fill="var(--gate-fill)" class="gate-symbol" stroke-width="3"/>
+          <text x="172" y="135" class="gate-label" font-size="12" font-weight="700" text-anchor="middle">NOR</text>
+
+          <!-- ===== LOWER NOR GATE (produces Q̄) ===== -->
+          <path d="M 130 395 C 172.5 395 193.75 405.5 215 430 C 193.75 454.5 172.5 465 130 465 C 142.75 451 142.75 409 130 395 Z" class="gate-symbol" stroke-width="3"/>
+          <circle cx="224" cy="430" r="9" fill="var(--gate-fill)" class="gate-symbol" stroke-width="3"/>
+          <text x="172" y="435" class="gate-label" font-size="12" font-weight="700" text-anchor="middle">NOR</text>
+
+          <!-- ===== INPUT PIN CONNECTION MARKERS — small solid dots showing exactly where each wire connects ===== -->
+          <circle cx="138" cy="120" r="5" class="gate-symbol" fill="var(--ink)" id="nor_pin_s" stroke-width="0"/>
+          <circle cx="138" cy="140" r="5" class="gate-symbol" fill="var(--ink)" id="nor_pin_qbar_fb" stroke-width="0"/>
+          <circle cx="138" cy="420" r="5" class="gate-symbol" fill="var(--ink)" id="nor_pin_q_fb" stroke-width="0"/>
+          <circle cx="138" cy="440" r="5" class="gate-symbol" fill="var(--ink)" id="nor_pin_r" stroke-width="0"/>
+
+          <!-- ===== Q OUTPUT (from upper gate) ===== -->
+          <line x1="233" y1="130" x2="300" y2="130" class="wire" id="nor_q_line" stroke-width="5"/>
+          <circle cx="310" cy="130" r="8" fill="var(--accent)" class="gate-symbol" stroke-width="2"/>
+          <text x="330" y="140" class="gate-label" font-size="18" font-weight="700">Q</text>
+
+          <!-- ===== Q̄ OUTPUT (from lower gate) ===== -->
+          <line x1="233" y1="430" x2="300" y2="430" class="wire" id="nor_qbar_line" stroke-width="5"/>
+          <circle cx="310" cy="430" r="8" fill="var(--accent)" class="gate-symbol" stroke-width="2"/>
+          <text x="330" y="440" class="gate-label" font-size="18" font-weight="700">Q̄</text>
+
+          <!-- Annotation -->
+          <text x="500" y="200" class="wire-label" font-size="13" font-weight="700">Cross-Coupled NOR Gates</text>
+          <text x="500" y="230" class="wire-label" font-size="12">Feedback paths create memory</text>
+          <text x="500" y="260" class="wire-label" font-size="12">Diagonal lines show feedback</text>
+        </svg>
+      </div>
+
+      <h3>📈 Live Timing Diagram</h3>
+      <div class="theory" style="margin-top:0">Every time you toggle S or R above, a new step is recorded here — so you can see exactly how Q and Q̄ respond over time, just like on a logic analyzer.</div>
+      <div class="wave-legend">
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--brand-b)"></span>S</span>
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--brand-c)"></span>R</span>
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--success)"></span>Q</span>
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--danger)"></span>Q̄</span>
+      </div>
+      <div class="circuit-box">
+        <svg viewBox="0 0 1000 260" xmlns="http://www.w3.org/2000/svg" id="nor_wave_svg">
+          <g id="nor_wave_grid"></g>
+          <text x="8" y="38" class="wire-label" font-size="13" font-weight="700">S</text>
+          <text x="8" y="88" class="wire-label" font-size="13" font-weight="700">R</text>
+          <text x="8" y="138" class="wire-label" font-size="13" font-weight="700">Q</text>
+          <text x="8" y="188" class="wire-label" font-size="13" font-weight="700">Q̄</text>
+          <g id="nor_wave_group"></g>
+        </svg>
+      </div>
+      <div class="controls">
+        <button class="ctrl-btn" onclick="clearWave('nor')">🧹 Clear Timing Diagram</button>
+      </div>
+    </div>
+
+    <!-- NAND Gate Based SR Latch -->
+    <div class="card">
+      <h2>⊙ SR Latch with NAND Gates</h2>
+      
+      <div class="theory">
+        <b>How NAND-based SR Latch Works:</b>
+      </div>
+      
+      <table class="truth-table">
+        <thead>
+          <tr><th>S̄</th><th>R̄</th><th>Q (next)</th><th>Q̄ (next)</th><th>Operation</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr id="nand_row_11"><td class="high">1</td><td class="high">1</td><td class="hold">Hold</td><td class="hold">Hold</td><td><b>Memory</b></td><td>Latch maintains previous state</td></tr>
+          <tr id="nand_row_01"><td class="low">0</td><td class="high">1</td><td class="high">1</td><td class="low">0</td><td><b>Set</b></td><td>Force Q to 1 (active-LOW S̄)</td></tr>
+          <tr id="nand_row_10"><td class="high">1</td><td class="low">0</td><td class="low">0</td><td class="high">1</td><td><b>Reset</b></td><td>Force Q to 0 (active-LOW R̄)</td></tr>
+          <tr id="nand_row_00"><td class="low">0</td><td class="low">0</td><td class="low">X</td><td class="high">X</td><td><b>Invalid</b></td><td>🚫 Forbidden state - avoid</td></tr>
+        </tbody>
+      </table>
+
+      <div class="note" style="margin-top:16px">
+        <b>NAND Gate Logic:</b> Output is 0 only when <b>both</b> inputs are 1. A NAND gate truth: (0,0)→1 | (0,1)→1 | (1,0)→1 | (1,1)→0. Uses active-LOW inputs (S̄, R̄).
+      </div>
+
+      <div class="note" id="nand_invalid_banner" style="margin-top:12px; border-left-color:var(--danger); display:none;">
+        <b>⚠ Invalid State:</b> S̄=0 and R̄=0 forces Q=1 <b>and</b> Q̄=1, breaking the rule that Q and Q̄ must always be opposite. Avoid this combination.
+      </div>
+
+      <!-- Interactive Circuit -->
+      <h3>⚡ Interactive SR Latch (NAND Gates)</h3>
+      
+      <div class="controls">
+        <button class="ctrl-btn" id="nand_s_btn" onclick="toggleNandInput(0)">S̄ = 1</button>
+        <button class="ctrl-btn" id="nand_r_btn" onclick="toggleNandInput(1)">R̄ = 1</button>
+        <button class="ctrl-btn" onclick="resetNandLatch()">⟲ Reset</button>
+      </div>
+
+      <div class="state-grid">
+        <div class="state-card low" id="nand_q_card">
+          <div class="state-label">Q Output</div>
+          <div class="state-value">0</div>
+        </div>
+        <div class="state-card high" id="nand_qbar_card">
+          <div class="state-label">Q̄ Output</div>
+          <div class="state-value">1</div>
+        </div>
+        <div class="state-card hold" id="nand_mode_card">
+          <div class="state-label">Mode</div>
+          <div class="state-value" style="font-size:18px;">HOLD</div>
+        </div>
+      </div>
+
+      <div class="result" id="nand_result">S̄=1, R̄=1 → Hold state (Memory mode)</div>
+
+      <div class="circuit-box">
+        <svg viewBox="0 0 1000 550" xmlns="http://www.w3.org/2000/svg">
+          <!-- Title -->
+          <text x="270" y="28" class="gate-label" font-size="16" font-weight="700">SR LATCH WITH NAND GATES (IEEE STANDARD - Active-LOW)</text>
+
+          <!-- Input Labels -->
+          <text x="10" y="125" class="wire-label" font-size="18" font-weight="700">S</text>
+          <text x="10" y="445" class="wire-label" font-size="18" font-weight="700">R</text>
+
+          <!-- ===== S INPUT (outer pin of upper gate, y=120) — drawn under the gate so it terminates flush ===== -->
+          <line x1="45" y1="120" x2="150" y2="120" class="wire" id="nand_s_wire" stroke-width="5"/>
+          <line x1="150" y1="120" x2="150" y2="120" class="wire" id="nand_s_input" stroke-width="5"/>
+
+          <!-- ===== R INPUT (outer pin of lower gate, y=440) — drawn under the gate so it terminates flush ===== -->
+          <line x1="45" y1="440" x2="150" y2="440" class="wire" id="nand_r_wire" stroke-width="5"/>
+          <line x1="150" y1="440" x2="150" y2="440" class="wire" id="nand_r_input" stroke-width="5"/>
+
+          <!-- ===== CROSS-COUPLED FEEDBACK — diagonal run, then a clearly visible bend into a horizontal approach that matches the S/R input-wire orientation ===== -->
+          <!-- Q feeds the inner pin of the LOWER gate (y=420) -->
+          <path d="M 310 130 L 100 420 L 130 420" class="wire" id="nand_feedback_q" stroke-width="5"/>
+          <!-- Q̄ feeds the inner pin of the UPPER gate (y=140) -->
+          <path d="M 310 430 L 100 140 L 130 140" class="wire" id="nand_feedback_qbar" stroke-width="5"/>
+
+          <!-- ===== UPPER NAND GATE (produces Q) — IEEE D-shape, flat back, rounded front — drawn on top to occlude wire tails ===== -->
+          <path d="M 130 95 L 175 95 A 35 35 0 0 1 175 165 L 130 165 Z" class="gate-symbol" stroke-width="3"/>
+          <circle cx="219" cy="130" r="9" fill="var(--gate-fill)" class="gate-symbol" stroke-width="3"/>
+          <text x="163" y="135" class="gate-label" font-size="11" font-weight="700" text-anchor="middle">NAND</text>
+
+          <!-- ===== LOWER NAND GATE (produces Q̄) ===== -->
+          <path d="M 130 395 L 175 395 A 35 35 0 0 1 175 465 L 130 465 Z" class="gate-symbol" stroke-width="3"/>
+          <circle cx="219" cy="430" r="9" fill="var(--gate-fill)" class="gate-symbol" stroke-width="3"/>
+          <text x="163" y="435" class="gate-label" font-size="11" font-weight="700" text-anchor="middle">NAND</text>
+
+          <!-- ===== INPUT PIN CONNECTION MARKERS — small solid dots showing exactly where each wire connects ===== -->
+          <circle cx="130" cy="120" r="5" class="gate-symbol" fill="var(--ink)" id="nand_pin_s" stroke-width="0"/>
+          <circle cx="130" cy="140" r="5" class="gate-symbol" fill="var(--ink)" id="nand_pin_qbar_fb" stroke-width="0"/>
+          <circle cx="130" cy="420" r="5" class="gate-symbol" fill="var(--ink)" id="nand_pin_q_fb" stroke-width="0"/>
+          <circle cx="130" cy="440" r="5" class="gate-symbol" fill="var(--ink)" id="nand_pin_r" stroke-width="0"/>
+
+          <!-- ===== Q OUTPUT (from upper gate) ===== -->
+          <line x1="228" y1="130" x2="300" y2="130" class="wire" id="nand_q_line" stroke-width="5"/>
+          <circle cx="310" cy="130" r="8" fill="var(--accent)" class="gate-symbol" stroke-width="2"/>
+          <text x="330" y="140" class="gate-label" font-size="18" font-weight="700">Q</text>
+
+          <!-- ===== Q̄ OUTPUT (from lower gate) ===== -->
+          <line x1="228" y1="430" x2="300" y2="430" class="wire" id="nand_qbar_line" stroke-width="5"/>
+          <circle cx="310" cy="430" r="8" fill="var(--accent)" class="gate-symbol" stroke-width="2"/>
+          <text x="330" y="440" class="gate-label" font-size="18" font-weight="700">Q̄</text>
+
+          <!-- Annotation -->
+          <text x="500" y="200" class="wire-label" font-size="13" font-weight="700">Cross-Coupled NAND Gates</text>
+          <text x="500" y="230" class="wire-label" font-size="12">Active-LOW inputs (S, R)</text>
+          <text x="500" y="260" class="wire-label" font-size="12">Diagonal lines show feedback</text>
+        </svg>
+      </div>
+
+      <h3>📈 Live Timing Diagram</h3>
+      <div class="theory" style="margin-top:0">Every time you toggle S̄ or R̄ above, a new step is recorded here — so you can see exactly how Q and Q̄ respond over time, just like on a logic analyzer.</div>
+      <div class="wave-legend">
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--brand-b)"></span>S̄</span>
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--brand-c)"></span>R̄</span>
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--success)"></span>Q</span>
+        <span class="wave-legend-item"><span class="wave-legend-swatch" style="background:var(--danger)"></span>Q̄</span>
+      </div>
+      <div class="circuit-box">
+        <svg viewBox="0 0 1000 260" xmlns="http://www.w3.org/2000/svg" id="nand_wave_svg">
+          <g id="nand_wave_grid"></g>
+          <text x="8" y="38" class="wire-label" font-size="13" font-weight="700">S̄</text>
+          <text x="8" y="88" class="wire-label" font-size="13" font-weight="700">R̄</text>
+          <text x="8" y="138" class="wire-label" font-size="13" font-weight="700">Q</text>
+          <text x="8" y="188" class="wire-label" font-size="13" font-weight="700">Q̄</text>
+          <g id="nand_wave_group"></g>
+        </svg>
+      </div>
+      <div class="controls">
+        <button class="ctrl-btn" onclick="clearWave('nand')">🧹 Clear Timing Diagram</button>
+      </div>
+    </div>
+
+    <!-- Applications -->
+    <div class="card">
+      <h2>💡 Applications of SR Latches</h2>
+      
+      <div class="app-box">
+        <h4>🔌 Debouncing Mechanical Switches</h4>
+        <p>Mechanical switches produce multiple rapid voltage transitions (bounces) when pressed. An SR latch with a switch connected to Set and Reset inputs cleanly captures a single state transition, eliminating bounce errors in digital systems.</p>
+        <b>Why it works:</b> The latch remains in its state even as contacts bounce, providing clean digital input.
+      </div>
+
+      <div class="app-box">
+        <h4>💾 Memory Element in Flip-Flops</h4>
+        <p>SR latches are the core of SR flip-flops and more advanced flip-flops (D, JK, T). They store and maintain the current state until the next clock pulse, forming the basis of sequential logic and state machines.</p>
+        <b>Why it works:</b> Cross-coupled gates retain state indefinitely without power consumption (in static CMOS).
+      </div>
+
+      <div class="app-box">
+        <h4>⚡ Asynchronous Reset Circuits</h4>
+        <p>In digital systems, an SR latch can provide asynchronous set/reset functionality independent of clock signals. This is critical for system initialization and emergency stop conditions.</p>
+        <b>Why it works:</b> Immediate response to input changes without waiting for clock synchronization.
+      </div>
+
+      <div class="app-box">
+        <h4>🎛️ Control Logic and Sequencing</h4>
+        <p>SR latches implement simple state machines in combinational logic. For example: toggling a relay on/off with separate Set and Reset buttons, or managing pump/motor control sequences.</p>
+        <b>Why it works:</b> Simple, fast, and requires no external clock or complex circuitry.
+      </div>
+
+      <div class="app-box">
+        <h4>🔐 Safety Interlocks</h4>
+        <p>SR latches enforce mutually exclusive operations. Once Set, they remain in that state until explicitly Reset, ensuring that critical operations complete before transitioning to the next state.</p>
+        <b>Why it works:</b> Memory property prevents accidental state changes and provides deterministic behavior.
+      </div>
+
+      <div class="app-box">
+        <h4>📡 Data Capture and Hold</h4>
+        <p>SR latches temporarily store data signals during asynchronous interfacing or when data must be held stable across different clock domains.</p>
+        <b>Why it works:</b> Bistable nature allows data to persist across timing boundaries.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PRACTICE PAGE -->
+  <div id="practice" class="page">
+    <div class="card">
+      <h2>🧪 Practice Sandbox — Experiment with SR Latches</h2>
+      <div class="theory">
+        Use this interactive sandbox to freely experiment with both NOR and NAND-based SR latches. Observe how different input combinations affect the output and mode. Try to predict the output before toggling inputs!
+      </div>
+
+      <h3>Choose a Configuration:</h3>
+      <div class="controls">
+        <button class="ctrl-btn active" onclick="selectPracticeType('nor')">⊕ NOR-based SR Latch</button>
+        <button class="ctrl-btn" onclick="selectPracticeType('nand')">⊙ NAND-based SR Latch</button>
+      </div>
+
+      <div class="note">
+        <b>Challenge:</b> For NOR latch: Try the sequence S=1→S=0, then R=1→R=0. Observe state changes.<br>
+        For NAND latch: Try S̄=0→S̄=1, then R̄=0→R̄=1. Compare to NOR behavior.
+      </div>
+
+      <h3 id="practice_title">NOR-based SR Latch Sandbox</h3>
+
+      <div class="controls">
+        <button class="ctrl-btn" id="practice_btn0" onclick="togglePracticeInput(0)">Input 0 = 0</button>
+        <button class="ctrl-btn" id="practice_btn1" onclick="togglePracticeInput(1)">Input 1 = 0</button>
+        <button class="ctrl-btn" onclick="resetPractice()">⟲ Reset All</button>
+      </div>
+
+      <div class="state-grid">
+        <div class="state-card low" id="practice_q_card">
+          <div class="state-label">Q Output</div>
+          <div class="state-value">0</div>
+        </div>
+        <div class="state-card high" id="practice_qbar_card">
+          <div class="state-label">Q̄ Output</div>
+          <div class="state-value">1</div>
+        </div>
+        <div class="state-card hold" id="practice_mode_card">
+          <div class="state-label">Mode</div>
+          <div class="state-value" style="font-size:18px;">HOLD</div>
+        </div>
+      </div>
+
+      <div class="result" id="practice_result">Press a button to start experimenting...</div>
+
+      <div class="note" style="margin-top:20px">
+        <b>Learning Tips:</b><br>
+        • Predict the output before toggling each input<br>
+        • Notice how the latch "remembers" previous states<br>
+        • Try both SET and RESET operations consecutively<br>
+        • Understand why S=R=1 (or S̄=R̄=0) is forbidden<br>
+        • Compare NOR and NAND behavior differences
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSESSMENT PAGE -->
+  <div id="assess" class="page">
+    <div class="card">
+      <h2>📝 Assessment — Test Your Knowledge</h2>
+      <div class="theory">
+        Complete this assessment to evaluate your understanding of SR latches. Answer all questions and submit to see your score and detailed feedback.
+      </div>
+
+      <!-- Question 1 -->
+      <div class="quiz-question">
+        <h4>1. In an SR latch with NOR gates, what is the output when S=1 and R=0?</h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="a"> <label>Q=0, Q̄=1 (Reset)</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="b"> <label>Q=1, Q̄=0 (Set)</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="c"> <label>Hold previous state</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="d"> <label>Undefined (Invalid)</label>
+          </label>
+        </div>
+        <div id="q1_feedback"></div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="quiz-question">
+        <h4>2. What does the abbreviation "SR" stand for in SR latch?</h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="a"> <label>Signal Reset</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="b"> <label>Set-Reset</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="c"> <label>Sequential Register</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="d"> <label>Shift Register</label>
+          </label>
+        </div>
+        <div id="q2_feedback"></div>
+      </div>
+
+      <!-- Question 3 -->
+      <div class="quiz-question">
+        <h4>3. Why is S=R=1 considered an invalid state in NOR-gate SR latch?</h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="a"> <label>It causes the gates to burn out</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="b"> <label>Both outputs become 0, violating Q = Q̄ complementarity</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="c"> <label>It enters metastable state; result is unpredictable</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="d"> <label>It prevents the latch from operating (Options B and C are correct)</label>
+          </label>
+        </div>
+        <div id="q3_feedback"></div>
+      </div>
+
+      <!-- Question 4 -->
+      <div class="quiz-question">
+        <h4>4. In a NAND-gate SR latch, which inputs are active-LOW?</h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q4" value="a"> <label>Only Set (S) is active-LOW</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q4" value="b"> <label>Both Set and Reset (S̄ and R̄) are active-LOW</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q4" value="c"> <label>Only Reset (R) is active-LOW</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q4" value="d"> <label>Neither input is active-LOW</label>
+          </label>
+        </div>
+        <div id="q4_feedback"></div>
+      </div>
+
+      <!-- Question 5 -->
+      <div class="quiz-question">
+        <h4>5. What is the primary application of an SR latch in digital systems?</h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q5" value="a"> <label>To amplify digital signals</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q5" value="b"> <label>To store one bit of data and maintain state without external input</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q5" value="c"> <label>To convert analog signals to digital</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q5" value="d"> <label>To perform arithmetic operations</label>
+          </label>
+        </div>
+        <div id="q5_feedback"></div>
+      </div>
+
+      <!-- Question 6 -->
+      <div class="quiz-question">
+        <h4>6. When S=0 and R=0 in a NOR-gate SR latch, what mode is the latch in?</h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q6" value="a"> <label>Set mode</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q6" value="b"> <label>Reset mode</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q6" value="c"> <label>Hold/Memory mode — retains previous state</label>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q6" value="d"> <label>Invalid mode</label>
+          </label>
+        </div>
+        <div id="q6_feedback"></div>
+      </div>
+
+      <button class="ctrl-btn" onclick="submitQuiz()" style="margin-top:20px; padding:14px 32px; font-size:15px">✓ Submit Assessment</button>
+
+      <div id="score_display"></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="fabs">
+  <button class="fab" id="topBtn">↑</button>
+</div>
+
+<footer>
+  <p>🎓 SR Latch Interactive Learning Laboratory — Master sequential logic through theory, practice, and assessment</p>
+  <p style="margin:8px 0 0">Real-time circuit visualization with IEEE standard gates and comprehensive learning resources</p>
+</footer>
+
+<script>
+// State Management
+let state = {
+  nor: { s: 0, r: 0, q: 0, qbar: 1 },
+  nand: { s: 1, r: 1, q: 0, qbar: 1 },
+  practice: { type: 'nor', input0: 0, input1: 0, q: 0, qbar: 1 }
+};
+
+// Timing-diagram history — each entry is a snapshot {s,r,q,qbar} recorded on every toggle
+let waveHistory = {
+  nor: [{ s: 0, r: 0, q: 0, qbar: 1 }],
+  nand: [{ s: 1, r: 1, q: 0, qbar: 1 }]
+};
+const WAVE_MAX_STEPS = 16;
+
+// Mode Switching
+function switchMode(mode) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(mode).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Theme Toggle
+let theme = (window.matchMedia && matchMedia('(prefers-color-scheme:light)').matches) ? 'light' : 'dark';
+function applyTheme(t) {
+  document.body.setAttribute('data-theme', t);
+  document.querySelector('#theme span:first-child').textContent = t === 'dark' ? '🌙' : '☀️';
+  document.querySelector('#theme span:last-child').textContent = t === 'dark' ? 'Dark' : 'Light';
+}
+applyTheme(theme);
+document.getElementById('theme').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme); };
+
+// Scroll to Top
+const topBtn = document.getElementById('topBtn');
+window.addEventListener('scroll', () => topBtn.classList.toggle('show', window.scrollY > 450));
+topBtn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
+
+// ===== TRUTH TABLE LIVE HIGHLIGHTING =====
+function highlightTruthRow(type, s, r) {
+  let ids = type === 'nor'
+    ? ['nor_row_00', 'nor_row_10', 'nor_row_01', 'nor_row_11']
+    : ['nand_row_11', 'nand_row_01', 'nand_row_10', 'nand_row_00'];
+  ids.forEach(id => document.getElementById(id)?.classList.remove('active'));
+  let activeId = `${type}_row_${s}${r}`;
+  document.getElementById(activeId)?.classList.add('active');
+}
+
+// ===== LIVE TIMING / WAVEFORM DIAGRAM =====
+function recordWave(type, s) {
+  let hist = waveHistory[type];
+  let last = hist[hist.length - 1];
+  if (last && last.s === s.s && last.r === s.r && last.q === s.q && last.qbar === s.qbar) {
+    drawWave(type); // nothing changed (e.g. redundant reset click) — just redraw
+    return;
+  }
+  hist.push({ s: s.s, r: s.r, q: s.q, qbar: s.qbar });
+  if (hist.length > WAVE_MAX_STEPS) hist.shift();
+  drawWave(type);
+}
+
+function clearWave(type) {
+  let s = state[type];
+  waveHistory[type] = [{ s: s.s, r: s.r, q: s.q, qbar: s.qbar }];
+  drawWave(type);
+}
+
+function drawWave(type) {
+  let hist = waveHistory[type];
+  let group = document.getElementById(type + '_wave_group');
+  let gridGroup = document.getElementById(type + '_wave_grid');
+  if (!group || !gridGroup) return;
+  group.innerHTML = '';
+  gridGroup.innerHTML = '';
+
+  const NS = 'http://www.w3.org/2000/svg';
+  let stepW = 60, startX = 34, rowH = 50, topPad = 22;
+  let rows = [
+    { key: 's', y: 0, cls: 'wave-s' },
+    { key: 'r', y: 1, cls: 'wave-r' },
+    { key: 'q', y: 2, cls: 'wave-q' },
+    { key: 'qbar', y: 3, cls: 'wave-qbar' }
+  ];
+  let plotRight = startX + hist.length * stepW + 20;
+  let plotWidth = Math.max(960, plotRight);
+  let plotBottom = topPad + rows.length * rowH + 6;
+
+  const mk = (tag, attrs) => {
+    let el = document.createElementNS(NS, tag);
+    for (let k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  };
+
+  // Alternating vertical step bands (readability)
+  hist.forEach((snap, i) => {
+    if (i % 2 === 1) {
+      gridGroup.appendChild(mk('rect', {
+        x: startX + i * stepW, y: topPad - 14, width: stepW, height: plotBottom - topPad + 14,
+        class: 'wave-band'
+      }));
+    }
+  });
+
+  // Vertical grid lines at every step boundary
+  for (let i = 0; i <= hist.length; i++) {
+    let x = startX + i * stepW;
+    gridGroup.appendChild(mk('line', { x1: x, y1: topPad - 14, x2: x, y2: plotBottom, class: 'wave-grid-v' }));
+  }
+
+  // Per-row dashed HI/LO reference lines + 0/1 level labels
+  rows.forEach(row => {
+    let baseY = topPad + row.y * rowH + 26;
+    let highY = baseY - 24;
+    gridGroup.appendChild(mk('line', { x1: startX, y1: highY, x2: plotWidth - 20, y2: highY, class: 'wave-grid-h' }));
+    gridGroup.appendChild(mk('line', { x1: startX, y1: baseY, x2: plotWidth - 20, y2: baseY, class: 'wave-grid-h' }));
+    gridGroup.appendChild(mk('text', { x: startX - 8, y: highY + 3, class: 'wave-lvl-label', 'text-anchor': 'end' })).textContent = '1';
+    gridGroup.appendChild(mk('text', { x: startX - 8, y: baseY + 3, class: 'wave-lvl-label', 'text-anchor': 'end' })).textContent = '0';
+  });
+
+  // Signal step-lines, each in its own color, with small dots marking each recorded step
+  rows.forEach(row => {
+    let baseY = topPad + row.y * rowH + 26;
+    let highY = baseY - 24;
+    let pathD = '';
+    hist.forEach((snap, i) => {
+      let x = startX + i * stepW;
+      let xNext = x + stepW;
+      let y = snap[row.key] === 1 ? highY : baseY;
+      pathD += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+      pathD += ` L ${xNext} ${y}`;
+    });
+    group.appendChild(mk('path', { d: pathD, class: 'wave-line ' + row.cls }));
+
+    hist.forEach((snap, i) => {
+      let x = startX + i * stepW;
+      let y = snap[row.key] === 1 ? highY : baseY;
+      let color = row.cls === 'wave-s' ? 'var(--brand-b)' : row.cls === 'wave-r' ? 'var(--brand-c)' : row.cls === 'wave-q' ? 'var(--success)' : 'var(--danger)';
+      let dot = mk('circle', { cx: x, cy: y, r: 3.5 });
+      dot.style.fill = 'var(--surface)';
+      dot.style.stroke = color;
+      dot.style.strokeWidth = '2.5';
+      group.appendChild(dot);
+    });
+  });
+
+  // Cursor + label on the most recent (current) step
+  let lastX = startX + (hist.length - 1) * stepW;
+  group.appendChild(mk('line', { x1: lastX, y1: topPad - 14, x2: lastX, y2: plotBottom, class: 'wave-cursor' }));
+
+  // Step index labels along the bottom
+  hist.forEach((snap, i) => {
+    let x = startX + i * stepW + stepW / 2;
+    let text = mk('text', { x, y: plotBottom + 16, class: 'wave-step-label', 'text-anchor': 'middle' });
+    text.textContent = i === hist.length - 1 ? `${i} ▲now` : i;
+    group.appendChild(text);
+  });
+
+  // Auto-fit + auto-scroll the timing diagram to show the latest steps
+  let svgEl = document.getElementById(type + '_wave_svg');
+  if (svgEl) {
+    svgEl.setAttribute('viewBox', `0 0 ${plotWidth} 260`);
+    let box = svgEl.closest('.circuit-box');
+    if (box) box.scrollLeft = box.scrollWidth;
+  }
+}
+
+// ===== NOR LATCH FUNCTIONS =====
+function toggleNorInput(bit) {
+  if (bit === 0) state.nor.s ^= 1;
+  else state.nor.r ^= 1;
+  updateNorLatch();
+}
+
+function resetNorLatch() {
+  state.nor = { s: 0, r: 0, q: 0, qbar: 1 };
+  waveHistory.nor = [{ s: 0, r: 0, q: 0, qbar: 1 }];
+  updateNorLatch();
+}
+
+function updateNorLatch() {
+  let s = state.nor;
+  if (s.s === 1 && s.r === 0) { s.q = 1; s.qbar = 0; }
+  else if (s.s === 0 && s.r === 1) { s.q = 0; s.qbar = 1; }
+
+  updateNorDisplay();
+  highlightNorWires();
+}
+
+function updateNorDisplay() {
+  let s = state.nor;
+  document.getElementById('nor_s_btn').textContent = 'S = ' + s.s;
+  document.getElementById('nor_r_btn').textContent = 'R = ' + s.r;
+  
+  let qCard = document.getElementById('nor_q_card');
+  let qbarCard = document.getElementById('nor_qbar_card');
+  let modeCard = document.getElementById('nor_mode_card');
+  
+  qCard.className = 'state-card ' + (s.q === 1 ? 'high' : 'low');
+  qbarCard.className = 'state-card ' + (s.qbar === 1 ? 'high' : 'low');
+  qCard.querySelector('.state-value').textContent = s.q;
+  qbarCard.querySelector('.state-value').textContent = s.qbar;
+  
+  let mode = 'HOLD', modeColor = 'hold';
+  if (s.s === 1 && s.r === 0) { mode = 'SET'; modeColor = 'high'; }
+  else if (s.s === 0 && s.r === 1) { mode = 'RESET'; modeColor = 'low'; }
+  else if (s.s === 1 && s.r === 1) { mode = '⚠ INVALID'; modeColor = 'low'; }
+  
+  modeCard.className = 'state-card ' + modeColor;
+  modeCard.querySelector('.state-value').textContent = mode;
+  
+  document.getElementById('nor_result').innerHTML = `<b>Input:</b> S=${s.s}, R=${s.r} → <b>Output:</b> Q=${s.q}, Q̄=${s.qbar} | <b>Mode:</b> ${mode}`;
+
+  highlightTruthRow('nor', s.s, s.r);
+  document.getElementById('nor_invalid_banner').style.display = (s.s === 1 && s.r === 1) ? 'block' : 'none';
+  recordWave('nor', s);
+}
+
+function highlightNorWires() {
+  let s = state.nor;
+  let wires = ['nor_s_wire', 'nor_r_wire', 'nor_q_line', 'nor_qbar_line', 'nor_feedback_q', 'nor_feedback_qbar', 'nor_s_input', 'nor_r_input'];
+  wires.forEach(id => {
+    let elem = document.getElementById(id);
+    if (elem) elem.classList.remove('on');
+  });
+  let pins = ['nor_pin_s', 'nor_pin_r', 'nor_pin_q_fb', 'nor_pin_qbar_fb'];
+  pins.forEach(id => document.getElementById(id)?.style.removeProperty('fill'));
+
+  // Highlight input wires
+  if (s.s === 1) {
+    document.getElementById('nor_s_wire')?.classList.add('on');
+    document.getElementById('nor_s_input')?.classList.add('on');
+    document.getElementById('nor_pin_s')?.style.setProperty('fill', 'var(--accent)');
+  }
+  if (s.r === 1) {
+    document.getElementById('nor_r_wire')?.classList.add('on');
+    document.getElementById('nor_r_input')?.classList.add('on');
+    document.getElementById('nor_pin_r')?.style.setProperty('fill', 'var(--accent)');
+  }
+  
+  // Highlight output wires
+  if (s.q === 1) {
+    document.getElementById('nor_q_line')?.classList.add('on');
+  }
+  if (s.qbar === 1) {
+    document.getElementById('nor_qbar_line')?.classList.add('on');
+  }
+  
+  // Highlight feedback wires
+  if (s.q === 1) {
+    document.getElementById('nor_feedback_q')?.classList.add('on');
+    document.getElementById('nor_pin_q_fb')?.style.setProperty('fill', 'var(--accent)');
+  }
+  if (s.qbar === 1) {
+    document.getElementById('nor_feedback_qbar')?.classList.add('on');
+    document.getElementById('nor_pin_qbar_fb')?.style.setProperty('fill', 'var(--accent)');
+  }
+}
+
+// ===== NAND LATCH FUNCTIONS =====
+function toggleNandInput(bit) {
+  if (bit === 0) state.nand.s ^= 1;
+  else state.nand.r ^= 1;
+  updateNandLatch();
+}
+
+function resetNandLatch() {
+  state.nand = { s: 1, r: 1, q: 0, qbar: 1 };
+  waveHistory.nand = [{ s: 1, r: 1, q: 0, qbar: 1 }];
+  updateNandLatch();
+}
+
+function updateNandLatch() {
+  let s = state.nand;
+  if (s.s === 0 && s.r === 1) { s.q = 1; s.qbar = 0; }
+  else if (s.s === 1 && s.r === 0) { s.q = 0; s.qbar = 1; }
+
+  updateNandDisplay();
+  highlightNandWires();
+}
+
+function updateNandDisplay() {
+  let s = state.nand;
+  document.getElementById('nand_s_btn').textContent = 'S̄ = ' + s.s;
+  document.getElementById('nand_r_btn').textContent = 'R̄ = ' + s.r;
+  
+  let qCard = document.getElementById('nand_q_card');
+  let qbarCard = document.getElementById('nand_qbar_card');
+  let modeCard = document.getElementById('nand_mode_card');
+  
+  qCard.className = 'state-card ' + (s.q === 1 ? 'high' : 'low');
+  qbarCard.className = 'state-card ' + (s.qbar === 1 ? 'high' : 'low');
+  qCard.querySelector('.state-value').textContent = s.q;
+  qbarCard.querySelector('.state-value').textContent = s.qbar;
+  
+  let mode = 'HOLD', modeColor = 'hold';
+  if (s.s === 0 && s.r === 1) { mode = 'SET'; modeColor = 'high'; }
+  else if (s.s === 1 && s.r === 0) { mode = 'RESET'; modeColor = 'low'; }
+  else if (s.s === 0 && s.r === 0) { mode = '⚠ INVALID'; modeColor = 'low'; }
+  
+  modeCard.className = 'state-card ' + modeColor;
+  modeCard.querySelector('.state-value').textContent = mode;
+  
+  document.getElementById('nand_result').innerHTML = `<b>Input:</b> S̄=${s.s}, R̄=${s.r} → <b>Output:</b> Q=${s.q}, Q̄=${s.qbar} | <b>Mode:</b> ${mode}`;
+
+  highlightTruthRow('nand', s.s, s.r);
+  document.getElementById('nand_invalid_banner').style.display = (s.s === 0 && s.r === 0) ? 'block' : 'none';
+  recordWave('nand', s);
+}
+
+function highlightNandWires() {
+  let s = state.nand;
+  let wires = ['nand_s_wire', 'nand_r_wire', 'nand_q_line', 'nand_qbar_line', 'nand_feedback_q', 'nand_feedback_qbar', 'nand_s_input', 'nand_r_input'];
+  wires.forEach(id => {
+    let elem = document.getElementById(id);
+    if (elem) elem.classList.remove('on');
+  });
+  let pins = ['nand_pin_s', 'nand_pin_r', 'nand_pin_q_fb', 'nand_pin_qbar_fb'];
+  pins.forEach(id => document.getElementById(id)?.style.removeProperty('fill'));
+
+  // Highlight input wires
+  if (s.s === 1) {
+    document.getElementById('nand_s_wire')?.classList.add('on');
+    document.getElementById('nand_s_input')?.classList.add('on');
+    document.getElementById('nand_pin_s')?.style.setProperty('fill', 'var(--accent)');
+  }
+  if (s.r === 1) {
+    document.getElementById('nand_r_wire')?.classList.add('on');
+    document.getElementById('nand_r_input')?.classList.add('on');
+    document.getElementById('nand_pin_r')?.style.setProperty('fill', 'var(--accent)');
+  }
+  
+  // Highlight output wires
+  if (s.q === 1) {
+    document.getElementById('nand_q_line')?.classList.add('on');
+  }
+  if (s.qbar === 1) {
+    document.getElementById('nand_qbar_line')?.classList.add('on');
+  }
+  
+  // Highlight feedback wires
+  if (s.q === 1) {
+    document.getElementById('nand_feedback_q')?.classList.add('on');
+    document.getElementById('nand_pin_q_fb')?.style.setProperty('fill', 'var(--accent)');
+  }
+  if (s.qbar === 1) {
+    document.getElementById('nand_feedback_qbar')?.classList.add('on');
+    document.getElementById('nand_pin_qbar_fb')?.style.setProperty('fill', 'var(--accent)');
+  }
+}
+
+// ===== PRACTICE SANDBOX FUNCTIONS =====
+function selectPracticeType(type) {
+  state.practice.type = type;
+  state.practice = { type: type, input0: type === 'nor' ? 0 : 1, input1: type === 'nor' ? 0 : 1, q: 0, qbar: 1 };
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  updatePracticeDisplay();
+}
+
+function togglePracticeInput(bit) {
+  if (bit === 0) state.practice.input0 ^= 1;
+  else state.practice.input1 ^= 1;
+  updatePractice();
+}
+
+function resetPractice() {
+  state.practice = { type: state.practice.type, input0: state.practice.type === 'nor' ? 0 : 1, input1: state.practice.type === 'nor' ? 0 : 1, q: 0, qbar: 1 };
+  updatePracticeDisplay();
+}
+
+function updatePractice() {
+  let p = state.practice;
+  if (p.type === 'nor') {
+    if (p.input0 === 1 && p.input1 === 0) { p.q = 1; p.qbar = 0; }
+    else if (p.input0 === 0 && p.input1 === 1) { p.q = 0; p.qbar = 1; }
+  } else {
+    if (p.input0 === 0 && p.input1 === 1) { p.q = 1; p.qbar = 0; }
+    else if (p.input0 === 1 && p.input1 === 0) { p.q = 0; p.qbar = 1; }
+  }
+  updatePracticeDisplay();
+}
+
+function updatePracticeDisplay() {
+  let p = state.practice;
+  let label0 = p.type === 'nor' ? 'S' : 'S̄';
+  let label1 = p.type === 'nor' ? 'R' : 'R̄';
+  
+  document.getElementById('practice_btn0').textContent = label0 + ' = ' + p.input0;
+  document.getElementById('practice_btn1').textContent = label1 + ' = ' + p.input1;
+  document.getElementById('practice_title').textContent = (p.type === 'nor' ? 'NOR' : 'NAND') + '-based SR Latch Sandbox';
+  
+  let qCard = document.getElementById('practice_q_card');
+  let qbarCard = document.getElementById('practice_qbar_card');
+  let modeCard = document.getElementById('practice_mode_card');
+  
+  qCard.className = 'state-card ' + (p.q === 1 ? 'high' : 'low');
+  qbarCard.className = 'state-card ' + (p.qbar === 1 ? 'high' : 'low');
+  qCard.querySelector('.state-value').textContent = p.q;
+  qbarCard.querySelector('.state-value').textContent = p.qbar;
+  
+  let mode = 'HOLD', modeColor = 'hold';
+  if (p.type === 'nor') {
+    if (p.input0 === 1 && p.input1 === 0) { mode = 'SET'; modeColor = 'high'; }
+    else if (p.input0 === 0 && p.input1 === 1) { mode = 'RESET'; modeColor = 'low'; }
+    else if (p.input0 === 1 && p.input1 === 1) { mode = '⚠ INVALID'; modeColor = 'low'; }
+  } else {
+    if (p.input0 === 0 && p.input1 === 1) { mode = 'SET'; modeColor = 'high'; }
+    else if (p.input0 === 1 && p.input1 === 0) { mode = 'RESET'; modeColor = 'low'; }
+    else if (p.input0 === 0 && p.input1 === 0) { mode = '⚠ INVALID'; modeColor = 'low'; }
+  }
+  
+  modeCard.className = 'state-card ' + modeColor;
+  modeCard.querySelector('.state-value').textContent = mode;
+  
+  let inp0Str = p.type === 'nor' ? 'S' : 'S̄';
+  let inp1Str = p.type === 'nor' ? 'R' : 'R̄';
+  document.getElementById('practice_result').innerHTML = `<b>Input:</b> ${inp0Str}=${p.input0}, ${inp1Str}=${p.input1} → <b>Output:</b> Q=${p.q}, Q̄=${p.qbar} | <b>Mode:</b> ${mode}`;
+}
+
+// ===== QUIZ FUNCTIONS =====
+const answers = {
+  q1: 'b',
+  q2: 'b',
+  q3: 'd',
+  q4: 'b',
+  q5: 'b',
+  q6: 'c'
+};
+
+function submitQuiz() {
+  let score = 0;
+  for (let i = 1; i <= 6; i++) {
+    let selected = document.querySelector(`input[name="q${i}"]:checked`);
+    if (!selected) continue;
+    
+    let isCorrect = selected.value === answers[`q${i}`];
+    if (isCorrect) score++;
+    
+    let feedback = document.getElementById(`q${i}_feedback`);
+    feedback.className = 'quiz-feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    feedback.textContent = isCorrect ? '✓ Correct!' : '✗ Incorrect. Review the material.';
+  }
+  
+  let percentage = (score / 6) * 100;
+  let message = percentage === 100 ? '🏆 Perfect! Mastery achieved!' : percentage >= 80 ? '🎯 Excellent understanding!' : percentage >= 60 ? '✓ Good! Continue learning.' : '📚 Review and try again.';
+  
+  document.getElementById('score_display').innerHTML = `
+    <div class="score-display">
+      <div class="big">${score}/6</div>
+      <div class="desc">Score: ${percentage.toFixed(0)}%</div>
+      <div style="margin-top:12px; font-size:15px">${message}</div>
+    </div>
+  `;
+  
+  window.scrollTo({top: document.getElementById('score_display').offsetTop - 100, behavior: 'smooth'});
+}
+
+// Initialize
+updateNorDisplay();
+updateNandDisplay();
+updatePracticeDisplay();
+</script>
+</body>
+</html>

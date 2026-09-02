@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>3-Bit Up Counter · JK Flip-Flop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0d14;
+  --surface:#121722;
+  --surface2:#1a2130;
+  --line:#293347;
+  --text:#e9edf5;
+  --muted:#8894a8;
+  --amber:#ffb020;
+  --amber-dim:#7a5518;
+  --j:#4fd8c4;
+  --k:#ff7a8a;
+  --j-dim:#1c4a44;
+  --k-dim:#4a2229;
+  --wire:#3c4a63;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius: 10px;
+  color-scheme: dark;
+}
+[data-theme="light"]{
+  --bg:#f3f1ea;
+  --surface:#ffffff;
+  --surface2:#ece8dd;
+  --line:#d8d2c2;
+  --text:#211d16;
+  --muted:#6b6355;
+  --amber:#a86414;
+  --amber-dim:#e9d3a8;
+  --j:#0d8f7c;
+  --k:#c23b52;
+  --j-dim:#d3ede8;
+  --k-dim:#f6dde1;
+  --wire:#a89f8a;
+  --shadow: 0 6px 20px rgba(80,70,40,.12);
+  color-scheme: light;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:90px;
+  transition:background .35s ease, color .35s ease;
+}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0; letter-spacing:.2px;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit;}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:40;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:12px 16px 10px;
+}
+.topbar-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.brand{display:flex; flex-direction:column; line-height:1.15;}
+.brand .kicker{font-size:11px; color:var(--amber); font-family:'IBM Plex Mono',monospace;}
+.brand h1{font-size:17px; font-weight:600;}
+.theme-toggle{
+  border:1px solid var(--line); background:var(--surface); color:var(--text);
+  border-radius:20px; padding:7px 12px; font-size:12px; display:flex; gap:6px; align-items:center;
+  cursor:pointer;
+}
+.theme-toggle:active{transform:scale(.96);}
+
+.navchips{
+  display:flex; gap:8px; overflow-x:auto; margin-top:12px; padding-bottom:2px;
+  scrollbar-width:none;
+}
+.navchips::-webkit-scrollbar{display:none;}
+.navchips a{
+  flex:0 0 auto; text-decoration:none; color:var(--muted);
+  font-size:12.5px; padding:7px 12px; border-radius:20px; border:1px solid var(--line);
+  background:var(--surface); white-space:nowrap; transition:all .2s ease;
+}
+.navchips a.active{color:var(--bg); background:var(--amber); border-color:var(--amber); font-weight:600;}
+
+/* ---------- Sticky counter control ---------- */
+.control{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  background:var(--surface); border-top:1px solid var(--line);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  box-shadow:0 -8px 24px rgba(0,0,0,.25);
+}
+.control .state-readout{display:flex; flex-direction:column; line-height:1.2;}
+.control .bits{font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:600; letter-spacing:2px;}
+.control .bits span{padding:0 1px; border-radius:3px;}
+.control .bits .b1{color:var(--amber);}
+.control .decrow{font-size:10.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+.control .btns{display:flex; gap:6px;}
+.ctrlbtn{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line);
+  background:var(--surface2); color:var(--text); font-size:15px;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.ctrlbtn:active{transform:scale(.92);}
+.ctrlbtn.play{background:var(--amber); color:var(--bg); border-color:var(--amber); width:44px; height:44px; font-size:16px;}
+
+/* ---------- Sections ---------- */
+.section{padding:34px 16px 8px; scroll-margin-top:118px;}
+.section .eyebrow{font-size:11px; color:var(--amber); font-family:'IBM Plex Mono',monospace; margin-bottom:6px;}
+.section h2{font-size:21px; margin-bottom:8px;}
+.section p.lead{color:var(--muted); font-size:14px; line-height:1.6; max-width:60ch; margin:0 0 18px;}
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; box-shadow:var(--shadow);
+}
+.card + .card{margin-top:14px;}
+
+/* ---------- Hero ---------- */
+.hero{padding:26px 16px 10px;}
+.hero-display{
+  background:radial-gradient(120% 140% at 20% 0%, color-mix(in srgb, var(--amber) 10%, var(--surface)) 0%, var(--surface) 60%);
+  border:1px solid var(--line); border-radius:14px; padding:22px 18px; box-shadow:var(--shadow);
+}
+.hero-title{font-size:26px; line-height:1.15; margin-bottom:8px;}
+.hero-sub{color:var(--muted); font-size:14px; line-height:1.55; margin-bottom:18px;}
+.hero-leds{display:flex; gap:14px; justify-content:center; margin:18px 0 14px;}
+.led-col{display:flex; flex-direction:column; align-items:center; gap:8px;}
+.led{
+  width:46px; height:46px; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface2); display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:18px; color:var(--muted);
+  transition:all .25s ease;
+}
+.led.on{background:var(--amber); color:var(--bg); border-color:var(--amber); box-shadow:0 0 18px color-mix(in srgb, var(--amber) 60%, transparent);}
+.led-label{font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+.hero-dec{text-align:center; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted);}
+.hero-dec b{color:var(--text); font-size:15px;}
+
+/* ---------- State diagram ---------- */
+.diagram-wrap{display:flex; justify-content:center;}
+svg{max-width:100%; height:auto; display:block;}
+.node-circle{fill:var(--surface2); stroke:var(--wire); stroke-width:1.5; transition:all .25s ease;}
+.node-circle.active{fill:var(--amber); stroke:var(--amber);}
+.node-text{font-family:'IBM Plex Mono',monospace; font-size:16px; fill:var(--text); font-weight:700;}
+.node-circle.active + .node-text, .node-text.active{fill:var(--bg);}
+.node-sub{font-family:'IBM Plex Mono',monospace; font-size:8.5px; fill:var(--muted);}
+.arrow-path{fill:none; stroke:var(--wire); stroke-width:1.6; marker-end:url(#arrowhead);}
+.arrow-path.active{stroke:var(--amber); stroke-width:2.4;}
+
+.seq-strip{
+  display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+  gap:4px; margin-top:16px; padding-top:14px; border-top:1px solid var(--line);
+}
+.seq-strip .seq-chip{
+  font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:600; color:var(--muted);
+  width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--line); background:var(--surface2); transition:all .2s ease;
+}
+.seq-strip .seq-chip.active{background:var(--amber); color:var(--bg); border-color:var(--amber); box-shadow:0 0 12px color-mix(in srgb, var(--amber) 55%, transparent);}
+.seq-strip .seq-arrow{color:var(--muted); font-size:12px;}
+
+/* ---------- Tables ---------- */
+.tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+table{border-collapse:collapse; width:100%; min-width:420px; font-family:'IBM Plex Mono',monospace; font-size:12.5px;}
+table.wide{min-width:620px;}
+th,td{padding:8px 9px; text-align:center; border-bottom:1px solid var(--line); white-space:nowrap;}
+thead th{
+  color:var(--muted); font-weight:600; font-size:10.5px; text-transform:none;
+  border-bottom:1px solid var(--line); background:var(--surface2);
+  position:sticky; top:0;
+}
+tbody tr{transition:background .2s ease;}
+tbody tr.active-row{background:color-mix(in srgb, var(--amber) 16%, transparent);}
+tbody tr.active-row td{color:var(--text); font-weight:600;}
+td.jcell{color:var(--j);}
+td.kcell{color:var(--k);}
+td.dontcare{color:var(--muted); font-style:italic;}
+.group-th{background:var(--surface); font-size:9.5px; color:var(--amber); letter-spacing:.4px;}
+.tag{
+  display:inline-block; font-size:9.5px; padding:1px 6px; border-radius:8px; margin-left:4px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.tag.a{background:var(--j-dim); color:var(--j);}
+.tag.b{background:var(--amber-dim); color:var(--amber);}
+.tag.c{background:var(--k-dim); color:var(--k);}
+
+/* ---------- K-maps ---------- */
+.kmap-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+@media (max-width:480px){.kmap-grid{grid-template-columns:1fr;}}
+.kmap-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px; box-shadow:var(--shadow);}
+.kmap-card h3{font-size:13px; margin-bottom:2px;}
+.kmap-eq{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--amber); margin-bottom:10px;}
+.kmap-eq .var{border-bottom:1.5px solid currentColor;}
+.kmap-box{position:relative; display:inline-grid; grid-template-columns:34px repeat(4,40px); grid-template-rows:26px repeat(2,40px); gap:3px; margin-top:12px;}
+@media (max-width:360px){.kmap-box{grid-template-columns:28px repeat(4,32px); grid-template-rows:22px repeat(2,32px);}}
+.kcell{
+  display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace;
+  font-size:15px; font-weight:700; border-radius:4px; background:var(--surface2); color:var(--text);
+  border:1px solid var(--line); position:relative; z-index:2;
+}
+.kcell.head{background:transparent; border:none; color:var(--muted); font-size:10.5px; font-weight:500;}
+.kcell.dc{color:var(--muted); font-style:italic;}
+.kcell.active-cell{outline:2.5px solid var(--text); outline-offset:-2.5px;}
+.kcell .mnum{
+  position:absolute; top:2px; left:4px; font-size:8px; font-weight:500; color:var(--muted); font-style:normal;
+}
+.kgroup{
+  position:absolute; inset:0; z-index:1; border-radius:9px; border-width:3px; border-style:solid;
+  pointer-events:none;
+}
+.kgroup-tag{
+  position:absolute; z-index:3; font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:700;
+  padding:2px 7px; border-radius:6px; top:-11px; left:8px; color:var(--bg); letter-spacing:.2px;
+}
+.kmap-minterms{font-size:11px; color:var(--muted); margin-top:10px; font-family:'IBM Plex Mono',monospace;}
+.kmap-reason{
+  font-size:12.5px; color:var(--text); line-height:1.55; margin-top:8px; padding-top:10px;
+  border-top:1px dashed var(--line);
+}
+.kmap-reason b{font-family:'IBM Plex Mono',monospace;}
+.hdig{padding:0 1px; border-radius:2px; transition:all .2s ease;}
+.hdig.const{font-weight:800; color:#fff; background:var(--hcolor);}
+
+/* ---------- Logic + timing diagrams ---------- */
+.diagram-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+.ff-box{fill:var(--surface2); stroke:var(--wire); stroke-width:1.4;}
+.gate-box{fill:var(--surface2); stroke:var(--amber); stroke-width:1.3;}
+.wire-line{stroke:var(--wire); stroke-width:1.4; fill:none;}
+.wire-line.hot{stroke:var(--amber); stroke-width:2;}
+.diagram-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; fill:var(--muted);}
+.diagram-label.strong{fill:var(--text); font-weight:600; font-size:11.5px;}
+.diagram-label.pin{font-size:9px; fill:var(--muted);}
+.diagram-label.ic{font-size:10px; fill:var(--muted); font-weight:500;}
+.term-dot{fill:var(--surface); stroke:var(--wire); stroke-width:1.4;}
+.term-dot.hot{fill:var(--amber); stroke:var(--amber);}
+.gate-pin{font-size:9px; fill:var(--muted); font-family:'IBM Plex Mono',monospace;}
+.qled{transition:fill .25s ease;}
+.wave-line{stroke:var(--text); stroke-width:1.8; fill:none;}
+.wave-grid{stroke:var(--line); stroke-width:1;}
+.wave-cursor{stroke:var(--amber); stroke-width:1.6; stroke-dasharray:3 3;}
+.wave-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; fill:var(--muted);}
+
+/* footer */
+.footer-note{padding:26px 16px 20px; color:var(--muted); font-size:12px; text-align:center; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-row">
+    <div class="brand">
+      <span class="kicker">DIGITAL LOGIC LAB</span>
+      <h1>3-Bit Up Counter — JK Flip-Flop</h1>
+    </div>
+    <button class="theme-toggle" id="themeToggle">
+      <span id="themeIcon">☾</span><span id="themeLabel">Dark</span>
+    </button>
+  </div>
+  <div class="navchips" id="navchips">
+    <a href="#hero">Overview</a>
+    <a href="#state-diagram">State Diagram</a>
+    <a href="#state-table">State Table</a>
+    <a href="#state-assignment">State Assignment</a>
+    <a href="#excitation">Excitation Table</a>
+    <a href="#merged">Merged Table</a>
+    <a href="#kmaps">K-Maps</a>
+    <a href="#logic">Logic Diagram</a>
+    <a href="#timing">Timing Diagram</a>
+  </div>
+</div>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="hero">
+  <div class="hero-display">
+    <div class="eyebrow" style="margin-bottom:10px;">01 · Overview</div>
+    <div class="hero-title">A 3-bit synchronous counter, built from three JK flip-flops.</div>
+    <div class="hero-sub">Every rising clock edge, the count steps forward: 0 → 1 → 2 → … → 7 → 0. Drag the control bar below to step through the sequence — every table, K-map and diagram on this page tracks the same state.</div>
+    <div class="hero-leds">
+      <div class="led-col"><div class="led" id="heroLedC">0</div><div class="led-label">Q<sub>C</sub></div></div>
+      <div class="led-col"><div class="led" id="heroLedB">0</div><div class="led-label">Q<sub>B</sub></div></div>
+      <div class="led-col"><div class="led" id="heroLedA">0</div><div class="led-label">Q<sub>A</sub></div></div>
+    </div>
+    <div class="hero-dec">Decimal count &nbsp; <b id="heroDec">0</b></div>
+  </div>
+</section>
+
+<!-- ================= STATE DIAGRAM ================= -->
+<section class="section" id="state-diagram">
+  <div class="eyebrow">02 · Sequence</div>
+  <h2>State (transition) diagram</h2>
+  <p class="lead">The counter visits eight states in a fixed loop, in order: <b class="mono" style="color:var(--text)">0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 0</b>. Each arrow is one clock pulse — after state 7 it wraps straight back to 0.</p>
+  <div class="card">
+    <div class="diagram-wrap"><svg id="stateDiagramSvg" viewBox="0 0 320 320" width="320"></svg></div>
+    <div class="seq-strip" id="seqStrip"></div>
+  </div>
+  <div class="card tbl-scroll" style="margin-top:14px;">
+    <table id="pnTable" style="min-width:0; width:100%;">
+      <thead><tr><th>Present State</th><th>Next State</th></tr></thead>
+      <tbody id="pnTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= STATE TABLE ================= -->
+<section class="section" id="state-table">
+  <div class="eyebrow">03 · Behaviour</div>
+  <h2>Three-bit state table</h2>
+  <p class="lead">Present state and the very next state, one clock later, for all eight counts.</p>
+  <div class="card tbl-scroll">
+    <table id="stateTable">
+      <thead>
+        <tr>
+          <th rowspan="2">Count</th>
+          <th colspan="3" class="group-th">Present state Q<sub>C</sub>Q<sub>B</sub>Q<sub>A</sub></th>
+          <th colspan="3" class="group-th">Next state Q<sub>C</sub><sup>+</sup>Q<sub>B</sub><sup>+</sup>Q<sub>A</sub><sup>+</sup></th>
+        </tr>
+        <tr><th>Q<sub>C</sub></th><th>Q<sub>B</sub></th><th>Q<sub>A</sub></th><th>Q<sub>C</sub><sup>+</sup></th><th>Q<sub>B</sub><sup>+</sup></th><th>Q<sub>A</sub><sup>+</sup></th></tr>
+      </thead>
+      <tbody id="stateTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= STATE ASSIGNMENT ================= -->
+<section class="section" id="state-assignment">
+  <div class="eyebrow">04 · Mapping</div>
+  <h2>State assignment</h2>
+  <p class="lead">Each decimal count is assigned a unique 3-bit code, one bit per flip-flop: FF-C holds the MSB, FF-A the LSB.</p>
+  <div class="card tbl-scroll">
+    <table id="assignTable">
+      <thead><tr><th>Count</th><th>FF-C → Q<sub>C</sub></th><th>FF-B → Q<sub>B</sub></th><th>FF-A → Q<sub>A</sub></th></tr></thead>
+      <tbody id="assignTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= EXCITATION TABLE ================= -->
+<section class="section" id="excitation">
+  <div class="eyebrow">05 · Flip-flop reference</div>
+  <h2>Excitation table of the JK flip-flop</h2>
+  <p class="lead">For any bit's transition from Q to the next value Q⁺, this table gives the J and K inputs that force it — independent of what the counter is doing. <span class="tag a">A</span><span class="tag b">B</span><span class="tag c">C</span> markers show which bit(s) use that row on the current clock edge.</p>
+  <div class="card tbl-scroll">
+    <table id="excitationTable">
+      <thead><tr><th>Q</th><th>Q<sup>+</sup></th><th>J</th><th>K</th><th>Active now</th></tr></thead>
+      <tbody id="excitationTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= MERGED TABLE ================= -->
+<section class="section" id="merged">
+  <div class="eyebrow">06 · Synthesis</div>
+  <h2>Merged state-assignment &amp; excitation table</h2>
+  <p class="lead">The state assignment and the JK excitation table combined into one design table — this is the source data for every K-map below.</p>
+  <div class="card tbl-scroll">
+    <table class="wide" id="mergedTable">
+      <thead>
+        <tr>
+          <th rowspan="2">Count</th>
+          <th colspan="3" class="group-th">Present Q<sub>C</sub>Q<sub>B</sub>Q<sub>A</sub></th>
+          <th colspan="3" class="group-th">Next Q<sub>C</sub><sup>+</sup>Q<sub>B</sub><sup>+</sup>Q<sub>A</sub><sup>+</sup></th>
+          <th colspan="2" class="group-th">FF-C</th>
+          <th colspan="2" class="group-th">FF-B</th>
+          <th colspan="2" class="group-th">FF-A</th>
+        </tr>
+        <tr>
+          <th>Q<sub>C</sub></th><th>Q<sub>B</sub></th><th>Q<sub>A</sub></th>
+          <th>Q<sub>C</sub><sup>+</sup></th><th>Q<sub>B</sub><sup>+</sup></th><th>Q<sub>A</sub><sup>+</sup></th>
+          <th>J<sub>C</sub></th><th>K<sub>C</sub></th>
+          <th>J<sub>B</sub></th><th>K<sub>B</sub></th>
+          <th>J<sub>A</sub></th><th>K<sub>A</sub></th>
+        </tr>
+      </thead>
+      <tbody id="mergedTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= K-MAPS ================= -->
+<section class="section" id="kmaps">
+  <div class="eyebrow">07 · Minimisation</div>
+  <h2>Karnaugh maps for J<sub>A</sub>, K<sub>A</sub>, J<sub>B</sub>, K<sub>B</sub>, J<sub>C</sub>, K<sub>C</sub></h2>
+  <p class="lead">Six 3-variable maps (Q<sub>C</sub>, Q<sub>B</sub>, Q<sub>A</sub>). Small digits in each cell are the minterm number. In every map, the winning loop is drawn with a solid outline; the column-header digits that stay <b class="mono" style="color:var(--text)">fixed</b> across that loop are highlighted — those are exactly the variables that survive in the final equation. A short explanation under each map spells out the "why."</p>
+  <div class="kmap-grid" id="kmapGrid"></div>
+</section>
+
+<!-- ================= LOGIC DIAGRAM ================= -->
+<section class="section" id="logic">
+  <div class="eyebrow">08 · Implementation</div>
+  <h2>Logic diagram</h2>
+  <p class="lead">Built from two 74LS76 dual JK flip-flop packages and one 74LS08 AND gate — matching a real hardware wiring diagram, pin numbers included. PR̄ is tied to Logic 1 (preset disabled) on every flip-flop; CLR̄ is a common active-low clear bus; CLK is shared by all three stages. J<sub>A</sub>=K<sub>A</sub>=1, J<sub>B</sub>=K<sub>B</sub>=Q<sub>A</sub>, J<sub>C</sub>=K<sub>C</sub>=Q<sub>A</sub>Q<sub>B</sub>. The Q outputs light up live for the current state.</p>
+  <div class="card diagram-scroll">
+    <svg id="logicDiagramSvg" viewBox="0 0 1260 400" width="1260"></svg>
+  </div>
+</section>
+
+<!-- ================= TIMING DIAGRAM ================= -->
+<section class="section" id="timing">
+  <div class="eyebrow">09 · Verification</div>
+  <h2>Timing diagram</h2>
+  <p class="lead">Clock, Q<sub>A</sub>, Q<sub>B</sub> and Q<sub>C</sub> across one full counting cycle. Q<sub>A</sub> toggles every clock edge, Q<sub>B</sub> every 2 edges, Q<sub>C</sub> every 4 — the dashed cursor marks where the counter is right now.</p>
+  <div class="card diagram-scroll">
+    <svg id="timingDiagramSvg" viewBox="0 0 720 260" width="720"></svg>
+  </div>
+</section>
+
+<div class="footer-note">Built as a self-contained interactive reference for the JK flip-flop 3-bit synchronous up counter · tap ▶ on the control bar to auto-run the sequence</div>
+
+<!-- ================= CONTROL BAR ================= -->
+<div class="control">
+  <div class="state-readout">
+    <div class="bits" id="ctrlBits"><span class="b1">0</span><span class="b1">0</span><span class="b1">0</span></div>
+    <div class="decrow">COUNT <span id="ctrlDec">0</span> / 7</div>
+  </div>
+  <div class="btns">
+    <button class="ctrlbtn" id="btnReset" title="Reset">⟲</button>
+    <button class="ctrlbtn" id="btnPrev" title="Previous">◀</button>
+    <button class="ctrlbtn play" id="btnPlay" title="Play">▶</button>
+    <button class="ctrlbtn" id="btnNext" title="Next">▶</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+/* ============================================================
+   THEME
+   ============================================================ */
+var root = document.documentElement;
+var savedTheme = 'dark';
+try { savedTheme = window.__theme || 'dark'; } catch(e){}
+function applyTheme(t){
+  if(t==='light'){ root.setAttribute('data-theme','light'); document.getElementById('themeIcon').textContent='☀'; document.getElementById('themeLabel').textContent='Light'; }
+  else { root.removeAttribute('data-theme'); document.getElementById('themeIcon').textContent='☾'; document.getElementById('themeLabel').textContent='Dark'; }
+  window.__theme = t;
+}
+applyTheme(savedTheme);
+document.getElementById('themeToggle').addEventListener('click', function(){
+  applyTheme(window.__theme === 'light' ? 'dark' : 'light');
+});
+
+/* ============================================================
+   DATA MODEL — the eight states of the counter
+   ============================================================ */
+function bits(n){ return { C:(n>>2)&1, B:(n>>1)&1, A:n&1 }; }
+
+// excitation lookup: given Q -> Qn, return {J,K} where 'X' = don't care
+function excite(q,qn){
+  if(q===0 && qn===0) return {J:0,K:'X'};
+  if(q===0 && qn===1) return {J:1,K:'X'};
+  if(q===1 && qn===0) return {J:'X',K:1};
+  return {J:'X',K:0};
+}
+
+var STATES = [];
+for(var n=0;n<8;n++){
+  var cur = bits(n);
+  var nxt = bits((n+1)%8);
+  STATES.push({
+    n:n, cur:cur, nxt:nxt,
+    A: excite(cur.A,nxt.A),
+    B: excite(cur.B,nxt.B),
+    C: excite(cur.C,nxt.C)
+  });
+}
+
+var current = 0;
+var playTimer = null;
+
+/* ============================================================
+   RENDER: control bar + hero
+   ============================================================ */
+function renderControl(){
+  var s = bits(current);
+  var bitsEl = document.getElementById('ctrlBits');
+  bitsEl.innerHTML = '<span class="b1">'+s.C+'</span><span class="b1">'+s.B+'</span><span class="b1">'+s.A+'</span>';
+  document.getElementById('ctrlDec').textContent = current;
+
+  document.getElementById('heroDec').textContent = current;
+  setLed('heroLedC', s.C); setLed('heroLedB', s.B); setLed('heroLedA', s.A);
+}
+function setLed(id, val){
+  var el = document.getElementById(id);
+  el.textContent = val;
+  el.classList.toggle('on', val===1);
+}
+
+/* ============================================================
+   STATE DIAGRAM (circular)
+   ============================================================ */
+function buildStateDiagram(){
+  var svg = document.getElementById('stateDiagramSvg');
+  var cx=160, cy=160, r=118, nodeR=24;
+  var defs = '<defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="var(--wire)"></path></marker>' +
+             '<marker id="arrowhead-active" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="var(--amber)"></path></marker></defs>';
+  var html = defs;
+  var pos = [];
+  for(var i=0;i<8;i++){
+    var ang = (-90 + i*45) * Math.PI/180;
+    pos.push({x: cx + r*Math.cos(ang), y: cy + r*Math.sin(ang)});
+  }
+  // arrows between consecutive nodes
+  for(var i=0;i<8;i++){
+    var a = pos[i], b = pos[(i+1)%8];
+    var dx=b.x-a.x, dy=b.y-a.y, dist=Math.sqrt(dx*dx+dy*dy);
+    var ux=dx/dist, uy=dy/dist;
+    var sx=a.x+ux*(nodeR+3), sy=a.y+uy*(nodeR+3);
+    var ex=b.x-ux*(nodeR+7), ey=b.y-uy*(nodeR+7);
+    var mx=(sx+ex)/2 - uy*14, my=(sy+ey)/2 + ux*14;
+    html += '<path id="arc'+i+'" class="arrow-path" d="M'+sx+','+sy+' Q'+mx+','+my+' '+ex+','+ey+'"></path>';
+  }
+  for(var i=0;i<8;i++){
+    var b3 = bits(i);
+    html += '<circle id="node'+i+'" class="node-circle" cx="'+pos[i].x+'" cy="'+pos[i].y+'" r="'+nodeR+'"></circle>';
+    html += '<text id="nodetext'+i+'" class="node-text" x="'+pos[i].x+'" y="'+(pos[i].y+5)+'" text-anchor="middle">'+i+'</text>';
+    var subx = pos[i].x, suby = pos[i].y + nodeR + 13;
+    html += '<text class="node-sub" x="'+subx+'" y="'+suby+'" text-anchor="middle">'+b3.C+''+b3.B+''+b3.A+'</text>';
+  }
+  svg.innerHTML = html;
+}
+function updateStateDiagram(){
+  for(var i=0;i<8;i++){
+    var node = document.getElementById('node'+i);
+    var txt = document.getElementById('nodetext'+i);
+    node.classList.toggle('active', i===current);
+    txt.classList.toggle('active', i===current);
+  }
+  for(var i=0;i<8;i++){
+    var arc = document.getElementById('arc'+i);
+    arc.classList.toggle('active', i===current);
+    arc.setAttribute('marker-end', i===current ? 'url(#arrowhead-active)' : 'url(#arrowhead)');
+  }
+}
+
+function buildSeqStrip(){
+  var el = document.getElementById('seqStrip');
+  var order = [0,1,2,3,4,5,6,7,0];
+  var html = '';
+  order.forEach(function(n,idx){
+    html += '<div class="seq-chip" id="seqchip'+idx+'">'+n+'</div>';
+    if(idx < order.length-1) html += '<span class="seq-arrow">→</span>';
+  });
+  el.innerHTML = html;
+}
+function updateSeqStrip(){
+  // two chips can represent state 0 (first and last) — highlight both when current is 0
+  for(var idx=0; idx<9; idx++){
+    var chip = document.getElementById('seqchip'+idx);
+    var val = idx===8 ? 0 : idx;
+    chip.classList.toggle('active', val===current && (current!==0 || idx===0));
+  }
+}
+
+function buildPnTable(){
+  var body = document.getElementById('pnTableBody');
+  var html = '';
+  for(var n=0;n<8;n++){
+    html += '<tr id="pnrow'+n+'"><td>'+n+'</td><td>'+((n+1)%8)+'</td></tr>';
+  }
+  body.innerHTML = html;
+}
+function updatePnTable(){
+  for(var i=0;i<8;i++) document.getElementById('pnrow'+i).classList.toggle('active-row', i===current);
+}
+
+/* ============================================================
+   STATE TABLE
+   ============================================================ */
+function buildStateTable(){
+  var body = document.getElementById('stateTableBody');
+  var html = '';
+  STATES.forEach(function(s){
+    html += '<tr id="strow'+s.n+'"><td>'+s.n+'</td><td>'+s.cur.C+'</td><td>'+s.cur.B+'</td><td>'+s.cur.A+'</td>' +
+            '<td>'+s.nxt.C+'</td><td>'+s.nxt.B+'</td><td>'+s.nxt.A+'</td></tr>';
+  });
+  body.innerHTML = html;
+}
+function updateStateTable(){
+  for(var i=0;i<8;i++) document.getElementById('strow'+i).classList.toggle('active-row', i===current);
+}
+
+/* ============================================================
+   STATE ASSIGNMENT
+   ============================================================ */
+function buildAssignTable(){
+  var body = document.getElementById('assignTableBody');
+  var html = '';
+  STATES.forEach(function(s){
+    html += '<tr id="asrow'+s.n+'"><td>'+s.n+'</td><td>'+s.cur.C+'</td><td>'+s.cur.B+'</td><td>'+s.cur.A+'</td></tr>';
+  });
+  body.innerHTML = html;
+}
+function updateAssignTable(){
+  for(var i=0;i<8;i++) document.getElementById('asrow'+i).classList.toggle('active-row', i===current);
+}
+
+/* ============================================================
+   EXCITATION TABLE (static reference, 4 rows)
+   ============================================================ */
+var EXC_ROWS = [
+  {q:0,qn:0,j:0,k:'X'},
+  {q:0,qn:1,j:1,k:'X'},
+  {q:1,qn:0,j:'X',k:1},
+  {q:1,qn:1,j:'X',k:0}
+];
+function buildExcitationTable(){
+  var body = document.getElementById('excitationTableBody');
+  var html = '';
+  EXC_ROWS.forEach(function(r,idx){
+    html += '<tr id="excrow'+idx+'"><td>'+r.q+'</td><td>'+r.qn+'</td>' +
+            '<td class="'+(r.j==='X'?'dontcare':'jcell')+'">'+r.j+'</td>' +
+            '<td class="'+(r.k==='X'?'dontcare':'kcell')+'">'+r.k+'</td>' +
+            '<td id="exctag'+idx+'"></td></tr>';
+  });
+  body.innerHTML = html;
+}
+function rowIndexFor(q,qn){
+  for(var i=0;i<EXC_ROWS.length;i++){ if(EXC_ROWS[i].q===q && EXC_ROWS[i].qn===qn) return i; }
+  return -1;
+}
+function updateExcitationTable(){
+  for(var i=0;i<4;i++){
+    document.getElementById('excrow'+i).classList.remove('active-row');
+    document.getElementById('exctag'+i).innerHTML = '';
+  }
+  var s = STATES[current];
+  var tags = [
+    {bit:'A', q:s.cur.A, qn:s.nxt.A, cls:'a'},
+    {bit:'B', q:s.cur.B, qn:s.nxt.B, cls:'b'},
+    {bit:'C', q:s.cur.C, qn:s.nxt.C, cls:'c'}
+  ];
+  tags.forEach(function(t){
+    var idx = rowIndexFor(t.q, t.qn);
+    if(idx>=0){
+      document.getElementById('excrow'+idx).classList.add('active-row');
+      document.getElementById('exctag'+idx).innerHTML += '<span class="tag '+t.cls+'">'+t.bit+'</span>';
+    }
+  });
+}
+
+/* ============================================================
+   MERGED TABLE
+   ============================================================ */
+function fmt(v){ return v==='X' ? '<span class="dontcare">X</span>' : v; }
+function buildMergedTable(){
+  var body = document.getElementById('mergedTableBody');
+  var html = '';
+  STATES.forEach(function(s){
+    html += '<tr id="mgrow'+s.n+'"><td>'+s.n+'</td>' +
+      '<td>'+s.cur.C+'</td><td>'+s.cur.B+'</td><td>'+s.cur.A+'</td>' +
+      '<td>'+s.nxt.C+'</td><td>'+s.nxt.B+'</td><td>'+s.nxt.A+'</td>' +
+      '<td class="jcell">'+fmt(s.C.J)+'</td><td class="kcell">'+fmt(s.C.K)+'</td>' +
+      '<td class="jcell">'+fmt(s.B.J)+'</td><td class="kcell">'+fmt(s.B.K)+'</td>' +
+      '<td class="jcell">'+fmt(s.A.J)+'</td><td class="kcell">'+fmt(s.A.K)+'</td>' +
+      '</tr>';
+  });
+  body.innerHTML = html;
+}
+function updateMergedTable(){
+  for(var i=0;i<8;i++) document.getElementById('mgrow'+i).classList.toggle('active-row', i===current);
+}
+
+/* ============================================================
+   K-MAPS
+   ============================================================ */
+// each map: cValues for C=0 row, C=1 row, in column order BA = 00,01,11,10
+// "minterms" lists the decimal states covered by the winning group (1s + don't-cares used)
+var KMAPS = [
+  {id:'kmJA', title:'K-map for J_A', eq:'J<sub>A</sub> = 1', tag:'JA', minterms:'0,1,2,3,4,5,6,7', c0:[1,'X','X',1], c1:[1,'X','X',1], group:{colStart:2,colSpan:4}, colorVar:'--j'},
+  {id:'kmKA', title:'K-map for K_A', eq:'K<sub>A</sub> = 1', tag:'KA', minterms:'0,1,2,3,4,5,6,7', c0:['X',1,1,'X'], c1:['X',1,1,'X'], group:{colStart:2,colSpan:4}, colorVar:'--k'},
+  {id:'kmJB', title:'K-map for J_B', eq:'J<sub>B</sub> = Q<span class="var">A</span>', tag:'JB', minterms:'1, 3, 5, 7', c0:[0,1,'X','X'], c1:[0,1,'X','X'], group:{colStart:3,colSpan:2}, colorVar:'--j'},
+  {id:'kmKB', title:'K-map for K_B', eq:'K<sub>B</sub> = Q<span class="var">A</span>', tag:'KB', minterms:'1, 3, 5, 7', c0:['X','X',1,0], c1:['X','X',1,0], group:{colStart:3,colSpan:2}, colorVar:'--k'},
+  {id:'kmJC', title:'K-map for J_C', eq:'J<sub>C</sub> = Q<span class="var">B</span>Q<span class="var">A</span>', tag:'JC', minterms:'3, 7', c0:[0,0,1,0], c1:['X','X','X','X'], group:{colStart:4,colSpan:1}, colorVar:'--j'},
+  {id:'kmKC', title:'K-map for K_C', eq:'K<sub>C</sub> = Q<span class="var">B</span>Q<span class="var">A</span>', tag:'KC', minterms:'3, 7', c0:['X','X','X','X'], c1:[0,0,1,0], group:{colStart:4,colSpan:1}, colorVar:'--k'}
+];
+var BA_COLS = ['00','01','11','10']; // gray code column order
+var BA_PAIRS = [[0,0],[0,1],[1,1],[1,0]]; // [B,A] for each column, matching BA_COLS
+function grayColIndex(B,A){
+  if(B===0&&A===0) return 0;
+  if(B===0&&A===1) return 1;
+  if(B===1&&A===1) return 2;
+  return 3; // B=1,A=0
+}
+function mintermFor(C, colIdx){
+  var pair = BA_PAIRS[colIdx];
+  return C*4 + pair[0]*2 + pair[1];
+}
+// works out which variable(s) stay constant across a group's columns — that's
+// the actual K-map rule: only variables that DON'T change across the loop survive.
+function deriveGroup(m){
+  var colIdx0 = m.group.colStart-2;
+  var colIdxs = [];
+  for(var i=0;i<m.group.colSpan;i++) colIdxs.push(colIdx0+i);
+  var Bs = colIdxs.map(function(ci){return BA_PAIRS[ci][0];});
+  var As = colIdxs.map(function(ci){return BA_PAIRS[ci][1];});
+  var Bconst = Bs.every(function(v){return v===Bs[0];}) ? Bs[0] : null; // null = B changes -> eliminated
+  var Aconst = As.every(function(v){return v===As[0];}) ? As[0] : null;
+  var terms = [];
+  if(Bconst!==null) terms.push({name:'Q<sub>B</sub>', value:Bconst});
+  if(Aconst!==null) terms.push({name:'Q<sub>A</sub>', value:Aconst});
+  return {colIdxs:colIdxs, Bconst:Bconst, Aconst:Aconst, terms:terms};
+}
+function buildKmaps(){
+  var grid = document.getElementById('kmapGrid');
+  var html = '';
+  KMAPS.forEach(function(m){
+    var d = deriveGroup(m);
+    var cellCount = m.group.colSpan*2;
+
+    html += '<div class="kmap-card"><h3>'+m.title+'</h3><div class="kmap-eq">'+m.eq+'</div>';
+    html += '<div class="kmap-box" id="'+m.id+'" style="--hcolor:var('+m.colorVar+');">';
+    html += '<div class="kcell head"></div>';
+    BA_COLS.forEach(function(c,ci){
+      var inGroup = d.colIdxs.indexOf(ci)>=0;
+      var bHi = inGroup && d.Bconst!==null;
+      var aHi = inGroup && d.Aconst!==null;
+      html += '<div class="kcell head">' +
+              '<span class="hdig'+(bHi?' const':'')+'">'+c[0]+'</span>' +
+              '<span class="hdig'+(aHi?' const':'')+'">'+c[1]+'</span></div>';
+    });
+    html += '<div class="kcell head">C=0</div>';
+    m.c0.forEach(function(v,ci){
+      var mn = mintermFor(0,ci);
+      html += '<div class="kcell '+(v==='X'?'dc':'')+'" id="'+m.id+'_0_'+ci+'"><span class="mnum">m'+mn+'</span>'+v+'</div>';
+    });
+    html += '<div class="kcell head">C=1</div>';
+    m.c1.forEach(function(v,ci){
+      var mn = mintermFor(1,ci);
+      html += '<div class="kcell '+(v==='X'?'dc':'')+'" id="'+m.id+'_1_'+ci+'"><span class="mnum">m'+mn+'</span>'+v+'</div>';
+    });
+    // group overlay — solid outline + filled tag naming the equation
+    html += '<div class="kgroup" style="grid-column:'+m.group.colStart+' / span '+m.group.colSpan+'; grid-row: 2 / span 2; border-color:var('+m.colorVar+'); background:color-mix(in srgb, var('+m.colorVar+') 18%, transparent);">' +
+            '<span class="kgroup-tag" style="background:var('+m.colorVar+');">'+m.tag+'</span></div>';
+    html += '</div>';
+    html += '<div class="kmap-minterms">Grouped cells: m('+m.minterms+') &nbsp;·&nbsp; loop size: '+cellCount+'</div>';
+
+    // ---- the "how" — plain-language derivation, built from the actual group data ----
+    var reason;
+    if(d.terms.length===0){
+      reason = 'All <b>'+cellCount+'</b> cells the loop covers are 1 or X — C, B <i>and</i> A all change across the loop, so every variable cancels out, leaving a constant <b>'+m.tag[0]+'<sub>'+m.tag[1]+'</sub> = 1</b>.';
+    } else {
+      var kept = d.terms.map(function(t){ return t.value===1 ? t.name : t.name+'\u0305'; }).join('·');
+      var droppedList = ['C'];
+      if(d.Bconst===null) droppedList.push('B');
+      if(d.Aconst===null) droppedList.push('A');
+      reason = 'Highlighted digits above show what stays fixed across all <b>'+cellCount+'</b> grouped cells ('+d.terms.map(function(t){return t.name.replace(/<\/?sub>/g,'').replace('Q','Q')+'='+t.value;}).join(', ')+'). '+droppedList.join(', ')+' change within the loop and drop out, leaving <b>'+kept+'</b>.';
+    }
+    html += '<div class="kmap-reason">'+reason+'</div>';
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+}
+function updateKmaps(){
+  var s = bits(current);
+  var col = grayColIndex(s.B, s.A);
+  var row = s.C;
+  KMAPS.forEach(function(m){
+    for(var r=0;r<2;r++){
+      for(var c=0;c<4;c++){
+        var el = document.getElementById(m.id+'_'+r+'_'+c);
+        if(el) el.classList.toggle('active-cell', r===row && c===col);
+      }
+    }
+  });
+}
+
+/* ============================================================
+   LOGIC DIAGRAM
+   ============================================================ */
+function buildLogicDiagram(){
+  var svg = document.getElementById('logicDiagramSvg');
+  var html = '';
+
+  function line(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" class="wire-line"></line>'; }
+  function dot(x,y){ return '<circle cx="'+x+'" cy="'+y+'" r="2.8" fill="var(--wire)"></circle>'; }
+  function overline(x,y,text,anchor){
+    anchor = anchor||'start';
+    var w = text.length*6.6;
+    var lx = anchor==='start' ? x : (anchor==='end' ? x-w : x-w/2);
+    return '<text class="diagram-label strong" x="'+x+'" y="'+y+'" text-anchor="'+anchor+'">'+text+'</text>' +
+           '<line x1="'+lx+'" y1="'+(y-9)+'" x2="'+(lx+w)+'" y2="'+(y-9)+'" stroke="var(--text)" stroke-width="1"></line>';
+  }
+  // a horizontal bus that "hops" over any unrelated wire it crosses, so crossings
+  // never read as connections (the standard schematic convention)
+  function busWithHops(y, xStart, xEnd, hopXs){
+    var d = 'M'+xStart+','+y;
+    hopXs.slice().sort(function(a,b){return a-b;}).forEach(function(hx){
+      d += ' L'+(hx-7)+','+y+' A7,7 0 0 1 '+(hx+7)+','+y;
+    });
+    d += ' L'+xEnd+','+y;
+    return '<path d="'+d+'" class="wire-line" fill="none"></path>';
+  }
+
+  /* ---------- shared geometry — identical on every FF, nothing is eyeballed ---------- */
+  var boxW=180, boxH=150, boxY=130;
+  var ffX = [130, 470, 880];
+  var Jy = boxY+34;             // 164 — J / Q row, identical on all three FFs
+  var Ky = boxY+boxH-26;        // 254 — K / Q̄ row, identical on all three FFs
+  var CLKy = boxY+boxH/2;       // 205 — clock row, identical on all three FFs
+  var boxBot = boxY+boxH;       // 280
+  var preclrX = boxW-40;        // 140 — PRE/CLR column offset inside each box
+  var topRailY = 46;
+  var preBusY = 92;
+  var clkBusY = 320;
+  var clrBusY = 364;
+  var LOGIC1_X = 100;
+
+  var data = [
+    {J:'4', PRE:'2', K:'16', CLR:'3', CLK:'1', Q:'15', Qbar:'14', ic:'IC 7476', pkg:'(1)', bit:'A', tag:'Q<tspan font-size="8" baseline-shift="sub">A</tspan> (LSB)'},
+    {J:'9', PRE:'7', K:'12', CLR:'8', CLK:'6', Q:'11', Qbar:'10', ic:'IC 7476', pkg:'(1)', bit:'B', tag:'Q<tspan font-size="8" baseline-shift="sub">B</tspan>'},
+    {J:'4', PRE:'2', K:'16', CLR:'3', CLK:'1', Q:'15', Qbar:'14', ic:'IC 7476', pkg:'(2)', bit:'C', tag:'Q<tspan font-size="8" baseline-shift="sub">C</tspan> (MSB)'}
+  ];
+  var preclrXs = ffX.map(function(x){ return x+preclrX; });   // [270, 610, 1020]
+  var qX = ffX.map(function(x){ return x+boxW+26; });          // [336, 676, 1086]
+
+  /* ---------- CLK bus — common to all three FFs, hops over the two CLR stubs it meets ---------- */
+  html += '<circle cx="16" cy="'+clkBusY+'" r="3" fill="none" stroke="var(--wire)"></circle>';
+  html += '<text class="diagram-label strong" x="4" y="'+(clkBusY-8)+'">CLK</text>';
+  html += busWithHops(clkBusY, 16, ffX[2], [preclrXs[0], preclrXs[1]]);
+  for(var i=0;i<3;i++){ html += line(ffX[i], clkBusY, ffX[i], CLKy); html += dot(ffX[i], clkBusY); }
+
+  /* ---------- CLR̄ bus — common active-low clear, own row, no crossings ---------- */
+  html += '<circle cx="16" cy="'+clrBusY+'" r="3" fill="none" stroke="var(--wire)"></circle>';
+  html += line(16, clrBusY, preclrXs[2], clrBusY);
+  for(var i=0;i<3;i++){
+    var cx = preclrXs[i];
+    html += line(cx, boxBot, cx, clrBusY);
+    html += '<circle cx="'+cx+'" cy="'+(boxBot+18)+'" r="4" fill="var(--surface)" stroke="var(--wire)" stroke-width="1.3"></circle>';
+    html += dot(cx, clrBusY);
+    html += '<text class="diagram-label pin" x="'+(cx+9)+'" y="'+(boxBot+21)+'">'+data[i].CLR+'</text>';
+  }
+  html += overline(28, clrBusY+22, 'CLR', 'start');
+
+  /* ---------- PRE̅ bus — tied to Logic 1, hops over QA's and QB's rising wires ---------- */
+  html += '<circle cx="'+LOGIC1_X+'" cy="34" r="3" fill="none" stroke="var(--wire)"></circle>';
+  html += '<text class="diagram-label strong" x="18" y="28">Logic 1</text>';
+  html += line(LOGIC1_X, 37, LOGIC1_X, preBusY);
+  html += busWithHops(preBusY, LOGIC1_X, preclrXs[2], [qX[0], qX[1]]);
+  for(var i=0;i<3;i++){
+    var px = preclrXs[i];
+    html += line(px, preBusY, px, boxY);
+    html += '<circle cx="'+px+'" cy="'+(boxY-18)+'" r="4" fill="var(--surface)" stroke="var(--wire)" stroke-width="1.3"></circle>';
+    html += dot(px, preBusY);
+    html += '<text class="diagram-label pin" x="'+(px+9)+'" y="'+(boxY-15)+'">'+data[i].PRE+'</text>';
+  }
+  html += overline(120, preBusY-14, 'PRE', 'start');
+
+  /* ---------- Logic 1 also ties FF-A's J and K together: JA = KA = 1 ---------- */
+  html += line(LOGIC1_X, preBusY, LOGIC1_X, Ky);
+  html += line(LOGIC1_X, Jy, ffX[0], Jy);
+  html += line(LOGIC1_X, Ky, ffX[0], Ky);
+  html += dot(LOGIC1_X, Jy);
+
+  /* ---------- flip-flop boxes ---------- */
+  for(var i=0;i<3;i++){
+    var x = ffX[i], d = data[i];
+    html += '<rect class="ff-box" x="'+x+'" y="'+boxY+'" width="'+boxW+'" height="'+boxH+'" rx="6"></rect>';
+    html += '<text class="diagram-label strong" x="'+(x+20)+'" y="'+(Jy+4)+'">J</text>';
+    html += '<text class="diagram-label strong" x="'+(x+20)+'" y="'+(Ky+4)+'">K</text>';
+    html += '<text class="diagram-label strong" x="'+(x+boxW-20)+'" y="'+(Jy+4)+'" text-anchor="end">Q</text>';
+    html += '<text class="diagram-label" x="'+(x+boxW-20)+'" y="'+(Ky+4)+'" text-anchor="end">Q\u0305</text>';
+    html += '<text class="diagram-label" x="'+(x+12)+'" y="'+(CLKy+4)+'">\u25B7</text>';
+    html += '<text class="diagram-label ic" x="'+(x+boxW/2)+'" y="'+(CLKy-6)+'" text-anchor="middle">'+d.ic+'</text>';
+    html += '<text class="diagram-label ic" x="'+(x+boxW/2)+'" y="'+(CLKy+12)+'" text-anchor="middle">'+d.pkg+'</text>';
+    // pin numbers — always tucked just inside the box, above their own letter, never near an edge
+    html += '<text class="diagram-label pin" x="'+(x+2)+'" y="'+(Jy-10)+'">'+d.J+'</text>';
+    html += '<text class="diagram-label pin" x="'+(x+2)+'" y="'+(Ky-10)+'">'+d.K+'</text>';
+    html += '<text class="diagram-label pin" x="'+(x-6)+'" y="'+(CLKy-10)+'">'+d.CLK+'</text>';
+    html += '<text class="diagram-label pin" x="'+(x+boxW-2)+'" y="'+(Jy-10)+'" text-anchor="end">'+d.Q+'</text>';
+    html += '<text class="diagram-label pin" x="'+(x+boxW-2)+'" y="'+(Ky-10)+'" text-anchor="end">'+d.Qbar+'</text>';
+    // Q output stub + terminal LED + label parked well clear of every wire
+    var qx = qX[i];
+    html += line(x+boxW, Jy, qx-9, Jy);
+    html += '<circle class="qled" id="qled'+d.bit+'" cx="'+qx+'" cy="'+Jy+'" r="9" fill="var(--surface2)" stroke="var(--wire)"></circle>';
+    html += '<text class="diagram-label pin" x="'+(qx-14)+'" y="'+(Jy-14)+'" text-anchor="end">'+d.Q+'</text>';
+    html += '<text class="diagram-label strong" x="'+(qx+16)+'" y="'+(Jy+4)+'">'+d.tag+'</text>';
+  }
+
+  /* ---------- Q_A rises, feeds FF-B's J & K, then continues to the AND gate ---------- */
+  var branchB = ffX[1]-30;                 // 440 — trunk feeding FF-B, offset from the box just like Logic-1's trunk
+  var gx=740, gy=80, gw=60, gh=60;         // IC 7408 body
+  var gInTopY=gy+15, gInBotY=gy+gh-15;     // 95, 125
+  html += line(qX[0], Jy, qX[0], topRailY);
+  html += line(qX[0], topRailY, gx, topRailY);
+  html += dot(qX[0], topRailY);
+  html += line(branchB, topRailY, branchB, Ky);
+  html += line(branchB, Jy, ffX[1], Jy);
+  html += line(branchB, Ky, ffX[1], Ky);
+  html += dot(branchB, topRailY);
+  html += dot(branchB, Jy);
+  // QA drops straight into the gate's top input — no other wire shares this column
+  html += line(gx, topRailY, gx, gInTopY);
+
+  /* ---------- Q_B rises independently, clear of Q_A's rail, into the gate's bottom input ---------- */
+  var qbTurnY = 62;
+  html += line(qX[1], Jy, qX[1], qbTurnY);
+  html += line(qX[1], qbTurnY, gx-10, qbTurnY);
+  html += line(gx-10, qbTurnY, gx-10, gInBotY);
+  html += line(gx-10, gInBotY, gx, gInBotY);
+
+  /* ---------- IC 7408 AND gate ---------- */
+  html += '<path class="gate-box" d="M'+gx+','+gy+' h'+(gw*0.55)+' a'+(gh/2)+','+(gh/2)+' 0 0 1 0 '+gh+' h-'+(gw*0.55)+' z"></path>';
+  html += '<text class="diagram-label strong" x="'+(gx+gw*0.24)+'" y="'+(gy+gh/2+4)+'" text-anchor="middle">&amp;</text>';
+  html += '<text class="diagram-label ic" x="'+(gx+35)+'" y="'+(gy-10)+'" text-anchor="middle">IC 7408</text>';
+  html += '<text class="gate-pin" x="'+(gx+5)+'" y="'+(gInTopY-5)+'">1</text>';
+  html += '<text class="gate-pin" x="'+(gx+5)+'" y="'+(gInBotY+11)+'">2</text>';
+  var goutX = gx+gw*0.55+gh/2, goutY = gy+gh/2;
+  html += '<text class="gate-pin" x="'+(goutX-4)+'" y="'+(goutY-7)+'" text-anchor="middle">3</text>';
+
+  /* ---------- gate output feeds FF-C's J & K ---------- */
+  var busC = ffX[2]-30;
+  html += line(goutX, goutY, busC, goutY);
+  html += line(busC, goutY, busC, Ky);
+  html += line(busC, Jy, ffX[2], Jy);
+  html += line(busC, Ky, ffX[2], Ky);
+  html += dot(busC, Jy);
+
+  svg.innerHTML = html;
+}
+function updateLogicDiagram(){
+  var s = bits(current);
+  var map = {A:s.A,B:s.B,C:s.C};
+  ['A','B','C'].forEach(function(l){
+    var el = document.getElementById('qled'+l);
+    if(el){
+      el.setAttribute('fill', map[l]===1 ? 'var(--amber)' : 'var(--surface2)');
+      el.setAttribute('stroke', map[l]===1 ? 'var(--amber)' : 'var(--wire)');
+    }
+  });
+}
+
+/* ============================================================
+   TIMING DIAGRAM
+   ============================================================ */
+function buildTimingDiagram(){
+  var svg = document.getElementById('timingDiagramSvg');
+  var left = 60, top0 = 20, rowH = 55, w = 620, steps = 8;
+  var stepW = w/steps;
+  var html = '';
+
+  // vertical grid + clock cycle numbers
+  for(var i=0;i<=steps;i++){
+    var x = left + i*stepW;
+    html += '<line x1="'+x+'" y1="'+top0+'" x2="'+x+'" y2="'+(top0+rowH*4+10)+'" class="wave-grid"></line>';
+    if(i<steps) html += '<text class="wave-label" x="'+(x+stepW/2)+'" y="'+(top0+rowH*4+28)+'" text-anchor="middle">'+i+'</text>';
+  }
+  html += '<text class="wave-label" x="'+(left+steps*stepW/2)+'" y="'+(top0+rowH*4+44)+'" text-anchor="middle">clock cycle</text>';
+
+  // Build bit sequences across 9 sample points (0..8, 8 wraps to state0)
+  var seqA=[],seqB=[],seqC=[],clk=[];
+  for(var i=0;i<=steps;i++){ var b = bits(i%8); seqA.push(b.A); seqB.push(b.B); seqC.push(b.C); }
+
+  function stepPath(seq, rowTop, amp){
+    var d = '';
+    for(var i=0;i<seq.length;i++){
+      var x = left + i*stepW;
+      var y = rowTop + (seq[i]===1 ? 0 : amp);
+      d += (i===0?'M':'L') + x + ',' + y;
+      if(i<seq.length-1){
+        var y2 = rowTop + (seq[i+1]===1 ? 0 : amp);
+        var x2 = left+(i+1)*stepW;
+        d += ' L' + x2 + ',' + y;
+      }
+    }
+    return d;
+  }
+  function clockPath(rowTop, amp){
+    var d = '';
+    for(var i=0;i<steps;i++){
+      var x1 = left + i*stepW, x2 = left+(i+0.5)*stepW, x3 = left+(i+1)*stepW;
+      var yHigh = rowTop, yLow = rowTop+amp;
+      d += (i===0?('M'+x1+','+yLow):('L'+x1+','+yLow)) + ' L'+x1+','+yHigh+' L'+x2+','+yHigh+' L'+x2+','+yLow+' L'+x3+','+yLow;
+    }
+    return d;
+  }
+
+  var rows = [
+    {label:'CLK', top: top0+8, isClock:true},
+    {label:'Q_A', top: top0+8+rowH, seq: seqA},
+    {label:'Q_B', top: top0+8+rowH*2, seq: seqB},
+    {label:'Q_C', top: top0+8+rowH*3, seq: seqC}
+  ];
+  var amp = 26;
+  rows.forEach(function(r){
+    html += '<text class="wave-label" x="8" y="'+(r.top+amp/2+4)+'">'+r.label+'</text>';
+    if(r.isClock){
+      html += '<path class="wave-line" d="'+clockPath(r.top, amp)+'"></path>';
+    } else {
+      html += '<path class="wave-line" d="'+stepPath(r.seq, r.top, amp)+'"></path>';
+    }
+  });
+
+  // cursor
+  html += '<line id="timingCursor" class="wave-cursor" x1="'+left+'" y1="'+(top0-4)+'" x2="'+left+'" y2="'+(top0+rowH*4+14)+'"></line>';
+
+  svg.innerHTML = html;
+  svg.setAttribute('data-left', left);
+  svg.setAttribute('data-stepw', stepW);
+}
+function updateTimingDiagram(){
+  var svg = document.getElementById('timingDiagramSvg');
+  var left = parseFloat(svg.getAttribute('data-left'));
+  var stepW = parseFloat(svg.getAttribute('data-stepw'));
+  var cursor = document.getElementById('timingCursor');
+  var x = left + current*stepW;
+  cursor.setAttribute('x1', x); cursor.setAttribute('x2', x);
+}
+
+/* ============================================================
+   MASTER RENDER + NAV
+   ============================================================ */
+function renderAll(){
+  renderControl();
+  updateStateDiagram();
+  updateSeqStrip();
+  updatePnTable();
+  updateStateTable();
+  updateAssignTable();
+  updateExcitationTable();
+  updateMergedTable();
+  updateKmaps();
+  updateLogicDiagram();
+  updateTimingDiagram();
+}
+
+function goTo(n){ current = ((n%8)+8)%8; renderAll(); }
+document.getElementById('btnNext').addEventListener('click', function(){ stopPlay(); goTo(current+1); });
+document.getElementById('btnPrev').addEventListener('click', function(){ stopPlay(); goTo(current-1); });
+document.getElementById('btnReset').addEventListener('click', function(){ stopPlay(); goTo(0); });
+document.getElementById('btnPlay').addEventListener('click', function(){
+  if(playTimer){ stopPlay(); } else { startPlay(); }
+});
+function startPlay(){
+  document.getElementById('btnPlay').textContent = '❚❚';
+  playTimer = setInterval(function(){ goTo(current+1); }, 1100);
+}
+function stopPlay(){
+  if(playTimer){ clearInterval(playTimer); playTimer=null; }
+  document.getElementById('btnPlay').textContent = '▶';
+}
+
+// nav chip active-state via IntersectionObserver
+function setupNavObserver(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#navchips a'));
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var sections = Array.prototype.slice.call(document.querySelectorAll('section[id]'));
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove('active'); });
+        var link = map[e.target.id];
+        if(link){ link.classList.add('active'); link.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); }
+      }
+    });
+  }, {rootMargin:'-40% 0px -50% 0px', threshold:0});
+  sections.forEach(function(s){ obs.observe(s); });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+buildStateDiagram();
+buildSeqStrip();
+buildPnTable();
+buildStateTable();
+buildAssignTable();
+buildExcitationTable();
+buildMergedTable();
+buildKmaps();
+buildLogicDiagram();
+buildTimingDiagram();
+setupNavObserver();
+renderAll();
+
+})();
+</script>
+</body>
+</html>
