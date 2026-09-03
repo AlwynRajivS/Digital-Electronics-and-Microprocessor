@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flip-Flop Interactive Lab — SR · D · JK · T</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --radius-lg:24px; --radius-md:16px; --radius-sm:10px;
+  --font-display:'Space Grotesk',Inter,sans-serif;
+  --font-body:'Inter',Arial,sans-serif;
+  --font-mono:'JetBrains Mono',Consolas,monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0a0e18; --bg-grid:#151f33;
+  --surface:#111d2e; --surface-2:#1a2540; --surface-hover:#202d47;
+  --border:#2a3a52; --border-soft:#202d47;
+  --text:#f0f4fa; --text-muted:#9da8bf; --text-faint:#6b7a94;
+  --ink:#e8ecf6; --gate-fill:#162235;
+  --wire-off:#3d4d68;
+  --accent:#ff9500; --accent-strong:#ffa600; --accent-ink:#1a0a00;
+  --success:#48dda8; --danger:#ff6b6b; --warning:#ffd056;
+  --brand-a:#7c6cf0; --brand-b:#34d3c9; --brand-c:#ff8fb1; --brand-d:#ffb454;
+  --shadow:0 20px 50px -20px rgba(0,0,0,.8);
+  --shadow-sm:0 8px 24px -12px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+[data-theme="light"]{
+  --bg:#f0f4fa; --bg-grid:#e0e8f5;
+  --surface:#ffffff; --surface-2:#f5f9ff; --surface-hover:#ebf2ff;
+  --border:#d9e4f0; --border-soft:#e5ecf8;
+  --text:#0a1628; --text-muted:#4a5f7a; --text-faint:#7a8fa5;
+  --ink:#152d48; --gate-fill:#ffffff;
+  --wire-off:#9fb3d0;
+  --accent:#e67e22; --accent-strong:#ff9500; --accent-ink:#3a1a00;
+  --success:#089968; --danger:#e74c3c; --warning:#d4a700;
+  --brand-a:#4338ca; --brand-b:#0891b2; --brand-c:#c0388a; --brand-d:#c07a12;
+  --shadow:0 20px 50px -20px rgba(30,50,100,.15);
+  --shadow-sm:0 8px 24px -12px rgba(30,50,100,.1);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font-body);color:var(--text);background:var(--bg);
+  background-image:linear-gradient(var(--bg-grid) 1px,transparent 1px),linear-gradient(90deg,var(--bg-grid) 1px,transparent 1px);
+  background-size:50px 50px;min-height:100vh;transition:all .4s var(--ease)}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+header{position:relative;overflow:hidden;padding:45px 20px 35px;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2 40%,#f093fb);background-size:220% 220%;animation:bgshift 15s ease infinite}
+@keyframes bgshift{0%,100%{background-position:0% 40%}50%{background-position:100% 60%}}
+header .orb{position:absolute;border-radius:50%;background:#ffffff2a;filter:blur(3px);pointer-events:none}
+header .orb.o1{width:340px;height:340px;right:-110px;top:-160px;animation:float1 11s ease-in-out infinite}
+header .orb.o2{width:200px;height:200px;left:-80px;bottom:-110px;animation:float2 13s ease-in-out infinite}
+@keyframes float1{50%{transform:translate(-60px,60px) scale(1.18)}}
+@keyframes float2{50%{transform:translate(50px,-35px) scale(1.12)}}
+.wrap,main{max-width:1400px;margin:auto}
+.head{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:56px;height:56px;border-radius:16px;background:#ffffff26;border:1.5px solid #ffffff48;display:flex;align-items:center;justify-content:center;font-size:28px;backdrop-filter:blur(8px);box-shadow:0 0 28px #ffffff35;flex:none;animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.eyebrow{margin:0 0 4px;font:600 11.5px/1 var(--font-mono);letter-spacing:.16em;text-transform:uppercase;opacity:.9}
+h1{margin:0;font:700 clamp(26px,5vw,40px)/1.1 var(--font-display);letter-spacing:-.02em}
+header p.tagline{position:relative;line-height:1.8;opacity:.94;font-size:15px;max-width:920px;margin:16px 0 0}
+.theme-toggle{display:flex;align-items:center;gap:10px;border:1.5px solid #ffffff45;background:#ffffff20;color:#fff;padding:10px 18px;border-radius:999px;cursor:pointer;font:600 13.5px var(--font-body);backdrop-filter:blur(8px);transition:.3s var(--ease)}
+.theme-toggle:hover{background:#ffffff30;transform:translateY(-2px)}
+.stat-row{margin:20px 0 0;display:flex;gap:12px;flex-wrap:wrap}
+.stat{padding:9px 15px;border-radius:12px;background:#ffffff1e;border:1px solid #ffffff40;font:600 12px var(--font-mono);backdrop-filter:blur(8px)}
+
+.mode-tabs{display:flex;gap:10px;padding:12px 20px;background:var(--surface);border-bottom:2px solid var(--border-soft);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.mode-btn{padding:12px 22px;border:2px solid var(--border);background:transparent;color:var(--text-muted);border-radius:12px;font:600 14px var(--font-display);cursor:pointer;transition:.3s var(--ease)}
+.mode-btn:hover{border-color:var(--accent);color:var(--text)}
+.mode-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-strong));color:var(--accent-ink);border-color:transparent;box-shadow:0 8px 24px color-mix(in srgb, var(--accent) 50%, transparent)}
+.page{display:none}.page.active{display:block;animation:fadeIn .5s var(--ease)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+main{padding:20px}
+
+.ff-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px;position:sticky;top:64px;z-index:25;background:var(--bg);padding:10px 0}
+.ff-tab{padding:10px 18px;border-radius:999px;border:2px solid var(--border);background:var(--surface);color:var(--text-muted);font:700 13px var(--font-display);cursor:pointer;transition:.3s var(--ease);display:flex;align-items:center;gap:8px}
+.ff-tab:hover{border-color:var(--ff-color,var(--accent));color:var(--text)}
+.ff-tab.active{background:var(--ff-color,var(--accent));border-color:var(--ff-color,var(--accent));color:#04101f;box-shadow:0 8px 20px color-mix(in srgb, var(--ff-color,var(--accent)) 45%, transparent)}
+.ff-tab .dot{width:9px;height:9px;border-radius:50%;background:var(--ff-color,var(--accent));flex:none}
+.ff-tab.active .dot{background:#04101f}
+.ff-page{display:none}
+.ff-page.active{display:block;animation:fadeIn .45s var(--ease)}
+
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin:18px 0;box-shadow:var(--shadow-sm);transition:all .4s var(--ease)}
+.card:hover{transform:translateY(-3px);border-color:var(--ff-color,var(--accent));box-shadow:var(--shadow)}
+.card h2{margin-top:0;font-family:var(--font-display);font-size:21px;border-left:6px solid var(--ff-color,var(--accent));padding-left:14px;color:var(--text)}
+.card h3{margin:20px 0 12px;font-size:16px;color:var(--text);font-weight:600}
+.theory{line-height:1.85;color:var(--text-muted);font-size:14.5px;margin:12px 0}
+.theory b{color:var(--text)}
+.theory code{background:var(--surface-2);padding:3px 10px;border-radius:6px;font-family:var(--font-mono);color:var(--ff-color,var(--accent));font-weight:600}
+
+.note,.concept{background:var(--surface-2);border-left:5px solid var(--brand-b);border-radius:10px;padding:15px;line-height:1.8;margin:14px 0;font-size:13.5px;color:var(--text-muted)}
+.note b,.concept b{color:var(--text)}
+.note.warn{border-left-color:var(--danger)}
+
+.result{background:linear-gradient(120deg,var(--brand-a),var(--brand-b));color:#fff;border-radius:12px;padding:16px;margin:16px 0;font-family:var(--font-mono);box-shadow:var(--shadow-sm);border:none;font-size:13.5px;font-weight:600}
+
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0;align-items:center}
+.ctrl-btn{padding:12px 22px;background:var(--surface-2);border:2px solid var(--border);border-radius:10px;font:600 13px var(--font-mono);color:var(--text-muted);cursor:pointer;transition:.3s var(--ease);box-shadow:var(--shadow-sm)}
+.ctrl-btn:hover{border-color:var(--ff-color,var(--accent));color:var(--text);transform:translateY(-2px)}
+.ctrl-btn.active{background:linear-gradient(135deg,var(--ff-color,var(--accent)),var(--accent-strong));color:#04101f;border:none;box-shadow:0 8px 20px color-mix(in srgb, var(--ff-color,var(--accent)) 50%, transparent)}
+.ctrl-btn.ck.active{background:linear-gradient(135deg,var(--success),#2fbf8f)}
+.ctrl-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.ctrl-btn.wide{padding:12px 30px}
+
+.state-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin:20px 0}
+.state-card{background:var(--surface-2);border:2.5px solid var(--border);border-radius:12px;padding:16px;text-align:center;transition:all .4s var(--ease)}
+.state-card.high{border-color:var(--success);background:color-mix(in srgb, var(--success) 15%, transparent);box-shadow:0 0 20px color-mix(in srgb, var(--success) 35%, transparent)}
+.state-card.low{border-color:var(--danger);background:color-mix(in srgb, var(--danger) 15%, transparent);box-shadow:0 0 20px color-mix(in srgb, var(--danger) 35%, transparent)}
+.state-card.hold{border-color:var(--warning);background:color-mix(in srgb, var(--warning) 12%, transparent)}
+.state-label{font-size:10.5px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.state-value{font-size:32px;font-family:var(--font-mono);font-weight:900;letter-spacing:2px;color:var(--text)}
+.state-card.high .state-value{color:var(--success)}
+.state-card.low .state-value{color:var(--danger)}
+.state-card.hold .state-value{color:var(--warning)}
+
+.circuit-box{background:var(--surface-2);border:1.5px solid var(--border-soft);border-radius:14px;padding:14px;margin:18px 0;overflow:auto}
+.circuit-box svg{display:block;width:100%;height:auto;min-height:440px}
+
+.wire{fill:none;stroke:var(--wire-off);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;transition:all .25s;vector-effect:non-scaling-stroke}
+.wire.on{stroke:var(--ff-color,var(--accent));stroke-width:6;filter:drop-shadow(0 0 12px var(--ff-color,var(--accent)));animation:flowGlow .5s ease-in-out}
+.wire.dim{opacity:.22}
+.wire.fbq{stroke-dasharray:2,7;stroke-width:4}
+.wire.fbq.on{stroke:var(--success);stroke-width:5;filter:drop-shadow(0 0 10px var(--success))}
+.wire.fbqbar{stroke-dasharray:2,7;stroke-width:4}
+.wire.fbqbar.on{stroke:var(--danger);stroke-width:5;filter:drop-shadow(0 0 10px var(--danger))}
+.junction-dot{fill:var(--text-faint)}
+.zone-panel{fill:var(--surface);opacity:.55;stroke:var(--border-soft);stroke-width:1.5;stroke-dasharray:6,5}
+.zone-title{fill:var(--text-faint);font:700 12px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+@keyframes flowGlow{0%{filter:drop-shadow(0 0 2px var(--ff-color,var(--accent)))}50%{filter:drop-shadow(0 0 16px var(--ff-color,var(--accent)))}100%{filter:drop-shadow(0 0 8px var(--ff-color,var(--accent)))}}
+.gate-symbol{fill:var(--gate-fill);stroke:var(--ink);stroke-width:2.5;transition:all .3s}
+.gate-symbol.dim{opacity:.3}
+.gate-symbol.active-gate{stroke:var(--ff-color,var(--accent));filter:drop-shadow(0 0 8px color-mix(in srgb, var(--ff-color,var(--accent)) 60%, transparent))}
+.gate-label{fill:var(--ink);font:600 11px var(--font-mono);pointer-events:none;font-weight:700;font-family:monospace}
+.wire-label{fill:var(--text-faint);font:700 13px var(--font-mono);pointer-events:none;font-weight:700}
+.pin-dot{fill:var(--ink)}
+
+.wave-legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0 4px}
+.wave-legend-item{display:flex;align-items:center;gap:7px;font:600 12px var(--font-mono);color:var(--text-muted)}
+.wave-legend-swatch{width:20px;height:4px;border-radius:2px;flex:none}
+.wave-grid-v{stroke:var(--border);stroke-width:1;opacity:.55}
+.wave-grid-h{stroke:var(--border-soft);stroke-width:1;stroke-dasharray:3,4;opacity:.7}
+.wave-band{fill:var(--surface);opacity:.5}
+.wave-line{fill:none;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.wave-lvl-label{fill:var(--text-faint);font:600 9px var(--font-mono)}
+.wave-step-label{fill:var(--text-faint);font:600 9.5px var(--font-mono)}
+.wave-cursor{stroke:var(--ff-color,var(--accent));stroke-width:1.5;stroke-dasharray:4,3;opacity:.85}
+
+.truth-table{width:100%;border-collapse:collapse;margin:16px 0;font-family:var(--font-mono);font-size:13.5px}
+.truth-table th{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;padding:11px;text-align:center;font-weight:700;border:1.5px solid var(--border)}
+.truth-table td{padding:11px;text-align:center;border:1.5px solid var(--border);background:var(--surface-2);font-weight:600}
+.truth-table tr.active td{background:color-mix(in srgb, var(--ff-color,var(--accent)) 25%, transparent);box-shadow:inset 0 0 0 2px var(--ff-color,var(--accent));color:var(--ff-color,var(--accent))}
+.truth-table .high{color:var(--success)}
+.truth-table .low{color:var(--danger)}
+.truth-table .hold{color:var(--warning)}
+.table-scroll{overflow-x:auto}
+
+.app-box{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;border-radius:12px;padding:16px;margin:12px 0;box-shadow:var(--shadow-sm)}
+.app-box h4{margin:0 0 8px;font:600 14.5px var(--font-display)}
+.app-box p{margin:6px 0;line-height:1.7;font-size:13.5px;opacity:.95}
+
+.quiz-question{background:var(--surface-2);border-left:5px solid var(--ff-color,var(--accent));border-radius:10px;padding:16px;margin:14px 0}
+.quiz-question h4{margin:0 0 12px;font:600 14.5px var(--font-display);color:var(--text)}
+.quiz-options{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.quiz-option{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:2px solid var(--border);border-radius:8px;cursor:pointer;transition:.3s var(--ease)}
+.quiz-option:hover{border-color:var(--ff-color,var(--accent));background:var(--surface-hover)}
+.quiz-option input[type="radio"]{width:18px;height:18px;cursor:pointer;accent-color:var(--ff-color,var(--accent))}
+.quiz-option label{flex:1;cursor:pointer;margin:0;font-weight:500;font-size:14px}
+.quiz-feedback{padding:12px;border-radius:8px;margin-top:10px;font-weight:600;font-size:13.5px}
+.quiz-feedback.correct{background:color-mix(in srgb, var(--success) 20%, transparent);color:var(--success);border-left:4px solid var(--success)}
+.quiz-feedback.incorrect{background:color-mix(in srgb, var(--danger) 20%, transparent);color:var(--danger);border-left:4px solid var(--danger)}
+
+.score-display{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;border-radius:14px;padding:22px;text-align:center;margin:18px 0}
+.score-display .big{font-size:44px;font-family:var(--font-mono);font-weight:900;margin:8px 0}
+.score-display .desc{font-size:13.5px;opacity:.9}
+.score-display.perfect{animation:winPulse 1s var(--ease) 2}
+@keyframes winPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+
+.progress-dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.progress-item{background:var(--surface-2);border:2px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.progress-item .pv{font-family:var(--font-mono);font-weight:900;font-size:22px;margin-top:6px}
+.progress-item .pl{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+
+.symbol-box{background:var(--surface-2);border-radius:12px;padding:14px;display:flex;justify-content:center}
+.symbol-box svg{max-width:260px}
+
+.step-log{background:var(--surface-2);border-radius:12px;padding:14px;margin:14px 0;font-family:var(--font-mono);font-size:13px;max-height:220px;overflow-y:auto;border:1.5px solid var(--border-soft)}
+.step-log .entry{padding:7px 0;border-bottom:1px dashed var(--border-soft);color:var(--text-muted)}
+.step-log .entry:last-child{border-bottom:none}
+.step-log .entry b{color:var(--ff-color,var(--accent))}
+.step-log .entry.final{color:var(--text);font-weight:700}
+
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font:700 11px var(--font-mono);background:var(--surface-2);border:1.5px solid var(--border);color:var(--text-muted)}
+
+.fabs{position:fixed;right:20px;bottom:20px;z-index:50}
+.fab{width:50px;height:50px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:var(--shadow);transition:.3s var(--ease);opacity:0;transform:translateY(15px);pointer-events:none}
+.fab.show{opacity:1;transform:none;pointer-events:auto}
+.fab:hover{transform:translateY(-4px);border-color:var(--accent);color:var(--accent)}
+
+footer{max-width:1400px;margin:20px auto 0;padding:28px 20px 50px;text-align:center;color:var(--text-faint);font-size:13px;border-top:1.5px solid var(--border-soft)}
+
+@media(max-width:768px){
+  .card{padding:16px}
+  .circuit-box svg{min-height:320px}
+  .state-grid{grid-template-columns:1fr 1fr}
+  .mode-tabs{flex-direction:column}
+  .mode-btn{width:100%}
+  header{padding:32px 16px 26px}
+  .ff-tabs{top:56px}
+}
+@media(prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body data-theme="dark">
+<header>
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <div class="wrap">
+    <div class="head">
+      <div class="brand">
+        <div class="brand-mark">🔁</div>
+        <div><p class="eyebrow">Sequential Logic · EC1306</p><h1>Flip-Flop Interactive Lab</h1></div>
+      </div>
+      <button id="theme" class="theme-toggle"><span>🌙</span><span>Dark</span></button>
+    </div>
+    <p class="tagline">Master SR, D, JK and T flip-flops end to end: learn the gate-level circuits with live signal flow, build and verify each circuit step-by-step in the practice sandbox, then prove your understanding in the assessment. IEEE-style NAND gates, live timing diagrams, and full mobile support.</p>
+    <div class="stat-row">
+      <span class="stat">📚 Learn</span>
+      <span class="stat">🧪 Practice Sandbox</span>
+      <span class="stat">📝 Assess</span>
+      <span class="stat">🔌 Live Circuits</span>
+      <span class="stat">📈 Timing Diagrams</span>
+    </div>
+  </div>
+</header>
+
+<nav class="mode-tabs">
+  <button class="mode-btn active" data-mode="learn" onclick="switchMode('learn',this)">📚 Learn</button>
+  <button class="mode-btn" data-mode="practice" onclick="switchMode('practice',this)">🧪 Practice Sandbox</button>
+  <button class="mode-btn" data-mode="assess" onclick="switchMode('assess',this)">📝 Assessment</button>
+</nav>
+
+<main id="main">
+  <div id="learn" class="page active">
+    <div class="ff-tabs" data-mode="learn"></div>
+    <div id="learn-content"></div>
+  </div>
+  <div id="practice" class="page">
+    <div class="ff-tabs" data-mode="practice"></div>
+    <div id="practice-content"></div>
+  </div>
+  <div id="assess" class="page">
+    <div class="card">
+      <h2>🏆 Your Progress</h2>
+      <div class="theory">Complete each flip-flop's assessment below. Your best score per topic is tracked here for the duration of this session.</div>
+      <div class="progress-dash" id="progress-dash"></div>
+    </div>
+    <div class="ff-tabs" data-mode="assess"></div>
+    <div id="assess-content"></div>
+  </div>
+</main>
+
+<div class="fabs">
+  <button class="fab" id="topBtn">↑</button>
+</div>
+
+<footer>
+  <p>🎓 Flip-Flop Interactive Learning Laboratory — Master sequential logic through theory, practice, and assessment</p>
+  <p style="margin:8px 0 0">SR · D · JK · T — gate-level NAND circuits, live timing diagrams and guided step-by-step verification</p>
+</footer>
+
+<script>
+/* ============================================================
+   GLOBAL: theme, mode switching, scroll-to-top (unchanged core)
+   ============================================================ */
+let theme = (window.matchMedia && matchMedia('(prefers-color-scheme:light)').matches) ? 'light' : 'dark';
+function applyTheme(t) {
+  document.body.setAttribute('data-theme', t);
+  document.querySelector('#theme span:first-child').textContent = t === 'dark' ? '🌙' : '☀️';
+  document.querySelector('#theme span:last-child').textContent = t === 'dark' ? 'Dark' : 'Light';
+}
+applyTheme(theme);
+document.getElementById('theme').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme); };
+
+const topBtn = document.getElementById('topBtn');
+window.addEventListener('scroll', () => topBtn.classList.toggle('show', window.scrollY > 450));
+topBtn.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
+
+let currentMode = 'learn';
+function switchMode(mode, btn) {
+  document.querySelectorAll('#main > .page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mode-tabs .mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(mode).classList.add('active');
+  if (btn) btn.classList.add('active');
+  currentMode = mode;
+  window.scrollTo(0, 0);
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(tag, attrs, text, parent) { const e = el(tag, attrs, parent); e.textContent = text; return e; }
+
+/* ============================================================
+   FLIP-FLOP CONFIG — one source of truth for all 3 modes
+   ============================================================ */
+const FF = {
+  sr: {
+    key:'sr', name:'SR Flip-Flop', short:'SR', color:'var(--brand-b)', colorHex:'#34d3c9',
+    icon:'⊕', inputs:['S','R'], gateInputs:2, hasInverter:false, feedback:false,
+    desc:'The SR (Set-Reset) flip-flop is a clocked version of the SR latch. Two NAND gates gate the S and R signals with the clock (CK) before they reach the cross-coupled NAND latch, so the latch only responds while CK = 1.',
+    truth:[
+      {clk:0,vals:{S:'X',R:'X'},q:'Qn',note:'No clock — hold (memory)'},
+      {clk:1,vals:{S:0,R:0},q:'Qn',note:'Hold — latch keeps its state'},
+      {clk:1,vals:{S:0,R:1},q:0,note:'Reset — Q forced to 0'},
+      {clk:1,vals:{S:1,R:0},q:1,note:'Set — Q forced to 1'},
+      {clk:1,vals:{S:1,R:1},q:'Invalid',note:'Forbidden — Q and Q̄ would both go low'}
+    ],
+    charRows:[
+      {qn:0,vals:{S:0,R:0},qn1:0},{qn:0,vals:{S:0,R:1},qn1:0},{qn:0,vals:{S:1,R:0},qn1:1},{qn:0,vals:{S:1,R:1},qn1:'X'},
+      {qn:1,vals:{S:0,R:0},qn1:1},{qn:1,vals:{S:0,R:1},qn1:0},{qn:1,vals:{S:1,R:0},qn1:1},{qn:1,vals:{S:1,R:1},qn1:'X'}
+    ],
+    equation:'Q<sub>n+1</sub> = S + Q<sub>n</sub>R̄&nbsp;&nbsp; (with the restriction S·R = 0)',
+    excitation:[
+      {qn:0,qn1:0,vals:{S:0,R:'X'}},{qn:0,qn1:1,vals:{S:1,R:0}},
+      {qn:1,qn1:0,vals:{S:0,R:1}},{qn:1,qn1:1,vals:{S:'X',R:0}}
+    ],
+    quiz:[
+      {q:'In a clocked SR flip-flop, what happens when CK = 0?',
+       options:['The flip-flop toggles','Q is forced to 0','The flip-flop holds its previous state, regardless of S and R','Q is forced to 1'],
+       correct:2, explain:'CK gates both input NAND gates. When CK = 0 both gate outputs go to 1 (S̄=R̄=1), which is the hold condition of the internal NAND latch.'},
+      {q:'With CK = 1, S = 1 and R = 0, what is Qn+1?',
+       options:['0','1','Hold (Qn)','Invalid'],
+       correct:1, explain:'This is the Set condition — Q is forced to 1 and Q̄ to 0.'},
+      {q:'Why is S = 1, R = 1 forbidden while CK = 1?',
+       options:['It damages the gates','It forces Q and Q̄ to be equal, breaking the complementary output rule','It has no effect at all','It automatically resets the circuit'],
+       correct:1, explain:'Both internal NAND gates output 0 simultaneously, so Q = Q̄ = 1, violating Q ≠ Q̄.'},
+      {q:'What is the characteristic equation of the SR flip-flop?',
+       options:['Qn+1 = D','Qn+1 = S + QnR̄','Qn+1 = T ⊕ Qn','Qn+1 = J·Q̄n + K̄·Qn'],
+       correct:1, explain:'Derived from the K-map of the characteristic table: Qn+1 = S + Qn·R̄, valid only when S·R = 0.'},
+      {q:'In the excitation table, to go from Qn = 1 to Qn+1 = 0, what must S and R be?',
+       options:['S=1, R=0','S=X, R=0','S=0, R=1','S=1, R=1'],
+       correct:2, explain:'Moving from 1 to 0 requires the Reset operation: S=0, R=1.'}
+    ]
+  },
+  d: {
+    key:'d', name:'D Flip-Flop', short:'D', color:'var(--brand-d)', colorHex:'#ffb454',
+    icon:'📥', inputs:['D'], gateInputs:2, hasInverter:true, feedback:false,
+    desc:'The D (Data/Delay) flip-flop eliminates the invalid SR state entirely. A single D input feeds one NAND gate directly and, through an inverter, the other NAND gate — guaranteeing S̄ and R̄ are always complementary while CK = 1.',
+    truth:[
+      {clk:0,vals:{D:'X'},q:'Qn',note:'No clock — hold (memory)'},
+      {clk:1,vals:{D:0},q:0,note:'Q follows D = 0'},
+      {clk:1,vals:{D:1},q:1,note:'Q follows D = 1'}
+    ],
+    charRows:[
+      {qn:0,vals:{D:0},qn1:0},{qn:0,vals:{D:1},qn1:1},
+      {qn:1,vals:{D:0},qn1:0},{qn:1,vals:{D:1},qn1:1}
+    ],
+    equation:'Q<sub>n+1</sub> = D',
+    excitation:[
+      {qn:0,qn1:0,vals:{D:0}},{qn:0,qn1:1,vals:{D:1}},
+      {qn:1,qn1:0,vals:{D:0}},{qn:1,qn1:1,vals:{D:1}}
+    ],
+    quiz:[
+      {q:'What is the main advantage of a D flip-flop over an SR flip-flop?',
+       options:['It is faster','It has no invalid/forbidden input state','It needs no clock','It can store two bits'],
+       correct:1, explain:'Because D and its inverted copy D̄ always feed the two NAND gates, S̄ and R̄ can never both be 0 — the invalid state is designed out.'},
+      {q:'With CK = 1 and D = 1, what is Qn+1?',
+       options:['0','1','Toggle','Hold'],
+       correct:1, explain:'A D flip-flop is "transparent" while CK=1: Qn+1 simply follows D.'},
+      {q:'What produces D̄ inside the D flip-flop circuit?',
+       options:['A second D input pin','A NOT (inverter) gate fed by D','The clock signal','Feedback from Q'],
+       correct:1, explain:'An inverter takes D and produces D̄, which is ANDed (via NAND) with CK to drive the reset side of the latch.'},
+      {q:'What is the characteristic equation of the D flip-flop?',
+       options:['Qn+1 = Qn','Qn+1 = D','Qn+1 = D ⊕ Qn','Qn+1 = D·Qn'],
+       correct:1, explain:'Qn+1 = D — the simplest of all flip-flop equations.'},
+      {q:'To move the D flip-flop from Qn = 1 to Qn+1 = 0, what must D be?',
+       options:['D = 1','D = X','D = 0','Cannot be done'],
+       correct:2, explain:'Since Qn+1 always equals D, D must simply be set to 0.'}
+    ]
+  },
+  jk: {
+    key:'jk', name:'JK Flip-Flop', short:'JK', color:'var(--brand-a)', colorHex:'#9b8cff',
+    icon:'⚙️', inputs:['J','K'], gateInputs:3, hasInverter:false, feedback:true,
+    desc:'The JK flip-flop fixes the SR flip-flop’s forbidden state by feeding Q and Q̄ back into the input NAND gates. Each input gate now takes three signals — the data input, CK, and the opposite output — so J = K = 1 produces a well-defined toggle instead of an invalid state.',
+    truth:[
+      {clk:0,vals:{J:'X',K:'X'},q:'Qn',note:'No clock — hold (memory)'},
+      {clk:1,vals:{J:0,K:0},q:'Qn',note:'Hold — no change'},
+      {clk:1,vals:{J:0,K:1},q:0,note:'Reset'},
+      {clk:1,vals:{J:1,K:0},q:1,note:'Set'},
+      {clk:1,vals:{J:1,K:1},q:'Q̄n',note:'Toggle — output complements itself'}
+    ],
+    charRows:[
+      {qn:0,vals:{J:0,K:0},qn1:0},{qn:0,vals:{J:0,K:1},qn1:0},{qn:0,vals:{J:1,K:0},qn1:1},{qn:0,vals:{J:1,K:1},qn1:1},
+      {qn:1,vals:{J:0,K:0},qn1:1},{qn:1,vals:{J:0,K:1},qn1:0},{qn:1,vals:{J:1,K:0},qn1:1},{qn:1,vals:{J:1,K:1},qn1:0}
+    ],
+    equation:'Q<sub>n+1</sub> = J·Q̄<sub>n</sub> + K̄·Q<sub>n</sub>',
+    excitation:[
+      {qn:0,qn1:0,vals:{J:0,K:'X'}},{qn:0,qn1:1,vals:{J:1,K:'X'}},
+      {qn:1,qn1:0,vals:{J:'X',K:1}},{qn:1,qn1:1,vals:{J:'X',K:0}}
+    ],
+    quiz:[
+      {q:'What key problem does the JK flip-flop solve compared to the SR flip-flop?',
+       options:['It removes the need for a clock','It gives a defined, useful output for J=K=1 instead of an invalid state','It stores two bits at once','It removes the need for feedback'],
+       correct:1, explain:'By feeding Q and Q̄ back into the input gates, J=K=1 produces a clean toggle instead of the SR flip-flop’s forbidden condition.'},
+      {q:'With CK = 1, J = 1 and K = 1, what does the JK flip-flop do?',
+       options:['Holds its state','Resets to 0','Sets to 1','Toggles — Qn+1 = Q̄n'],
+       correct:3, explain:'J=K=1 is the toggle condition: the output flips to the complement of its previous value on every active clock.'},
+      {q:'Which signals feed the input NAND gate that also receives J and CK?',
+       options:['Q̄ (feedback)','Q (feedback)','D (data)','T (toggle)'],
+       correct:0, explain:'The J-side gate is a 3-input NAND: J, CK, and Q̄ fed back from the latch output.'},
+      {q:'What is the characteristic equation of the JK flip-flop?',
+       options:['Qn+1 = J + QnK̄','Qn+1 = JQ̄n + K̄Qn','Qn+1 = J⊕K⊕Qn','Qn+1 = JK'],
+       correct:1, explain:'Qn+1 = J·Q̄n + K̄·Qn, derived from the characteristic table K-map.'},
+      {q:'In the excitation table, to hold Qn = 1 at Qn+1 = 1, what must J and K be?',
+       options:['J=1, K=1','J=X, K=0','J=0, K=X','J=0, K=0'],
+       correct:1, explain:'From Qn=1 to Qn+1=1: J can be anything (X) but K must be 0 to avoid toggling or resetting.'}
+    ]
+  },
+  t: {
+    key:'t', name:'T Flip-Flop', short:'T', color:'var(--brand-c)', colorHex:'#ff8fb1',
+    icon:'🔀', inputs:['T'], gateInputs:3, hasInverter:false, feedback:true,
+    desc:'The T (Toggle) flip-flop is the simplest sequential element: it is a JK flip-flop with J and K tied together as a single T input. When T = 1 and the clock is active, the output toggles every cycle; when T = 0 it holds.',
+    truth:[
+      {clk:0,vals:{T:'X'},q:'Qn',note:'No clock — hold (memory)'},
+      {clk:1,vals:{T:0},q:'Qn',note:'Hold — no change'},
+      {clk:1,vals:{T:1},q:'Q̄n',note:'Toggle — output complements itself'}
+    ],
+    charRows:[
+      {qn:0,vals:{T:0},qn1:0},{qn:0,vals:{T:1},qn1:1},
+      {qn:1,vals:{T:0},qn1:1},{qn:1,vals:{T:1},qn1:0}
+    ],
+    equation:'Q<sub>n+1</sub> = T ⊕ Q<sub>n</sub>',
+    excitation:[
+      {qn:0,qn1:0,vals:{T:0}},{qn:0,qn1:1,vals:{T:1}},
+      {qn:1,qn1:0,vals:{T:1}},{qn:1,qn1:1,vals:{T:0}}
+    ],
+    quiz:[
+      {q:'A T flip-flop can be built directly from which other flip-flop?',
+       options:['SR flip-flop with S=R','D flip-flop with D=Qn','JK flip-flop with J and K tied together','A single inverter'],
+       correct:2, explain:'Tying J and K together to a single signal T turns a JK flip-flop into a T flip-flop.'},
+      {q:'With CK = 1 and T = 0, what happens to Q?',
+       options:['Toggles','Resets to 0','Holds its current value','Sets to 1'],
+       correct:2, explain:'T=0 is the hold condition — the output does not change.'},
+      {q:'What is the characteristic equation of the T flip-flop?',
+       options:['Qn+1 = T','Qn+1 = T ⊕ Qn','Qn+1 = T·Qn','Qn+1 = T + Qn'],
+       correct:1, explain:'Qn+1 = T ⊕ Qn — XOR between T and the current state.'},
+      {q:'Why is the T flip-flop especially useful in digital design?',
+       options:['It needs no gates at all','It is ideal for building binary counters, since each active clock with T=1 divides the frequency by two','It can store analog values','It never needs a clock signal'],
+       correct:1, explain:'Repeatedly toggling on every clock pulse is exactly the behaviour needed for ripple/binary counters.'},
+      {q:'In the excitation table, to go from Qn = 0 to Qn+1 = 1, what must T be?',
+       options:['T = 0','T = 1','T = X','Not possible'],
+       correct:1, explain:'0 → 1 requires a toggle, so T must be 1.'}
+    ]
+  }
+};
+const FF_ORDER = ['sr','d','jk','t'];
+
+/* ============================================================
+   RUNTIME STATE
+   ============================================================ */
+const state = {};
+FF_ORDER.forEach(k=>{
+  const inputs = {}; FF[k].inputs.forEach(i=>inputs[i]=0);
+  state[k] = { ck:0, inputs, q:0, qbar:1, mode:'HOLD', invalid:false };
+});
+const practiceState = {};
+FF_ORDER.forEach(k=>{
+  const inputs = {}; FF[k].inputs.forEach(i=>inputs[i]=0);
+  practiceState[k] = { ck:0, inputs, q:0, qbar:1, mode:'HOLD', invalid:false, step:0 };
+});
+const waveHistory = {};
+FF_ORDER.forEach(k=>{ waveHistory[k] = [snapshotOf(state[k], k)]; });
+const WAVE_MAX_STEPS = 14;
+const bestScores = {}; FF_ORDER.forEach(k=>bestScores[k]=null);
+
+function snapshotOf(s, key) {
+  const snap = { ck:s.ck, q:s.q, qbar:s.qbar };
+  FF[key].inputs.forEach(i=> snap[i]=s.inputs[i]);
+  return snap;
+}
+function nand(a,b){ return (a===1 && b===1) ? 0 : 1; }
+function nand3(a,b,c){ return (a===1 && b===1 && c===1) ? 0 : 1; }
+
+/* ============================================================
+   NEXT-STATE LOGIC (authoritative) + illustrative gate outputs
+   ============================================================ */
+function computeNext(key, s) {
+  const {ck, inputs, q} = s;
+  let nq = q, mode = 'HOLD', invalid = false;
+  if (ck === 0) { mode = 'HOLD (CK=0)'; return {q:nq, qbar:1-nq, mode, invalid}; }
+  if (key === 'sr') {
+    const {S,R} = inputs;
+    if (S===0&&R===0){ mode='HOLD'; }
+    else if (S===1&&R===0){ nq=1; mode='SET'; }
+    else if (S===0&&R===1){ nq=0; mode='RESET'; }
+    else { invalid=true; mode='⚠ INVALID'; }
+  } else if (key === 'd') {
+    nq = inputs.D; mode = inputs.D===1 ? 'SET (D=1)' : 'RESET (D=0)';
+  } else if (key === 'jk') {
+    const {J,K} = inputs;
+    if (J===0&&K===0){ mode='HOLD'; }
+    else if (J===1&&K===0){ nq=1; mode='SET'; }
+    else if (J===0&&K===1){ nq=0; mode='RESET'; }
+    else { nq = 1-q; mode='TOGGLE'; }
+  } else if (key === 't') {
+    if (inputs.T===0){ mode='HOLD'; } else { nq = 1-q; mode='TOGGLE'; }
+  }
+  return {q:nq, qbar:1-nq, mode, invalid};
+}
+
+function gateEval(key, s) {
+  const {ck, inputs, q, qbar} = s;
+  if (key === 'sr') {
+    return { g1:{label:'S̄ = NAND(S,CK)', val:nand(inputs.S,ck)}, g2:{label:'R̄ = NAND(R,CK)', val:nand(inputs.R,ck)} };
+  }
+  if (key === 'd') {
+    const dbar = 1-inputs.D;
+    return { inv:{label:'D̄ = NOT(D)', val:dbar}, g1:{label:'S = D (direct)', val:inputs.D}, g2:{label:'R = D̄ (via inverter)', val:dbar} };
+  }
+  if (key === 'jk') {
+    return { g1:{label:'S = J · Q̄ₙ (AND)', val:inputs.J & qbar}, g2:{label:'R = K · Qₙ (AND)', val:inputs.K & q} };
+  }
+  return { g1:{label:'S = T · Q̄ₙ (AND)', val:inputs.T & qbar}, g2:{label:'R = T · Qₙ (AND)', val:inputs.T & q} };
+}
+
+/* ============================================================
+   TAB BUILDING (ff-tabs shared across learn/practice/assess)
+   ============================================================ */
+function buildFFTabs() {
+  document.querySelectorAll('.ff-tabs').forEach(container=>{
+    const mode = container.dataset.mode;
+    container.innerHTML = '';
+    FF_ORDER.forEach((k,i)=>{
+      const b = document.createElement('button');
+      b.className = 'ff-tab' + (i===0?' active':'');
+      b.style.setProperty('--ff-color', FF[k].colorHex);
+      b.innerHTML = `<span class="dot"></span>${FF[k].icon} ${FF[k].name}`;
+      b.onclick = ()=> showFFPage(mode, k, b);
+      container.appendChild(b);
+    });
+  });
+}
+function showFFPage(mode, key, btn) {
+  const container = document.querySelector(`#${mode}-content`) || document.querySelector(`#${mode==='assess'?'assess-content':mode+'-content'}`);
+  document.querySelectorAll(`#${mode==='assess'?'assess':mode==='practice'?'practice':'learn'} .ff-tabs .ff-tab`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll(`#${mode}-content .ff-page`).forEach(p=>p.classList.remove('active'));
+  const page = document.getElementById(`${mode}-${key}`);
+  if (page) page.classList.add('active');
+  window.scrollTo({top: document.querySelector('.ff-tabs[data-mode="'+mode+'"]').offsetTop - 70, behavior:'smooth'});
+}
+
+/* ============================================================
+   LEARN PAGE BUILDER
+   ============================================================ */
+function fmtVal(v){
+  if (v==='X') return '<span class="hold">X</span>';
+  if (v==='Invalid') return '<span class="low">Invalid</span>';
+  if (v==='Qn') return '<span class="hold">Qn</span>';
+  if (v==='Q̄n') return '<span class="hold">Q̄n</span>';
+  return `<span class="${v===1?'high':'low'}">${v}</span>`;
+}
+function buildLearnContent() {
+  const root = document.getElementById('learn-content');
+  root.innerHTML = '';
+  FF_ORDER.forEach(key=>{
+    const cfg = FF[key];
+    const page = document.createElement('div');
+    page.className = 'ff-page' + (key==='sr'?' active':'');
+    page.id = 'learn-'+key;
+    page.style.setProperty('--ff-color', cfg.colorHex);
+
+    const inputCols = cfg.inputs.map(i=>`<th>${i}</th>`).join('');
+    const truthRows = cfg.truth.map(r=>{
+      const cells = cfg.inputs.map(i=> `<td>${fmtVal(r.vals[i])}</td>`).join('');
+      return `<tr>${cells?'':''}<td>${r.clk}</td>${cells}<td>${fmtVal(r.q)}</td><td style="text-align:left;font-family:var(--font-body);font-weight:500">${r.note}</td></tr>`;
+    }).join('');
+
+    const charRows = cfg.charRows.map(r=>{
+      const cells = cfg.inputs.map(i=> `<td>${fmtVal(r.vals[i])}</td>`).join('');
+      return `<tr><td>${fmtVal(r.qn)}</td>${cells}<td>${fmtVal(r.qn1)}</td></tr>`;
+    }).join('');
+
+    const excRows = cfg.excitation.map(r=>{
+      const cells = cfg.inputs.map(i=> `<td>${fmtVal(r.vals[i])}</td>`).join('');
+      return `<tr><td>${fmtVal(r.qn)}</td><td>${fmtVal(r.qn1)}</td>${cells}</tr>`;
+    }).join('');
+
+    page.innerHTML = `
+      <div class="card">
+        <h2>${cfg.icon} ${cfg.name} — Theory</h2>
+        <div class="theory">${cfg.desc}</div>
+        <div class="concept">
+          <b>Inputs:</b> CK${cfg.inputs.map(i=>', '+i).join('')} &nbsp;·&nbsp; <b>Outputs:</b> Q, Q̄ &nbsp;·&nbsp;
+          <b>Gate family:</b> ${cfg.gateInputs}-input NAND ${cfg.hasInverter?'+ inverter':''} ${cfg.feedback?'+ Q/Q̄ feedback':''}
+        </div>
+        <h3>Truth Table (Level-triggered on CK)</h3>
+        <div class="table-scroll"><table class="truth-table" id="learn_${key}_truth">
+          <thead><tr><th>CK</th>${inputCols}<th>Q<sub>n+1</sub></th><th style="text-align:left">Operation</th></tr></thead>
+          <tbody>${truthRows}</tbody>
+        </table></div>
+        <h3>Characteristic Table</h3>
+        <div class="table-scroll"><table class="truth-table">
+          <thead><tr><th>Q<sub>n</sub></th>${inputCols}<th>Q<sub>n+1</sub></th></tr></thead>
+          <tbody>${charRows}</tbody>
+        </table></div>
+        <div class="result">📐 Characteristic Equation: ${cfg.equation}</div>
+        <h3>Excitation Table</h3>
+        <div class="table-scroll"><table class="truth-table">
+          <thead><tr><th>Q<sub>n</sub></th><th>Q<sub>n+1</sub></th>${inputCols}</tr></thead>
+          <tbody>${excRows}</tbody>
+        </table></div>
+        <h3>Logic Symbol</h3>
+        <div class="symbol-box">${buildSymbolSVG(key)}</div>
+      </div>
+
+      <div class="card">
+        <h2>⚡ Interactive Gate-Level Circuit</h2>
+        <div class="theory" style="margin-top:0">Toggle CK and the inputs below — watch the signal flow live through every gate to Q and Q̄, exactly as in the standard textbook circuit.</div>
+        <div class="controls" id="learn_${key}_controls"></div>
+        <div class="state-grid">
+          <div class="state-card low" id="learn_${key}_q_card"><div class="state-label">Q Output</div><div class="state-value">0</div></div>
+          <div class="state-card high" id="learn_${key}_qbar_card"><div class="state-label">Q̄ Output</div><div class="state-value">1</div></div>
+          <div class="state-card hold" id="learn_${key}_mode_card"><div class="state-label">Mode</div><div class="state-value" style="font-size:16px;">HOLD</div></div>
+        </div>
+        <div class="result" id="learn_${key}_result">Toggle CK and inputs to begin...</div>
+        <div class="note warn" id="learn_${key}_invalid_banner" style="display:none"></div>
+        <div class="circuit-box"><svg id="learn_${key}_svg" viewBox="0 0 1200 720" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        <h3>📈 Live Timing Diagram</h3>
+        <div class="wave-legend" id="learn_${key}_legend"></div>
+        <div class="circuit-box"><svg id="learn_${key}_wave_svg" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg">
+          <g id="learn_${key}_wave_grid"></g><g id="learn_${key}_wave_labels"></g><g id="learn_${key}_wave_group"></g>
+        </svg></div>
+        <div class="controls"><button class="ctrl-btn" onclick="clearWave('${key}')">🧹 Clear Timing Diagram</button></div>
+      </div>
+
+      <div class="card">
+        <h2>💡 Real-World Applications</h2>
+        ${applicationsFor(key)}
+      </div>
+    `;
+    root.appendChild(page);
+
+    // controls
+    const ctrl = page.querySelector(`#learn_${key}_controls`);
+    const ckBtn = document.createElement('button');
+    ckBtn.className = 'ctrl-btn ck'; ckBtn.id = `learn_${key}_ck_btn`;
+    ckBtn.textContent = 'CK = 0';
+    ckBtn.onclick = ()=>{ state[key].ck ^= 1; updateFF('learn', key); };
+    ctrl.appendChild(ckBtn);
+    cfg.inputs.forEach(inp=>{
+      const b = document.createElement('button');
+      b.className = 'ctrl-btn'; b.id = `learn_${key}_${inp}_btn`;
+      b.textContent = `${inp} = 0`;
+      b.onclick = ()=>{ state[key].inputs[inp] ^= 1; updateFF('learn', key); };
+      ctrl.appendChild(b);
+    });
+    const rb = document.createElement('button');
+    rb.className = 'ctrl-btn'; rb.textContent = '⟲ Reset';
+    rb.onclick = ()=> resetFF('learn', key);
+    ctrl.appendChild(rb);
+
+    // legend
+    const legend = page.querySelector(`#learn_${key}_legend`);
+    const legendItems = [['CK','var(--success)'],...cfg.inputs.map((i,idx)=>[i, idx===0?'var(--brand-b)':'var(--brand-c)']),['Q','var(--warning)'],['Q̄','var(--danger)']];
+    legend.innerHTML = legendItems.map(([l,c])=>`<span class="wave-legend-item"><span class="wave-legend-swatch" style="background:${c}"></span>${l}</span>`).join('');
+  });
+}
+
+function applicationsFor(key){
+  const apps = {
+    sr:[
+      ['🔌 Switch Debouncing','A mechanical switch wired to S and R eliminates contact bounce — the latch captures one clean transition per press.'],
+      ['⚡ Basis of All Other Flip-Flops','The gated SR latch is the memory core inside D, JK, and T flip-flops.'],
+      ['🎛️ Simple Control Logic','Used for basic set/reset control of relays, motors, and indicator states.']
+    ],
+    d:[
+      ['💾 Registers &amp; Data Latches','D flip-flops chain together to build shift registers and CPU registers, each cell storing one bit reliably.'],
+      ['🔄 Synchronizers','D flip-flops safely pass signals between clock domains, reducing metastability risk.'],
+      ['🖥️ Pipeline Stages','Used extensively to hold data between pipeline stages in processors.']
+    ],
+    jk:[
+      ['🧮 Counters &amp; Frequency Dividers','JK flip-flops with J=K=1 toggle every clock, forming the building block of ripple counters.'],
+      ['🔐 State Machines','The defined toggle behaviour makes JK flip-flops popular for implementing finite state machines.'],
+      ['📡 Shift Registers','Historically used in shift-register and control-logic designs before D flip-flops became dominant.']
+    ],
+    t:[
+      ['⏱️ Binary/Ripple Counters','Chaining T flip-flops with T=1 creates a classic divide-by-2 counter chain used in digital clocks and timers.'],
+      ['📻 Frequency Division','Each T flip-flop halves the input clock frequency — useful for clock generation circuits.'],
+      ['🎚️ Toggle Switches','Ideal for simple on/off toggle circuits triggered by a single button press.']
+    ]
+  };
+  return apps[key].map(([h,p])=>`<div class="app-box"><h4>${h}</h4><p>${p}</p></div>`).join('');
+}
+
+function buildSymbolSVG(key){
+  const cfg = FF[key];
+  const inputsTop = cfg.inputs;
+  const h = 60 + inputsTop.length*30;
+  let rows = inputsTop.map((inp,i)=>`<text x="4" y="${40+i*28}" class="wire-label" font-size="15">${inp}</text><line x1="20" y1="${36+i*28}" x2="70" y2="${36+i*28}" class="wire on"/>`).join('');
+  return `<svg viewBox="0 0 260 ${h}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="70" y="10" width="120" height="${h-20}" rx="8" class="gate-symbol" stroke-width="2.5"/>
+    ${rows}
+    <text x="4" y="${h-14}" class="wire-label" font-size="15">CK</text>
+    <line x1="20" y1="${h-18}" x2="70" y2="${h-18}" class="wire on"/>
+    <text x="130" y="${h/2+4}" class="gate-label" font-size="13" text-anchor="middle">${cfg.short}-FF</text>
+    <line x1="190" y1="${h*0.35}" x2="240" y2="${h*0.35}" class="wire on"/>
+    <text x="246" y="${h*0.35+5}" class="wire-label" font-size="15">Q</text>
+    <line x1="190" y1="${h*0.7}" x2="240" y2="${h*0.7}" class="wire"/>
+    <text x="246" y="${h*0.7+5}" class="wire-label" font-size="15">Q̄</text>
+  </svg>`;
+}
+
+/* ============================================================
+   CIRCUIT SVG RENDERER (shared geometry for the latch,
+   parameterised input stage per flip-flop type)
+   ============================================================ */
+function nandShape(x, yTop, yBot){
+  const r = (yBot-yTop)/2, cy=(yTop+yBot)/2, w=84;
+  return { d:`M ${x} ${yTop} L ${x+w} ${yTop} A ${r} ${r} 0 0 1 ${x+w} ${yBot} L ${x} ${yBot} Z`, bubbleCx:x+w+r+9, cy, edgeX:x+w+r+9+9 };
+}
+function drawNand(svg, x, yTop, yBot, idPrefix, refs, labelSize){
+  const s = nandShape(x,yTop,yBot);
+  const path = el('path',{d:s.d,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  const bub = el('circle',{cx:s.bubbleCx,cy:s.cy,r:9,fill:'var(--gate-fill)',class:'gate-symbol','stroke-width':3,id:idPrefix+'_bub'},svg);
+  txt('text',{x:x+34,y:s.cy+4,class:'gate-label','font-size':labelSize||11,'font-weight':700,'text-anchor':'middle'},'NAND',svg);
+  refs.gates[idPrefix] = [path,bub];
+  return s;
+}
+function drawNot(svg, x, y, idPrefix, refs){
+  const path = el('path',{d:`M ${x} ${y-25} L ${x} ${y+25} L ${x+50} ${y} Z`,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  const bub = el('circle',{cx:x+59,cy:y,r:9,fill:'var(--gate-fill)',class:'gate-symbol','stroke-width':3,id:idPrefix+'_bub'},svg);
+  refs.gates[idPrefix]=[path,bub];
+  return {edgeX:x+68, cy:y};
+}
+function drawWire(svg, id, pts, refs){
+  const d = pts.map((p,i)=>(i===0?'M':'L')+` ${p[0]} ${p[1]}`).join(' ');
+  const w = el('path',{d,class:'wire','stroke-width':5,fill:'none',id},svg);
+  refs.wires[id]=w; return w;
+}
+function drawPin(svg,id,x,y,refs){
+  const p = el('circle',{cx:x,cy:y,r:5,class:'pin-dot',id},svg);
+  refs.pins[id]=p; return p;
+}
+function drawNode(svg,id,x,y,label,refs){
+  const c = el('circle',{cx:x,cy:y,r:8,fill:'var(--wire-off)','stroke-width':2,class:'gate-symbol',id:id+'_node'},svg);
+  txt('text',{x:x+20,y:y+8,class:'gate-label','font-size':18,'font-weight':700},label,svg);
+  refs.nodes[id]=c; return c;
+}
+
+function gateGeom(x, cy, n){
+  const half = n===3 ? 65 : 45;
+  const yTop = cy-half, yBot = cy+half, r = half, bodyW = 90, bubbleR = 10;
+  const edgeX = x + bodyW + r + bubbleR + 8;
+  const pins = n===3 ? [cy-40, cy, cy+40] : [cy-22, cy+22];
+  return { x, yTop, yBot, r, cy, bodyW, edgeX, pins };
+}
+function drawNandAt(svg, g, idPrefix, refs, labelSize){
+  const w = g.bodyW, r = g.r;
+  const d = `M ${g.x} ${g.yTop} L ${g.x+w} ${g.yTop} A ${r} ${r} 0 0 1 ${g.x+w} ${g.yBot} L ${g.x} ${g.yBot} Z`;
+  const bubbleCx = g.x+w+r+10;
+  const path = el('path',{d,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  const bub = el('circle',{cx:bubbleCx,cy:g.cy,r:10,fill:'var(--gate-fill)',class:'gate-symbol','stroke-width':3,id:idPrefix+'_bub'},svg);
+  txt('text',{x:g.x+w/2,y:g.cy+4,class:'gate-label','font-size':labelSize||12,'font-weight':700,'text-anchor':'middle'},'NAND',svg);
+  refs.gates[idPrefix] = [path,bub];
+}
+function drawNotAt(svg, x, y, idPrefix, refs){
+  const path = el('path',{d:`M ${x} ${y-24} L ${x} ${y+24} L ${x+48} ${y} Z`,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  const bub = el('circle',{cx:x+58,cy:y,r:10,fill:'var(--gate-fill)',class:'gate-symbol','stroke-width':3,id:idPrefix+'_bub'},svg);
+  refs.gates[idPrefix]=[path,bub];
+  return {edgeX:x+68, cy:y};
+}
+function drawAndAt(svg, g, idPrefix, refs, labelSize){
+  const w = g.bodyW, r = g.r;
+  const d = `M ${g.x} ${g.yTop} L ${g.x+w} ${g.yTop} A ${r} ${r} 0 0 1 ${g.x+w} ${g.yBot} L ${g.x} ${g.yBot} Z`;
+  const path = el('path',{d,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  txt('text',{x:g.x+w/2-4,y:g.cy+4,class:'gate-label','font-size':labelSize||12,'font-weight':700,'text-anchor':'middle'},'AND',svg);
+  refs.gates[idPrefix] = [path];
+  return { edgeX: g.x+w+r+8 };
+}
+function drawBlockAt(svg, x, y, w, h, title, pinsLeft, pinsRight, idPrefix, refs){
+  const rect = el('rect',{x,y,width:w,height:h,rx:14,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  refs.gates[idPrefix] = [rect];
+  title.split('\n').forEach((line,i)=> txt('text',{x:x+w/2,y:y+26+i*17,class:'gate-label','font-size':13,'font-weight':700,'text-anchor':'middle'},line,svg));
+  pinsLeft.forEach(p=>{
+    txt('text',{x:x+14,y:p.y-9,class:'gate-label','font-size':12,'font-weight':700},p.label,svg);
+    drawPin(svg, idPrefix+'_pin_'+p.label, x, p.y, refs);
+    if (p.clock) el('path',{d:`M ${x} ${p.y-10} L ${x+17} ${p.y} L ${x} ${p.y+10}`,class:'gate-symbol','stroke-width':2.5,fill:'var(--gate-fill)'},svg);
+  });
+  pinsRight.forEach(p=>{
+    txt('text',{x:x+w-14,y:p.y-9,class:'gate-label','font-size':12,'font-weight':700,'text-anchor':'end'},p.label,svg);
+  });
+  return rect;
+}
+
+function gateGeom(x, cy, n){
+  const half = n===3 ? 65 : 45;
+  const yTop = cy-half, yBot = cy+half, r = half, bodyW = 90, bubbleR = 10;
+  const edgeX = x + bodyW + r + bubbleR + 8;
+  const pins = n===3 ? [cy-40, cy, cy+40] : [cy-22, cy+22];
+  return { x, yTop, yBot, r, cy, bodyW, edgeX, pins };
+}
+function drawNandAt(svg, g, idPrefix, refs, labelSize){
+  const w = g.bodyW, r = g.r;
+  const d = `M ${g.x} ${g.yTop} L ${g.x+w} ${g.yTop} A ${r} ${r} 0 0 1 ${g.x+w} ${g.yBot} L ${g.x} ${g.yBot} Z`;
+  const bubbleCx = g.x+w+r+10;
+  const path = el('path',{d,class:'gate-symbol','stroke-width':3,id:idPrefix+'_body'},svg);
+  const bub = el('circle',{cx:bubbleCx,cy:g.cy,r:10,fill:'var(--gate-fill)',class:'gate-symbol','stroke-width':3,id:idPrefix+'_bub'},svg);
+  txt('text',{x:g.x+w/2,y:g.cy+4,class:'gate-label','font-size':labelSize||12,'font-weight':700,'text-anchor':'middle'},'NAND',svg);
+  refs.gates[idPrefix] = [path,bub];
+}
+function drawWireCls(svg, id, pts, refs, cls){
+  const d = pts.map((p,i)=>(i===0?'M':'L')+` ${p[0]} ${p[1]}`).join(' ');
+  const w = el('path',{d,class:'wire'+(cls?(' '+cls):''),'stroke-width':5,fill:'none',id},svg);
+  refs.wires[id]=w; return w;
+}
+function drawJunction(svg,x,y){ el('circle',{cx:x,cy:y,r:4,class:'junction-dot'},svg); }
+function zonePanel(svg,x,y,w,h,title){
+  el('rect',{x,y,width:w,height:h,rx:16,class:'zone-panel'},svg);
+  txt('text',{x:x+16,y:y+24,class:'zone-title'},title,svg);
+}
+
+function buildCircuit(key){
+  const svg = document.getElementById(`learn_${key}_svg`);
+  svg.innerHTML='';
+  const refs = { wires:{}, gates:{}, pins:{}, nodes:{} };
+  if (key==='sr') return buildSRCircuit(svg, refs);
+  if (key==='d')  return buildDCircuit(svg, refs);
+  if (key==='jk') return buildJKCircuit(svg, refs);
+  return buildTCircuit(svg, refs);
+}
+
+/* ---- SR: full gate-level cross-coupled NAND latch ---- */
+function buildSRCircuit(svg, refs){
+  const key='sr';
+  svg.setAttribute('viewBox','0 0 1200 720');
+  const topY = 190, botY = 500, GX = 210, LX = 660, PIN = 10;
+  txt('text',{x:24,y:26,class:'gate-label','font-size':15,'font-weight':700}, 'SR FLIP-FLOP — GATE-LEVEL CIRCUIT', svg);
+  zonePanel(svg, 20, 55, 560, 630, 'Input Gating Stage');
+  zonePanel(svg, 600, 55, 580, 630, 'Memory Latch (Cross-Coupled NAND)');
+
+  const g1 = gateGeom(GX, topY, 2), g2 = gateGeom(GX, botY, 2);
+  drawNandAt(svg, g1, key+'_g1', refs, 12);
+  drawNandAt(svg, g2, key+'_g2', refs, 12);
+  const lu = gateGeom(LX, topY, 2), ll = gateGeom(LX, botY, 2);
+  drawNandAt(svg, lu, key+'_latchU', refs, 12);
+  drawNandAt(svg, ll, key+'_latchL', refs, 12);
+  const sbarPinY = lu.pins[0], qbarfbPinY = lu.pins[1];
+  const qfbPinY = ll.pins[0], rbarPinY = ll.pins[1];
+  drawPin(svg,key+'_pin_sbar',LX+PIN,sbarPinY,refs);
+  drawPin(svg,key+'_pin_qbarfb',LX+PIN,qbarfbPinY,refs);
+  drawPin(svg,key+'_pin_qfb',LX+PIN,qfbPinY,refs);
+  drawPin(svg,key+'_pin_rbar',LX+PIN,rbarPinY,refs);
+
+  const midX = Math.round((g1.edgeX + LX)/2);
+  drawWireCls(svg,key+'_w_g1_out',[[g1.edgeX,topY],[midX,topY],[midX,sbarPinY],[LX+PIN,sbarPinY]],refs);
+  drawWireCls(svg,key+'_w_g2_out',[[g2.edgeX,botY],[midX,botY],[midX,rbarPinY],[LX+PIN,rbarPinY]],refs);
+  txt('text',{x:midX-34,y:topY-56,class:'wire-label','font-size':11},'S̄',svg);
+  txt('text',{x:midX-34,y:botY+70,class:'wire-label','font-size':11},'R̄',svg);
+
+  const outTapX = LX + 90 + lu.r + 10 + 8 + 60;
+  drawWireCls(svg,key+'_w_qline',[[lu.edgeX,topY],[outTapX,topY]],refs);
+  drawWireCls(svg,key+'_w_qbarline',[[ll.edgeX,botY],[outTapX,botY]],refs);
+  drawNode(svg,key+'_Q',outTapX,topY,'Q',refs);
+  drawNode(svg,key+'_Qbar',outTapX,botY,'Q̄',refs);
+  const crossBendX = LX - 70;
+  drawWireCls(svg,key+'_w_fb_q',[[outTapX,topY],[crossBendX,qfbPinY],[LX+PIN,qfbPinY]],refs);
+  drawWireCls(svg,key+'_w_fb_qbar',[[outTapX,botY],[crossBendX,qbarfbPinY],[LX+PIN,qbarfbPinY]],refs);
+
+  const ckX = GX-70;
+  txt('text',{x:ckX-22,y:70,class:'wire-label','font-size':15,'font-weight':700},'CK',svg);
+  drawWireCls(svg,key+'_w_ck_lead',[[ckX,78],[ckX,g1.pins[1]]],refs);
+  drawWireCls(svg,key+'_w_ck_trunk',[[ckX,g1.pins[1]],[ckX,g2.pins[0]]],refs);
+  drawWireCls(svg,key+'_w_ck_g1',[[ckX,g1.pins[1]],[GX+PIN,g1.pins[1]]],refs);
+  drawWireCls(svg,key+'_w_ck_g2',[[ckX,g2.pins[0]],[GX+PIN,g2.pins[0]]],refs);
+  drawPin(svg,key+'_pin_ck1',GX+PIN,g1.pins[1],refs);
+  drawPin(svg,key+'_pin_ck2',GX+PIN,g2.pins[0],refs);
+
+  const sY=g1.pins[0], rY=g2.pins[1];
+  txt('text',{x:8,y:sY+5,class:'wire-label','font-size':16,'font-weight':700},'S',svg);
+  drawWireCls(svg,key+'_w_s_in',[[70,sY],[GX+PIN,sY]],refs);
+  drawPin(svg,key+'_pin_g1a',GX+PIN,sY,refs);
+  txt('text',{x:8,y:rY+5,class:'wire-label','font-size':16,'font-weight':700},'R',svg);
+  drawWireCls(svg,key+'_w_r_in',[[70,rY],[GX+PIN,rY]],refs);
+  drawPin(svg,key+'_pin_g2b',GX+PIN,rY,refs);
+
+  return refs;
+}
+
+/* ---- D: standard block symbol — D straight to S, D through inverter to R ---- */
+function buildDCircuit(svg, refs){
+  const key='d';
+  svg.setAttribute('viewBox','0 0 900 480');
+  txt('text',{x:20,y:26,class:'gate-label','font-size':15,'font-weight':700}, 'D FLIP-FLOP — STANDARD SYMBOL', svg);
+
+  const bx=380, by=90, bw=220, bh=300;
+  const sY=170, cY=240, rY=310, qY=170, qbarY=310;
+  drawBlockAt(svg, bx, by, bw, bh, 'D FLIP-FLOP', [
+    {y:sY,label:'S'}, {y:cY,label:'C',clock:true}, {y:rY,label:'R'}
+  ], [
+    {y:qY,label:'Qₙ'}, {y:qbarY,label:'Q̄ₙ'}
+  ], key+'_blk', refs);
+
+  // D straight into S
+  txt('text',{x:16,y:sY+6,class:'wire-label','font-size':18,'font-weight':700},'D',svg);
+  drawWireCls(svg,key+'_w_d_in',[[50,sY],[bx,sY]],refs);
+  drawJunction(svg, 140, sY);
+
+  // branch down -> inverter -> R
+  drawWireCls(svg,key+'_w_d_branch',[[140,sY],[140,rY],[170,rY]],refs);
+  const inv = drawNotAt(svg, 170, rY, key+'_inv', refs);
+  txt('text',{x:110,y:rY-18,class:'wire-label','font-size':12,'font-weight':700},'D̄',svg);
+  drawWireCls(svg,key+'_w_dbar_out',[[inv.edgeX,rY],[bx,rY]],refs);
+
+  // CK dropped in from a top rail into the C pin (kept clear of the D branch column)
+  const ckX = 300;
+  txt('text',{x:ckX-20,y:34,class:'wire-label','font-size':14,'font-weight':700},'CK',svg);
+  drawWireCls(svg,key+'_w_ck_lead',[[ckX,42],[ckX,cY],[bx,cY]],refs);
+
+  // outputs
+  drawWireCls(svg,key+'_w_qline',[[bx+bw,qY],[bx+bw+50,qY]],refs);
+  drawWireCls(svg,key+'_w_qbarline',[[bx+bw,qbarY],[bx+bw+50,qbarY]],refs);
+  drawNode(svg,key+'_Q',bx+bw+50,qY,'Q',refs);
+  drawNode(svg,key+'_Qbar',bx+bw+50,qbarY,'Q̄',refs);
+
+  return refs;
+}
+
+/* ---- JK: standard textbook symbol — two AND gates + SR flip-flop block ---- */
+function buildJKCircuit(svg, refs){
+  const key='jk';
+  svg.setAttribute('viewBox','0 0 960 560');
+  txt('text',{x:20,y:26,class:'gate-label','font-size':15,'font-weight':700}, 'JK FLIP-FLOP — STANDARD SYMBOL', svg);
+
+  const GX=140, topY=170, botY=390;
+  const g1 = gateGeom(GX, topY, 2), g2 = gateGeom(GX, botY, 2);
+  const g1out = drawAndAt(svg, g1, key+'_g1', refs, 12);
+  const g2out = drawAndAt(svg, g2, key+'_g2', refs, 12);
+  const jY=g1.pins[0], qbarfbY=g1.pins[1], qfbY=g2.pins[0], kY=g2.pins[1];
+
+  const bx=480, by=90, bw=220, bh=380;
+  const sY=topY, clkY=280, rY=botY, qY=topY, qbarY=botY;
+  drawBlockAt(svg, bx, by, bw, bh, 'SR FLIP-FLOP', [
+    {y:sY,label:'S'}, {y:clkY,label:'Clk',clock:true}, {y:rY,label:'R'}
+  ], [
+    {y:qY,label:'Q'}, {y:qbarY,label:'Q̄'}
+  ], key+'_blk', refs);
+
+  drawWireCls(svg,key+'_w_g1_out',[[g1out.edgeX,topY],[bx,sY]],refs);
+  drawWireCls(svg,key+'_w_g2_out',[[g2out.edgeX,botY],[bx,rY]],refs);
+
+  txt('text',{x:6,y:jY+5,class:'wire-label','font-size':16,'font-weight':700},'J',svg);
+  drawWireCls(svg,key+'_w_j_in',[[30,jY],[GX+8,jY]],refs);
+  drawPin(svg,key+'_pin_g1top',GX+8,jY,refs);
+  txt('text',{x:6,y:kY+5,class:'wire-label','font-size':16,'font-weight':700},'K',svg);
+  drawWireCls(svg,key+'_w_k_in',[[30,kY],[GX+8,kY]],refs);
+  drawPin(svg,key+'_pin_g2bot',GX+8,kY,refs);
+  drawPin(svg,key+'_pin_g1bot',GX+8,qbarfbY,refs);
+  drawPin(svg,key+'_pin_g2top',GX+8,qfbY,refs);
+
+  // Clk dropped in from a top rail (crosses the J-gate output once — a normal, clearly-marked crossing)
+  const ckX = 440;
+  txt('text',{x:ckX-16,y:34,class:'wire-label','font-size':13,'font-weight':700},'Clk',svg);
+  drawWireCls(svg,key+'_w_ck_lead',[[ckX,42],[ckX,clkY],[bx,clkY]],refs);
+
+  // Feedback: Q -> AND2's top pin (Q feedback, success-tinted, loops via the top),
+  //           Q̄ -> AND1's bottom pin (Q̄ feedback, danger-tinted, loops via the bottom)
+  const tapX = bx+bw+40;
+  drawWireCls(svg,key+'_w_qline',[[bx+bw,qY],[tapX,qY]],refs);
+  drawWireCls(svg,key+'_w_qbarline',[[bx+bw,qbarY],[tapX,qbarY]],refs);
+  drawJunction(svg, tapX, qY);
+  drawJunction(svg, tapX, qbarY);
+
+  drawWireCls(svg,key+'_w_fb_q_loop',[[tapX,qY],[tapX,32],[20,32],[20,qfbY],[GX+8,qfbY]],refs,'fbq');
+  drawWireCls(svg,key+'_w_fb_qbar_loop',[[tapX,qbarY],[tapX,528],[40,528],[40,qbarfbY],[GX+8,qbarfbY]],refs,'fbqbar');
+  txt('text',{x:60,y:22,class:'wire-label','font-size':10},'Q feedback → AND2',svg);
+  txt('text',{x:60,y:540,class:'wire-label','font-size':10},'Q̄ feedback → AND1',svg);
+
+  return refs;
+}
+
+/* ---- T: standard textbook symbol — T tied to J and K of a JK flip-flop block ---- */
+function buildTCircuit(svg, refs){
+  const key='t';
+  svg.setAttribute('viewBox','0 0 700 420');
+  txt('text',{x:20,y:26,class:'gate-label','font-size':15,'font-weight':700}, 'T FLIP-FLOP — STANDARD SYMBOL', svg);
+
+  const bx=280, by=80, bw=220, bh=260;
+  const jY=150, clkY=210, kY=270, qY=150, qbarY=270;
+  drawBlockAt(svg, bx, by, bw, bh, 'JK FLIP-FLOP', [
+    {y:jY,label:'J'}, {y:clkY,label:'Clk',clock:true}, {y:kY,label:'K'}
+  ], [
+    {y:qY,label:'Q'}, {y:qbarY,label:'Q̄'}
+  ], key+'_blk', refs);
+
+  txt('text',{x:16,y:jY+6,class:'wire-label','font-size':18,'font-weight':700},'T',svg);
+  drawWireCls(svg,key+'_w_t_in',[[50,jY],[bx,jY]],refs);
+  drawJunction(svg, 120, jY);
+  drawWireCls(svg,key+'_w_t_branch',[[120,jY],[120,kY],[bx,kY]],refs);
+
+  txt('text',{x:16,y:clkY+6,class:'wire-label','font-size':14,'font-weight':700},'Clk',svg);
+  drawWireCls(svg,key+'_w_ck_lead',[[50,clkY],[bx,clkY]],refs);
+
+  drawWireCls(svg,key+'_w_qline',[[bx+bw,qY],[bx+bw+50,qY]],refs);
+  drawWireCls(svg,key+'_w_qbarline',[[bx+bw,qbarY],[bx+bw+50,qbarY]],refs);
+  drawNode(svg,key+'_Q',bx+bw+50,qY,'Q',refs);
+  drawNode(svg,key+'_Qbar',bx+bw+50,qbarY,'Q̄',refs);
+
+  return refs;
+}
+const circuitRefs = {};
+
+/* ============================================================
+   UPDATE / RENDER (learn + practice share this)
+   ============================================================ */
+function updateFF(mode, key, opts) {
+  opts = opts || {};
+  const s = mode==='learn' ? state[key] : practiceState[key];
+  const cfg = FF[key];
+  const result = computeNext(key, s);
+  s.q = result.q; s.qbar = result.qbar; s.mode = result.mode; s.invalid = result.invalid;
+
+  // buttons
+  const ckBtn = document.getElementById(`${mode}_${key}_ck_btn`);
+  if (ckBtn){ ckBtn.textContent = 'CK = '+s.ck; ckBtn.classList.toggle('active', s.ck===1); }
+  cfg.inputs.forEach(inp=>{
+    const b = document.getElementById(`${mode}_${key}_${inp}_btn`);
+    if (b){ b.textContent = `${inp} = ${s.inputs[inp]}`; b.classList.toggle('active', s.inputs[inp]===1); }
+  });
+
+  const qCard = document.getElementById(`${mode}_${key}_q_card`);
+  const qbarCard = document.getElementById(`${mode}_${key}_qbar_card`);
+  const modeCard = document.getElementById(`${mode}_${key}_mode_card`);
+  if (qCard){
+    qCard.className = 'state-card ' + (s.q===1?'high':'low');
+    qCard.querySelector('.state-value').textContent = s.q;
+    qbarCard.className = 'state-card ' + (s.qbar===1?'high':'low');
+    qbarCard.querySelector('.state-value').textContent = s.qbar;
+    modeCard.className = 'state-card ' + (s.invalid?'low':(s.mode==='HOLD'||s.mode.indexOf('HOLD')===0?'hold':(s.mode==='TOGGLE'?'high':( s.q===1?'high':'low'))));
+    modeCard.querySelector('.state-value').textContent = s.mode;
+  }
+  const resultEl = document.getElementById(`${mode}_${key}_result`);
+  if (resultEl){
+    const inpStr = cfg.inputs.map(i=>`${i}=${s.inputs[i]}`).join(', ');
+    resultEl.innerHTML = `<b>Input:</b> CK=${s.ck}, ${inpStr} → <b>Output:</b> Q=${s.q}, Q̄=${s.qbar} | <b>Mode:</b> ${s.mode}`;
+  }
+  const banner = document.getElementById(`${mode}_${key}_invalid_banner`);
+  if (banner){
+    if (s.invalid){ banner.style.display='block'; banner.innerHTML = '<b>⚠ Invalid State:</b> This input combination forces Q and Q̄ to be equal — avoid it in real designs.'; }
+    else banner.style.display='none';
+  }
+
+  if (mode==='learn') {
+    if (!circuitRefs[key]) circuitRefs[key] = buildCircuit(key);
+    highlightCircuit(key, s);
+    highlightTruthRow(key, s);
+    recordWave(key, s);
+  }
+  if (mode==='practice') {
+    updatePracticeStepUI(key);
+  }
+}
+
+function highlightTruthRow(key, s){
+  const table = document.getElementById(`learn_${key}_truth`);
+  if (!table) return;
+  [...table.querySelectorAll('tbody tr')].forEach(r=>r.classList.remove('active'));
+  const cfg = FF[key];
+  const rows = [...table.querySelectorAll('tbody tr')];
+  // find matching row by clk + input values (X treated as wildcard when ck=0)
+  let matchIdx = -1;
+  cfg.truth.forEach((r,idx)=>{
+    if (r.clk !== s.ck) return;
+    if (s.ck===0){ matchIdx = idx; return; }
+    const ok = cfg.inputs.every(i=> r.vals[i]===s.inputs[i]);
+    if (ok) matchIdx = idx;
+  });
+  if (matchIdx>=0 && rows[matchIdx]) rows[matchIdx].classList.add('active');
+}
+
+function highlightCircuit(key, s){
+  const refs = circuitRefs[key];
+  if (!refs) return;
+  Object.values(refs.wires).forEach(w=>w.classList.remove('on'));
+  Object.values(refs.gates).forEach(g=>g.forEach(el2=>el2.classList.remove('active-gate')));
+  Object.values(refs.pins).forEach(p=>p.style.fill = 'var(--ink)');
+
+  const ge = gateEval(key, s);
+  const on = (id)=> refs.wires[id] && refs.wires[id].classList.add('on');
+  const glow = (id)=> refs.gates[id] && refs.gates[id].forEach(el2=>el2.classList.add('active-gate'));
+  const pinOn = (id)=> refs.pins[id] && (refs.pins[id].style.fill='var(--ff-color, var(--accent))');
+  const nodeSet = (id,on2)=> refs.nodes[id] && (refs.nodes[id].style.fill = on2 ? 'var(--success)' : 'var(--wire-off)');
+
+  if (key==='sr'){
+    if (s.ck===1){ on(key+'_w_ck_lead'); on(key+'_w_ck_trunk'); on(key+'_w_ck_g1'); on(key+'_w_ck_g2'); glow(key+'_g1'); glow(key+'_g2'); }
+    if (s.inputs.S===1){ on(key+'_w_s_in'); pinOn(key+'_pin_g1a'); }
+    if (s.inputs.R===1){ on(key+'_w_r_in'); pinOn(key+'_pin_g2b'); }
+    if (ge.g1.val===1) on(key+'_w_g1_out');
+    if (ge.g2.val===1) on(key+'_w_g2_out');
+    if (ge.g1.val===0) pinOn(key+'_pin_sbar');
+    if (ge.g2.val===0) pinOn(key+'_pin_rbar');
+    if (s.q===1){ on(key+'_w_qline'); on(key+'_w_fb_q'); pinOn(key+'_pin_qfb'); glow(key+'_latchU'); }
+    if (s.qbar===1){ on(key+'_w_qbarline'); on(key+'_w_fb_qbar'); pinOn(key+'_pin_qbarfb'); glow(key+'_latchL'); }
+    nodeSet(key+'_Q', s.q===1); nodeSet(key+'_Qbar', s.qbar===1);
+  } else if (key==='d'){
+    if (s.inputs.D===1){ on(key+'_w_d_in'); on(key+'_w_d_branch'); pinOn(key+'_blk_pin_S'); }
+    if (ge.inv.val===1){ on(key+'_w_dbar_out'); pinOn(key+'_blk_pin_R'); }
+    glow(key+'_inv');
+    if (s.ck===1){ on(key+'_w_ck_lead'); pinOn(key+'_blk_pin_C'); glow(key+'_blk'); }
+    if (s.q===1) on(key+'_w_qline'); if (s.qbar===1) on(key+'_w_qbarline');
+    nodeSet(key+'_Q', s.q===1); nodeSet(key+'_Qbar', s.qbar===1);
+  } else if (key==='jk'){
+    if (s.inputs.J===1){ on(key+'_w_j_in'); pinOn(key+'_pin_g1top'); }
+    if (s.inputs.K===1){ on(key+'_w_k_in'); pinOn(key+'_pin_g2bot'); }
+    if (s.qbar===1){ on(key+'_w_fb_qbar_loop'); pinOn(key+'_pin_g1bot'); }
+    if (s.q===1){ on(key+'_w_fb_q_loop'); pinOn(key+'_pin_g2top'); }
+    if (ge.g1.val===1){ on(key+'_w_g1_out'); glow(key+'_g1'); pinOn(key+'_blk_pin_S'); }
+    if (ge.g2.val===1){ on(key+'_w_g2_out'); glow(key+'_g2'); pinOn(key+'_blk_pin_R'); }
+    if (s.ck===1){ on(key+'_w_ck_lead'); pinOn(key+'_blk_pin_Clk'); glow(key+'_blk'); }
+    if (s.q===1) on(key+'_w_qline'); if (s.qbar===1) on(key+'_w_qbarline');
+    nodeSet(key+'_Q', s.q===1); nodeSet(key+'_Qbar', s.qbar===1);
+  } else {
+    if (s.inputs.T===1){ on(key+'_w_t_in'); on(key+'_w_t_branch'); pinOn(key+'_blk_pin_J'); pinOn(key+'_blk_pin_K'); }
+    if (s.ck===1){ on(key+'_w_ck_lead'); pinOn(key+'_blk_pin_Clk'); glow(key+'_blk'); }
+    if (s.q===1) on(key+'_w_qline'); if (s.qbar===1) on(key+'_w_qbarline');
+    nodeSet(key+'_Q', s.q===1); nodeSet(key+'_Qbar', s.qbar===1);
+  }
+}
+
+function resetFF(mode, key){
+  const s = mode==='learn' ? state[key] : practiceState[key];
+  s.ck = 0; FF[key].inputs.forEach(i=> s.inputs[i]=0);
+  s.q = 0; s.qbar = 1; s.mode='HOLD'; s.invalid=false;
+  if (mode==='learn'){ waveHistory[key] = [snapshotOf(s,key)]; }
+  if (mode==='practice'){ s.step = 0; }
+  updateFF(mode, key);
+  if (mode==='practice') resetStepLog(key);
+}
+
+/* ============================================================
+   LIVE TIMING DIAGRAM (generalised N-row waveform)
+   ============================================================ */
+function recordWave(key, s){
+  const hist = waveHistory[key];
+  const snap = snapshotOf(s,key);
+  const last = hist[hist.length-1];
+  const same = last && Object.keys(snap).every(k=>last[k]===snap[k]);
+  if (same){ drawWave(key); return; }
+  hist.push(snap);
+  if (hist.length>WAVE_MAX_STEPS) hist.shift();
+  drawWave(key);
+}
+function clearWave(key){
+  waveHistory[key] = [snapshotOf(state[key],key)];
+  drawWave(key);
+}
+function drawWave(key){
+  const hist = waveHistory[key];
+  const group = document.getElementById(`learn_${key}_wave_group`);
+  const gridGroup = document.getElementById(`learn_${key}_wave_grid`);
+  const labelGroup = document.getElementById(`learn_${key}_wave_labels`);
+  if (!group||!gridGroup) return;
+  group.innerHTML=''; gridGroup.innerHTML=''; labelGroup.innerHTML='';
+
+  const rowKeys = ['ck', ...FF[key].inputs, 'q', 'qbar'];
+  const rowColors = { ck:'var(--success)', q:'var(--warning)', qbar:'var(--danger)' };
+  const palette = ['var(--brand-b)','var(--brand-c)'];
+  FF[key].inputs.forEach((inp,i)=> rowColors[inp]=palette[i%palette.length]);
+  const rowLabels = { ck:'CK', q:'Q', qbar:'Q̄' }; FF[key].inputs.forEach(i=>rowLabels[i]=i);
+
+  const stepW=60, startX=44, rowH=44, topPad=20;
+  const plotRight = startX + hist.length*stepW + 20;
+  const plotWidth = Math.max(960, plotRight);
+  const plotBottom = topPad + rowKeys.length*rowH + 6;
+
+  rowKeys.forEach((rk,ri)=>{
+    txt('text',{x:8,y:topPad+ri*rowH+30,class:'wire-label','font-size':12,'font-weight':700},rowLabels[rk],labelGroup);
+  });
+
+  hist.forEach((snap,i)=>{ if(i%2===1) el('rect',{x:startX+i*stepW,y:topPad-12,width:stepW,height:plotBottom-topPad+12,class:'wave-band'},gridGroup); });
+  for(let i=0;i<=hist.length;i++){ const x=startX+i*stepW; el('line',{x1:x,y1:topPad-12,x2:x,y2:plotBottom,class:'wave-grid-v'},gridGroup); }
+
+  rowKeys.forEach((rk,ri)=>{
+    const baseY = topPad + ri*rowH + 24, highY = baseY-20;
+    el('line',{x1:startX,y1:highY,x2:plotWidth-20,y2:highY,class:'wave-grid-h'},gridGroup);
+    el('line',{x1:startX,y1:baseY,x2:plotWidth-20,y2:baseY,class:'wave-grid-h'},gridGroup);
+    txt('text',{x:startX-8,y:highY+3,class:'wave-lvl-label','text-anchor':'end'},'1',gridGroup);
+    txt('text',{x:startX-8,y:baseY+3,class:'wave-lvl-label','text-anchor':'end'},'0',gridGroup);
+
+    let d='';
+    hist.forEach((snap,i)=>{ const x=startX+i*stepW, xN=x+stepW, y=snap[rk]===1?highY:baseY; d += (i===0?`M ${x} ${y}`:` L ${x} ${y}`) + ` L ${xN} ${y}`; });
+    el('path',{d,class:'wave-line',style:`stroke:${rowColors[rk]}`},group);
+    hist.forEach((snap,i)=>{
+      const x=startX+i*stepW, y=snap[rk]===1?highY:baseY;
+      const dot = el('circle',{cx:x,cy:y,r:3.2},group);
+      dot.style.fill='var(--surface)'; dot.style.stroke=rowColors[rk]; dot.style.strokeWidth='2.2';
+    });
+  });
+
+  const lastX = startX + (hist.length-1)*stepW;
+  el('line',{x1:lastX,y1:topPad-12,x2:lastX,y2:plotBottom,class:'wave-cursor'},group);
+  hist.forEach((snap,i)=>{ const x=startX+i*stepW+stepW/2; txt('text',{x,y:plotBottom+15,class:'wave-step-label','text-anchor':'middle'}, i===hist.length-1?`${i}▲`:''+i, group); });
+
+  const svgEl2 = document.getElementById(`learn_${key}_wave_svg`);
+  svgEl2.setAttribute('viewBox', `0 0 ${plotWidth} ${plotBottom+40}`);
+  const box = svgEl2.closest('.circuit-box');
+  if (box) box.scrollLeft = box.scrollWidth;
+}
+
+/* ============================================================
+   PRACTICE SANDBOX — build & verify step by step
+   ============================================================ */
+function buildPracticeContent(){
+  const root = document.getElementById('practice-content');
+  root.innerHTML='';
+  FF_ORDER.forEach(key=>{
+    const cfg = FF[key];
+    const page = document.createElement('div');
+    page.className='ff-page'+(key==='sr'?' active':'');
+    page.id='practice-'+key;
+    page.style.setProperty('--ff-color', cfg.colorHex);
+    page.innerHTML = `
+      <div class="card">
+        <h2>🧪 ${cfg.icon} ${cfg.name} — Build &amp; Verify Step-by-Step</h2>
+        <div class="theory">Set CK and the inputs, then press <b>Evaluate Step-by-Step</b>. The simulator walks through each gate in order — just like tracing a real circuit by hand — logging every intermediate value before the final Q/Q̄ settle.</div>
+        <div class="controls" id="practice_${key}_controls"></div>
+        <div class="state-grid">
+          <div class="state-card low" id="practice_${key}_q_card"><div class="state-label">Q Output</div><div class="state-value">0</div></div>
+          <div class="state-card high" id="practice_${key}_qbar_card"><div class="state-label">Q̄ Output</div><div class="state-value">1</div></div>
+          <div class="state-card hold" id="practice_${key}_mode_card"><div class="state-label">Mode</div><div class="state-value" style="font-size:16px;">HOLD</div></div>
+        </div>
+        <div class="result" id="practice_${key}_result">Set inputs, then Evaluate Step-by-Step...</div>
+        <div class="note warn" id="practice_${key}_invalid_banner" style="display:none"></div>
+        <div class="controls">
+          <button class="ctrl-btn wide" id="practice_${key}_eval_btn" onclick="evaluateStepByStep('${key}')">▶ Evaluate Step-by-Step</button>
+          <button class="ctrl-btn" onclick="resetFF('practice','${key}')">⟲ Reset All</button>
+        </div>
+        <div class="step-log" id="practice_${key}_log"><div class="entry">Log will appear here once you evaluate a step.</div></div>
+        <div class="note"><b>Challenge:</b> ${challengeFor(key)}</div>
+      </div>
+    `;
+    root.appendChild(page);
+    const ctrl = page.querySelector(`#practice_${key}_controls`);
+    const ckBtn = document.createElement('button');
+    ckBtn.className='ctrl-btn ck'; ckBtn.id=`practice_${key}_ck_btn`; ckBtn.textContent='CK = 0';
+    ckBtn.onclick = ()=>{ practiceState[key].ck ^= 1; refreshPracticeButtons(key); };
+    ctrl.appendChild(ckBtn);
+    cfg.inputs.forEach(inp=>{
+      const b=document.createElement('button');
+      b.className='ctrl-btn'; b.id=`practice_${key}_${inp}_btn`; b.textContent=`${inp} = 0`;
+      b.onclick = ()=>{ practiceState[key].inputs[inp]^=1; refreshPracticeButtons(key); };
+      ctrl.appendChild(b);
+    });
+  });
+}
+function challengeFor(key){
+  const c = {
+    sr:'Set S=1, CK=1 and evaluate (Set). Then set S=0, R=1 and evaluate (Reset). Finally try S=1, R=1 while CK=1 and see the invalid warning.',
+    d:'Set D=1, CK=1 and evaluate. Then flip D to 0 and evaluate again — notice Q always follows D while CK=1.',
+    jk:'Set J=1,K=0 (Set), then J=0,K=1 (Reset), then J=1,K=1 with CK=1 repeatedly and watch Q toggle every evaluation.',
+    t:'With CK=1 and T=1, click Evaluate repeatedly and watch Q flip every single time — this is exactly how a binary counter stage works.'
+  };
+  return c[key];
+}
+function refreshPracticeButtons(key){
+  const s = practiceState[key];
+  const ckBtn = document.getElementById(`practice_${key}_ck_btn`);
+  ckBtn.textContent='CK = '+s.ck; ckBtn.classList.toggle('active', s.ck===1);
+  FF[key].inputs.forEach(inp=>{
+    const b = document.getElementById(`practice_${key}_${inp}_btn`);
+    b.textContent = `${inp} = ${s.inputs[inp]}`; b.classList.toggle('active', s.inputs[inp]===1);
+  });
+}
+function resetStepLog(key){
+  const log = document.getElementById(`practice_${key}_log`);
+  if (log) log.innerHTML = '<div class="entry">Log will appear here once you evaluate a step.</div>';
+}
+function logEntry(key, html, isFinal){
+  const log = document.getElementById(`practice_${key}_log`);
+  const d = document.createElement('div');
+  d.className = 'entry'+(isFinal?' final':'');
+  d.innerHTML = html;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+function evaluateStepByStep(key){
+  const s = practiceState[key];
+  const cfg = FF[key];
+  const btn = document.getElementById(`practice_${key}_eval_btn`);
+  btn.disabled = true;
+  const log = document.getElementById(`practice_${key}_log`);
+  log.innerHTML='';
+  const inpStr = cfg.inputs.map(i=>`${i}=${s.inputs[i]}`).join(', ');
+  logEntry(key, `<b>Inputs:</b> CK=${s.ck}, ${inpStr}  (current Qn=${s.q}, Q̄n=${s.qbar})`);
+
+  const steps = [];
+  if (s.ck===0){
+    steps.push(()=> logEntry(key, `<b>Step 1:</b> CK = 0 → the flip-flop is disabled and simply <b>holds</b> its previous state.`));
+  } else {
+    const ge = gateEval(key, s);
+    if (key==='d'){
+      steps.push(()=> logEntry(key, `<b>Step 1:</b> ${ge.inv.label} = <b>${ge.inv.val}</b>`));
+    }
+    steps.push(()=> logEntry(key, `<b>Step ${key==='d'?2:1}:</b> ${ge.g1.label} = <b>${ge.g1.val}</b>`));
+    steps.push(()=> logEntry(key, `<b>Step ${key==='d'?3:2}:</b> ${ge.g2.label} = <b>${ge.g2.val}</b>`));
+  }
+  const finalResult = computeNext(key, s);
+  steps.push(()=>{
+    logEntry(key, `<b>Latch resolves:</b> Q<sub>n+1</sub> = ${finalResult.q}, Q̄<sub>n+1</sub> = ${finalResult.qbar} — Mode: <b>${finalResult.mode}</b>`, true);
+    s.q = finalResult.q; s.qbar = finalResult.qbar; s.mode = finalResult.mode; s.invalid = finalResult.invalid;
+    updatePracticeStepUI(key);
+    btn.disabled = false;
+  });
+
+  steps.forEach((fn,i)=> setTimeout(fn, i*550));
+}
+function updatePracticeStepUI(key){
+  const s = practiceState[key];
+  const cfg = FF[key];
+  const qCard = document.getElementById(`practice_${key}_q_card`);
+  const qbarCard = document.getElementById(`practice_${key}_qbar_card`);
+  const modeCard = document.getElementById(`practice_${key}_mode_card`);
+  qCard.className='state-card '+(s.q===1?'high':'low'); qCard.querySelector('.state-value').textContent=s.q;
+  qbarCard.className='state-card '+(s.qbar===1?'high':'low'); qbarCard.querySelector('.state-value').textContent=s.qbar;
+  modeCard.className='state-card '+(s.invalid?'low':(String(s.mode).indexOf('HOLD')===0?'hold':(s.mode==='TOGGLE'?'high':(s.q===1?'high':'low'))));
+  modeCard.querySelector('.state-value').textContent=s.mode;
+  const inpStr = cfg.inputs.map(i=>`${i}=${s.inputs[i]}`).join(', ');
+  document.getElementById(`practice_${key}_result`).innerHTML = `<b>Input:</b> CK=${s.ck}, ${inpStr} → <b>Output:</b> Q=${s.q}, Q̄=${s.qbar} | <b>Mode:</b> ${s.mode}`;
+  const banner = document.getElementById(`practice_${key}_invalid_banner`);
+  if (s.invalid){ banner.style.display='block'; banner.innerHTML='<b>⚠ Invalid State:</b> Q and Q̄ would both be forced equal — avoid this combination.'; }
+  else banner.style.display='none';
+}
+
+/* ============================================================
+   ASSESSMENT
+   ============================================================ */
+function buildAssessContent(){
+  const root = document.getElementById('assess-content');
+  root.innerHTML='';
+  FF_ORDER.forEach(key=>{
+    const cfg = FF[key];
+    const page = document.createElement('div');
+    page.className='ff-page'+(key==='sr'?' active':'');
+    page.id='assess-'+key;
+    page.style.setProperty('--ff-color', cfg.colorHex);
+    const qHtml = cfg.quiz.map((q,i)=>`
+      <div class="quiz-question">
+        <h4>${i+1}. ${q.q}</h4>
+        <div class="quiz-options">
+          ${q.options.map((o,oi)=>`
+            <label class="quiz-option">
+              <input type="radio" name="${key}_q${i}" value="${oi}">
+              <label>${o}</label>
+            </label>`).join('')}
+        </div>
+        <div id="${key}_q${i}_feedback"></div>
+      </div>`).join('');
+    page.innerHTML = `
+      <div class="card">
+        <h2>📝 ${cfg.icon} ${cfg.name} — Assessment</h2>
+        <div class="theory">Answer all ${cfg.quiz.length} questions, then submit to see your score and explanations.</div>
+        ${qHtml}
+        <button class="ctrl-btn wide" onclick="submitQuiz('${key}')" style="margin-top:10px">✓ Submit Assessment</button>
+        <div id="${key}_score_display"></div>
+      </div>`;
+    root.appendChild(page);
+  });
+}
+function submitQuiz(key){
+  const cfg = FF[key];
+  let score = 0, answeredAll = true;
+  cfg.quiz.forEach((q,i)=>{
+    const sel = document.querySelector(`input[name="${key}_q${i}"]:checked`);
+    const fb = document.getElementById(`${key}_q${i}_feedback`);
+    if (!sel){ answeredAll=false; fb.className=''; fb.textContent=''; return; }
+    const correct = parseInt(sel.value)===q.correct;
+    if (correct) score++;
+    fb.className='quiz-feedback '+(correct?'correct':'incorrect');
+    fb.innerHTML = (correct?'✓ Correct! ':'✗ Not quite. ') + q.explain;
+  });
+  const total = cfg.quiz.length;
+  const pct = Math.round((score/total)*100);
+  const msg = pct===100?'🏆 Perfect! Mastery achieved!':pct>=80?'🎯 Excellent understanding!':pct>=60?'✓ Good! Keep practicing.':'📚 Review the material and try again.';
+  const disp = document.getElementById(`${key}_score_display`);
+  disp.innerHTML = `<div class="score-display ${pct===100?'perfect':''}"><div class="big">${score}/${total}</div><div class="desc">Score: ${pct}%</div><div style="margin-top:10px;font-size:14px">${msg}</div></div>`;
+  if (bestScores[key]===null || score>bestScores[key]) bestScores[key]=score;
+  renderProgressDash();
+  disp.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function renderProgressDash(){
+  const dash = document.getElementById('progress-dash');
+  dash.innerHTML = FF_ORDER.map(k=>{
+    const cfg=FF[k]; const bs=bestScores[k]; const total=cfg.quiz.length;
+    return `<div class="progress-item" style="--ff-color:${cfg.colorHex}"><div class="pl">${cfg.icon} ${cfg.short}</div><div class="pv" style="color:${bs===null?'var(--text-faint)':cfg.colorHex}">${bs===null?'—':bs+'/'+total}</div></div>`;
+  }).join('');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+buildFFTabs();
+buildLearnContent();
+buildPracticeContent();
+buildAssessContent();
+renderProgressDash();
+FF_ORDER.forEach(k=>{ updateFF('learn', k); refreshPracticeButtons(k); updatePracticeStepUI(k); });
+</script>
+</body>
+</html>
