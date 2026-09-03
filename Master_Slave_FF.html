@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Master-Slave JK Flip-Flop — Schematic Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --radius-lg:18px; --radius-md:12px; --radius-sm:7px;
+  --font-display:'IBM Plex Sans',Arial,sans-serif;
+  --font-body:'IBM Plex Sans',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',Consolas,monospace;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#080b12; --bg-grid:#121b2c;
+  --surface:#0e1520; --surface-2:#141e30; --surface-hover:#1b2740;
+  --border:#243248; --border-soft:#182238;
+  --text:#eef3fb; --text-muted:#93a6c4; --text-faint:#5c6f90;
+  --ink:#e4ecfb; --gate-fill:#0f1826;
+  --wire-off:#3a4b6b;
+  --accent:#ffb020; --accent-strong:#ffc94d; --accent-ink:#1c1100;
+  --success:#00e5a0; --danger:#ff5470; --warning:#ffd166;
+  --master:#8b7bff; --slave:#22d3ee;
+  --shadow:0 20px 50px -20px rgba(0,0,0,.85);
+  --shadow-sm:0 8px 24px -12px rgba(0,0,0,.65);
+  color-scheme: dark;
+}
+[data-theme="light"]{
+  --bg:#eef3fb; --bg-grid:#dae5f5;
+  --surface:#ffffff; --surface-2:#f2f7fe; --surface-hover:#e6f0fd;
+  --border:#c6d7ee; --border-soft:#dbe7f8;
+  --text:#0d2340; --text-muted:#3f5a80; --text-faint:#7590b3;
+  --ink:#132b4d; --gate-fill:#ffffff;
+  --wire-off:#a9c0dd;
+  --accent:#c97a12; --accent-strong:#e08e1c; --accent-ink:#2c1400;
+  --success:#0a8f5e; --danger:#d6304c; --warning:#a8730b;
+  --master:#4338ca; --slave:#0b7d94;
+  --shadow:0 20px 50px -20px rgba(20,40,80,.18);
+  --shadow-sm:0 8px 24px -12px rgba(20,40,80,.12);
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font-body);color:var(--text);background:var(--bg);
+  background-image:linear-gradient(var(--bg-grid) 1px,transparent 1px),linear-gradient(90deg,var(--bg-grid) 1px,transparent 1px);
+  background-size:34px 34px;min-height:100vh;transition:background-color .4s var(--ease),color .4s var(--ease)}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+/* ---------- HEADER: instrument-panel chrome, theme-independent ---------- */
+header{position:relative;overflow:hidden;padding:38px 20px 30px;color:#eef3fb;background:#080c14;border-bottom:1px solid #1c2740}
+header svg.trace-bg{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+.trace-line{fill:none;stroke:#ffb020;stroke-width:1.6;stroke-dasharray:6 10;opacity:.55;animation:traceFlow 5s linear infinite}
+.trace-line.alt{stroke:#22d3ee;animation-duration:7s;animation-direction:reverse;opacity:.4}
+.trace-pad{fill:#ffb020;opacity:.7}
+.trace-pad.alt{fill:#22d3ee}
+@keyframes traceFlow{to{stroke-dashoffset:-160}}
+@keyframes padPulse{0%,100%{opacity:.35}50%{opacity:.9}}
+.wrap,main{max-width:1360px;margin:auto}
+.head{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:52px;height:52px;border-radius:10px;background:#ffb02014;border:1.5px solid #ffb02055;display:flex;align-items:center;justify-content:center;font-size:22px;flex:none;font-family:var(--font-mono);font-weight:700;color:#ffb020}
+.eyebrow{margin:0 0 4px;font:600 11px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:#22d3ee}
+h1{margin:0;font:700 clamp(22px,4.4vw,34px)/1.15 var(--font-display);letter-spacing:-.01em;color:#f4f8ff}
+header p.tagline{position:relative;z-index:1;line-height:1.75;opacity:.86;font-size:14.5px;max-width:900px;margin:16px 0 0;color:#c3d0e6}
+.theme-toggle{position:relative;z-index:1;display:flex;align-items:center;gap:9px;border:1.5px solid #ffb02055;background:#ffb02012;color:#f4f8ff;padding:9px 16px;border-radius:999px;cursor:pointer;font:600 13px var(--font-mono);transition:.25s var(--ease)}
+.theme-toggle:hover{background:#ffb02022;border-color:#ffb020}
+.stat-row{position:relative;z-index:1;margin:20px 0 0;display:flex;gap:10px;flex-wrap:wrap}
+.stat{padding:7px 13px;border-radius:8px;background:#ffffff08;border:1px solid #ffffff18;font:600 11.5px var(--font-mono);color:#d3ddef}
+
+.mode-tabs{display:flex;gap:8px;padding:12px 20px;background:var(--surface);border-bottom:1.5px solid var(--border-soft);flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.mode-btn{padding:11px 20px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);border-radius:var(--radius-sm);font:600 13.5px var(--font-mono);cursor:pointer;transition:.25s var(--ease)}
+.mode-btn:hover{border-color:var(--accent);color:var(--text)}
+.mode-btn.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent)}
+.page{display:none}.page.active{display:block;animation:fadeIn .4s var(--ease)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+main{padding:18px}
+
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:22px;margin:16px 0;box-shadow:var(--shadow-sm)}
+.card h2{margin-top:0;font-family:var(--font-display);font-size:19px;font-weight:700;border-left:5px solid var(--accent);padding-left:12px;color:var(--text)}
+.card h3{margin:18px 0 10px;font-size:15px;color:var(--text);font-weight:600;font-family:var(--font-display)}
+.theory{line-height:1.8;color:var(--text-muted);font-size:14px;margin:10px 0}
+.theory b{color:var(--text)}
+.theory code{background:var(--surface-2);padding:2px 8px;border-radius:5px;font-family:var(--font-mono);color:var(--accent);font-weight:600;font-size:.92em}
+
+.note,.concept{background:var(--surface-2);border-left:4px solid var(--slave);border-radius:8px;padding:14px;line-height:1.75;margin:12px 0;font-size:13px;color:var(--text-muted)}
+.note b,.concept b{color:var(--text)}
+.note.warn{border-left-color:var(--danger)}
+.note.master{border-left-color:var(--master)}
+.note.slave{border-left-color:var(--slave)}
+
+.result{background:var(--surface-2);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:14px;margin:14px 0;font-family:var(--font-mono);font-size:13px;font-weight:500}
+.result b{color:var(--accent)}
+
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0;align-items:center}
+.ctrl-btn{padding:11px 20px;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);font:600 12.5px var(--font-mono);color:var(--text-muted);cursor:pointer;transition:.2s var(--ease);box-shadow:inset 0 -2px 0 var(--border-soft)}
+.ctrl-btn:hover{border-color:var(--accent);color:var(--text)}
+.ctrl-btn.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent-strong)}
+.ctrl-btn.ck.active{background:var(--success);border-color:var(--success);color:#00301f;box-shadow:inset 0 -2px 0 #00996b}
+.ctrl-btn:disabled{opacity:.4;cursor:not-allowed}
+.ctrl-btn.wide{padding:11px 28px}
+.ctrl-btn.demo{background:var(--master);color:#fff;border:none;box-shadow:inset 0 -2px 0 #2d1f9e}
+
+.state-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:12px;margin:18px 0}
+.state-card{background:var(--surface-2);border:2px solid var(--border);border-radius:var(--radius-md);padding:14px;text-align:center;transition:all .3s var(--ease)}
+.state-card.high{border-color:var(--success);background:color-mix(in srgb, var(--success) 13%, transparent)}
+.state-card.low{border-color:var(--danger);background:color-mix(in srgb, var(--danger) 13%, transparent)}
+.state-card.transparent{border-color:var(--master);background:color-mix(in srgb, var(--master) 14%, transparent)}
+.state-card.frozen{border-color:var(--text-faint)}
+.state-label{font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:7px;font-family:var(--font-mono)}
+.state-value{font-size:27px;font-family:var(--font-mono);font-weight:700;letter-spacing:1px;color:var(--text)}
+.state-card.high .state-value{color:var(--success)}
+.state-card.low .state-value{color:var(--danger)}
+.state-card.transparent .state-value{color:var(--master)}
+.state-card.frozen .state-value{color:var(--text-faint)}
+
+.circuit-box{background:var(--surface-2);border:1.5px solid var(--border-soft);border-radius:var(--radius-md);padding:12px;margin:16px 0;overflow:auto}
+.circuit-box svg{display:block;width:100%;height:auto;min-height:360px}
+
+.title-block{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));border:1.5px solid var(--border);border-top:none;border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;font-family:var(--font-mono);font-size:10.5px;margin:-16px 0 16px}
+.title-block div{padding:8px 10px;border-right:1px solid var(--border-soft);background:var(--surface)}
+.title-block div:last-child{border-right:none}
+.title-block .tb-label{display:block;color:var(--text-faint);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:9px;margin-bottom:3px}
+.title-block .tb-val{color:var(--text);font-weight:700}
+
+.wire{fill:none;stroke:var(--wire-off);stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round;transition:all .2s;vector-effect:non-scaling-stroke}
+.wire.on{stroke:var(--accent);stroke-width:3.8;filter:drop-shadow(0 0 7px var(--accent))}
+.wire.fbq{stroke-dasharray:2,6;stroke-width:3}
+.wire.fbq.on{stroke:var(--success);stroke-width:3.4;filter:drop-shadow(0 0 6px var(--success))}
+.wire.fbqbar{stroke-dasharray:2,6;stroke-width:3}
+.wire.fbqbar.on{stroke:var(--danger);stroke-width:3.4;filter:drop-shadow(0 0 6px var(--danger))}
+.junction-dot{fill:var(--text-faint)}
+.zone-panel{fill:var(--surface);opacity:.5;stroke:var(--border-soft);stroke-width:1.3;stroke-dasharray:5,4}
+.zone-title{fill:var(--text-faint);font:700 11px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
+.gate-symbol{fill:var(--gate-fill);stroke:var(--ink);stroke-width:2;transition:all .25s}
+.gate-symbol.active-master{stroke:var(--master);filter:drop-shadow(0 0 6px color-mix(in srgb, var(--master) 55%, transparent))}
+.gate-symbol.active-slave{stroke:var(--slave);filter:drop-shadow(0 0 6px color-mix(in srgb, var(--slave) 55%, transparent))}
+.gate-label{fill:var(--ink);font:700 10px var(--font-mono);pointer-events:none}
+.wire-label{fill:var(--text-faint);font:700 12px var(--font-mono);pointer-events:none}
+.pin-dot{fill:var(--ink)}
+
+.wave-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px}
+.wave-legend-item{display:flex;align-items:center;gap:6px;font:600 11.5px var(--font-mono);color:var(--text-muted)}
+.wave-legend-swatch{width:18px;height:3.5px;border-radius:2px;flex:none}
+.wave-grid-v{stroke:var(--border);stroke-width:1;opacity:.5}
+.wave-grid-h{stroke:var(--border-soft);stroke-width:1;stroke-dasharray:3,4;opacity:.7}
+.wave-band{fill:var(--surface);opacity:.5}
+.wave-line{fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.wave-lvl-label{fill:var(--text-faint);font:600 9px var(--font-mono)}
+.wave-cursor{stroke:var(--accent);stroke-width:1.4;stroke-dasharray:4,3;opacity:.8}
+
+.truth-table{width:100%;border-collapse:collapse;margin:14px 0;font-family:var(--font-mono);font-size:12.5px}
+.truth-table th{background:var(--surface-2);color:var(--accent);padding:10px;text-align:center;font-weight:700;border:1.3px solid var(--border);text-transform:uppercase;font-size:11px;letter-spacing:.03em}
+.truth-table td{padding:10px;text-align:center;border:1.3px solid var(--border);background:var(--surface);font-weight:600}
+.truth-table tr.active td{background:color-mix(in srgb, var(--accent) 18%, transparent);box-shadow:inset 0 0 0 2px var(--accent);color:var(--accent)}
+.truth-table .high{color:var(--success)}
+.truth-table .low{color:var(--danger)}
+.truth-table .hold{color:var(--warning)}
+.table-scroll{overflow-x:auto}
+
+.app-box{background:var(--surface-2);border:1.5px solid var(--border);border-left:4px solid var(--slave);border-radius:var(--radius-md);padding:14px;margin:10px 0}
+.app-box h4{margin:0 0 6px;font:600 13.5px var(--font-display);color:var(--text)}
+.app-box p{margin:4px 0;line-height:1.65;font-size:13px;color:var(--text-muted)}
+
+.quiz-question{background:var(--surface-2);border-left:4px solid var(--accent);border-radius:8px;padding:14px;margin:12px 0}
+.quiz-question h4{margin:0 0 10px;font:600 14px var(--font-display);color:var(--text)}
+.quiz-options{display:flex;flex-direction:column;gap:7px;margin:10px 0}
+.quiz-option{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;cursor:pointer;transition:.2s var(--ease)}
+.quiz-option:hover{border-color:var(--accent);background:var(--surface-hover)}
+.quiz-option input[type="radio"]{width:16px;height:16px;cursor:pointer;accent-color:var(--accent)}
+.quiz-option label{flex:1;cursor:pointer;margin:0;font-weight:500;font-size:13.5px}
+.quiz-feedback{padding:11px;border-radius:7px;margin-top:9px;font-weight:600;font-size:13px}
+.quiz-feedback.correct{background:color-mix(in srgb, var(--success) 18%, transparent);color:var(--success);border-left:3px solid var(--success)}
+.quiz-feedback.incorrect{background:color-mix(in srgb, var(--danger) 18%, transparent);color:var(--danger);border-left:3px solid var(--danger)}
+
+.score-display{background:var(--surface-2);border:2px solid var(--accent);color:var(--text);border-radius:var(--radius-md);padding:20px;text-align:center;margin:16px 0}
+.score-display .big{font-size:40px;font-family:var(--font-mono);font-weight:700;margin:6px 0;color:var(--accent)}
+.score-display .desc{font-size:13px;color:var(--text-muted)}
+.score-display.perfect{animation:winPulse 1s var(--ease) 2}
+@keyframes winPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+
+.progress-dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.progress-item{background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:13px;text-align:center}
+.progress-item .pv{font-family:var(--font-mono);font-weight:700;font-size:20px;margin-top:5px}
+.progress-item .pl{font-size:10.5px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono)}
+.timer-bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin:9px 0;border:1px solid var(--border-soft)}
+.timer-bar-fill{height:100%;background:var(--master);width:100%;transition:width .1s linear}
+
+.step-log{background:var(--surface-2);border-radius:var(--radius-md);padding:13px;margin:12px 0;font-family:var(--font-mono);font-size:12.5px;max-height:250px;overflow-y:auto;border:1.5px solid var(--border-soft)}
+.step-log .entry{padding:6px 0;border-bottom:1px dashed var(--border-soft);color:var(--text-muted)}
+.step-log .entry:last-child{border-bottom:none}
+.step-log .entry b{color:var(--accent)}
+.step-log .entry.final{color:var(--text);font-weight:700}
+.step-log .entry.m{border-left:3px solid var(--master);padding-left:8px}
+.step-log .entry.s{border-left:3px solid var(--slave);padding-left:8px}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:6px;font:700 10.5px var(--font-mono);background:var(--surface);border:1.3px solid var(--border);color:var(--text-muted)}
+.badge.m{border-color:var(--master);color:var(--master)}
+.badge.s{border-color:var(--slave);color:var(--slave)}
+
+.demo-lights{display:flex;gap:22px;flex-wrap:wrap;margin:16px 0;align-items:center}
+.demo-light-block{display:flex;flex-direction:column;align-items:center;gap:8px}
+.demo-light{width:64px;height:64px;border-radius:50%;border:3px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:23px;color:var(--text-faint);transition:all .12s}
+.demo-light.on{border-color:var(--danger);background:color-mix(in srgb, var(--danger) 22%, transparent);color:var(--danger)}
+.demo-light.stable{border-color:var(--success);background:color-mix(in srgb, var(--success) 18%, transparent);color:var(--success)}
+.demo-caption{font-size:11.5px;color:var(--text-muted);font-weight:600;text-align:center;font-family:var(--font-mono)}
+
+.fabs{position:fixed;right:18px;bottom:18px;z-index:50}
+.fab{width:46px;height:46px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;box-shadow:var(--shadow);transition:.25s var(--ease);opacity:0;transform:translateY(12px);pointer-events:none}
+.fab.show{opacity:1;transform:none;pointer-events:auto}
+.fab:hover{border-color:var(--accent);color:var(--accent)}
+
+footer{max-width:1360px;margin:16px auto 0;padding:24px 20px 44px;text-align:center;color:var(--text-faint);font-size:12.5px;border-top:1.5px solid var(--border-soft);font-family:var(--font-mono)}
+
+@media(max-width:768px){
+  .card{padding:15px}
+  .circuit-box svg{min-height:280px}
+  .state-grid{grid-template-columns:1fr 1fr}
+  .mode-tabs{flex-direction:column}
+  .mode-btn{width:100%}
+  header{padding:28px 14px 22px}
+  .demo-lights{justify-content:center}
+  .title-block{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body data-theme="dark">
+<header>
+  <svg class="trace-bg" viewBox="0 0 900 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path class="trace-line" d="M0 40 H180 V90 H420 V30 H620 V120 H900"/>
+    <path class="trace-line alt" d="M0 200 H140 V150 H360 V220 H700 V160 H900"/>
+    <path class="trace-line" d="M0 130 H260 V60 H520 V180 H780 V100 H900"/>
+    <circle class="trace-pad" cx="180" cy="40" r="4" style="animation:padPulse 2.4s ease-in-out infinite"/>
+    <circle class="trace-pad" cx="620" cy="120" r="4" style="animation:padPulse 2.4s ease-in-out .6s infinite"/>
+    <circle class="trace-pad alt" cx="360" cy="150" r="4" style="animation:padPulse 2.4s ease-in-out 1.1s infinite"/>
+    <circle class="trace-pad alt" cx="700" cy="220" r="4" style="animation:padPulse 2.4s ease-in-out 1.7s infinite"/>
+    <circle class="trace-pad" cx="520" cy="60" r="4" style="animation:padPulse 2.4s ease-in-out .3s infinite"/>
+  </svg>
+  <div class="wrap">
+    <div class="head">
+      <div class="brand">
+        <div class="brand-mark">MS</div>
+        <div><p class="eyebrow">SCHEMATIC LAB · SEQ-JK-02</p><h1>Master-Slave JK Flip-Flop</h1></div>
+      </div>
+      <button id="theme" class="theme-toggle"><span>🌙</span><span>Dark</span></button>
+    </div>
+    
+    <div class="stat-row">
+      <span class="stat">📚 LEARN</span>
+      <span class="stat">🧪 PRACTICE SANDBOX</span>
+      <span class="stat">📝 ASSESS · 10Q</span>
+      <span class="stat">⚙ 9-GATE NAND CIRCUIT</span>
+      <span class="stat">⚡ RACE-AROUND DEMO</span>
+    </div>
+  </div>
+</header>
+
+<nav class="mode-tabs">
+  <button class="mode-btn active" data-mode="learn" onclick="switchMode('learn',this)">📚 Learn</button>
+  <button class="mode-btn" data-mode="practice" onclick="switchMode('practice',this)">🧪 Practice Sandbox</button>
+  <button class="mode-btn" data-mode="assess" onclick="switchMode('assess',this)">📝 Assessment</button>
+</nav>
+
+<main id="main">
+
+<div id="learn" class="page active">
+
+  <div class="card">
+    <h2>🧩 Drawbacks of an Ordinary (Plain) JK Flip-Flop</h2>
+    <div class="theory">An ordinary JK flip-flop was designed to remove the SR flip-flop's forbidden state by feeding <b>Q</b> and <b>Q̄</b> back into its own input gates. That fix introduces a new drawback: while <b>CLK stays HIGH</b> and <b>J = K = 1</b>, the fed-back outputs keep re-triggering the gates through every gate-propagation delay, so <b>Q toggles again and again</b> for as long as the clock pulse lasts. Which value the flip-flop lands on when the clock finally falls is unpredictable. This drawback is called the <b>race-around condition</b>, and it is the single biggest limitation of an ordinary JK flip-flop.</div>
+    <div class="note warn"><b>Why it matters:</b> a flip-flop is supposed to change state <i>once</i> per clock cycle. Racing breaks that guarantee and makes the circuit's final state depend on unpredictable gate delays instead of your logic — unusable in a real synchronous design. This is exactly the drawback the <b>Master-Slave</b> configuration, covered next, is built to eliminate.</div>
+    <h3>⚡ See it for yourself</h3>
+    <div class="theory" style="margin-top:0">Run a clock pulse with J=K=1 held high for its whole duration — first on a plain JK flip-flop, then on the master-slave version.</div>
+    <div class="demo-lights">
+      <div class="demo-light-block">
+        <div class="demo-light" id="demo_plain">Q</div>
+        <div class="demo-caption">PLAIN JK<br>(J=K=1, CLK HIGH)</div>
+      </div>
+      <div class="demo-light-block">
+        <div class="demo-light" id="demo_ms">Q</div>
+        <div class="demo-caption">MASTER-SLAVE JK<br>(J=K=1, CLK HIGH)</div>
+      </div>
+      <div style="flex:1;min-width:180px">
+        <button class="ctrl-btn demo wide" id="demo_btn" onclick="runRaceDemo()">▶ Run Clock Pulse</button>
+        <div class="timer-bar"><div class="timer-bar-fill" id="demo_bar"></div></div>
+        <div class="badge" id="demo_status">READY</div>
+      </div>
+    </div>
+    <div class="note" id="demo_result" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>🏗️ Construction</h2>
+    <div class="theory">To avoid the race-around condition, we cascade <b>two JK flip-flops</b>: a <b>Master</b> and a <b>Slave</b>.</div>
+    <ul class="theory" style="padding-left:20px">
+      <li>External <b>J</b> and <b>K</b> drive the <b>Master</b> only. CLK drives the Master directly, and drives the Slave through a <b>NOT gate (inverter)</b>.</li>
+      <li>The Master's outputs <b>Q<sub>m</sub></b>, <b>Q̄<sub>m</sub></b> feed the Slave's gating gates. The Slave's outputs <b>Q<sub>s</sub></b>, <b>Q̄<sub>s</sub></b> are the flip-flop's final <b>Q</b>, <b>Q̄</b>.</li>
+      <li>When CLK = 1 for the Master, CLK̄ = 0 for the Slave — and vice-versa. <b>The two are never transparent at the same time.</b></li>
+    </ul>
+    <div class="concept">
+      <span class="badge m">MASTER</span> positive level-triggered — transparent while <b>CLK = 1</b>, frozen while CLK = 0. Internally it is a plain JK flip-flop (gated NAND latch with Q/Q̄ feedback), the same building block whose drawback we just saw.<br><br>
+      <span class="badge s">SLAVE</span> negative level-triggered — transparent while <b>CLK̄ = 1</b>. Internally it is a second JK flip-flop, but since its J and K inputs (Qm, Q̄m) are always complementary, it behaves like a simple gated latch with no race-around of its own.
+    </div>
+    <div class="note"><b>Why this ends the race:</b> while CLK is HIGH, only the Master can change — its result never reaches the output because the Slave is frozen. When CLK falls, the Master freezes with whatever value it last settled on, and only then does the Slave open up and copy that single value through to Q. The output changes <b>exactly once per clock cycle</b>.</div>
+  </div>
+
+  <div class="card">
+    <h2>📖 Operation Summary</h2>
+    <div class="table-scroll">
+      <table class="truth-table" id="op-table">
+        <thead><tr><th>J</th><th>K</th><th>Master (CLK=1)</th><th>Slave (CLK↓)</th><th>Operation</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>Holds Q<sub>m</sub></td><td>Copies Q<sub>m</sub></td><td style="text-align:left;font-family:var(--font-body);font-weight:500">Hold — output unchanged</td></tr>
+          <tr><td>0</td><td>1</td><td>Resets → Q<sub>m</sub>=0</td><td>Copies Q<sub>m</sub>=0</td><td style="text-align:left;font-family:var(--font-body);font-weight:500">Reset state</td></tr>
+          <tr><td>1</td><td>0</td><td>Sets → Q<sub>m</sub>=1</td><td>Copies Q<sub>m</sub>=1</td><td style="text-align:left;font-family:var(--font-body);font-weight:500">Set state</td></tr>
+          <tr><td>1</td><td>1</td><td>Toggles once</td><td>Copies the single toggled value</td><td style="text-align:left;font-family:var(--font-body);font-weight:500">Toggle — race-around avoided</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="result">📐 Q<sub>n+1</sub> = J·Q̄<sub>n</sub> + K̄·Q<sub>n</sub> — same characteristic equation as a JK flip-flop, evaluated once per falling edge of CLK.</div>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ Block Schematic — Live Simulation</h2>
+    <div class="theory" style="margin-top:0">Master and Slave are drawn as two cascaded flip-flop blocks with labeled <b>J, K, Q, Q′</b> pins and a small <b>▷</b> clock-edge marker on each. External J and K drive the Master only; the Master's Q, Q′ feed straight into the Slave's J, K; the Slave's Q, Q′ are the final output. CLK drives the Master directly and, through a <b>NOT gate</b>, drives the Slave as CLK̄. Where a routing wire must physically cross another without connecting, it "hops" over it — exactly as on a real schematic sheet. Toggle CLK, J and K below and trace the signal live.</div>
+    <div class="controls" id="learn_controls"></div>
+    <div class="state-grid">
+      <div class="state-card" id="learn_master_enable_card"><div class="state-label">Master</div><div class="state-value" style="font-size:14px">FROZEN</div></div>
+      <div class="state-card" id="learn_slave_enable_card"><div class="state-label">Slave</div><div class="state-value" style="font-size:14px">FROZEN</div></div>
+      <div class="state-card low" id="learn_qm_card"><div class="state-label">Q master</div><div class="state-value">0</div></div>
+      <div class="state-card low" id="learn_q_card"><div class="state-label">Q output</div><div class="state-value">0</div></div>
+    </div>
+    <div class="result" id="learn_result">Toggle CLK, J, K to begin...</div>
+    <div class="circuit-box"><svg id="learn_svg" viewBox="0 0 1750 880" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="title-block">
+      <div><span class="tb-label">Drawing</span><span class="tb-val">Master-Slave JK FF</span></div>
+      <div><span class="tb-label">Dwg No.</span><span class="tb-val">SEQ-JK-02</span></div>
+      <div><span class="tb-label">Blocks</span><span class="tb-val">Master + Slave + 1×NOT</span></div>
+      <div><span class="tb-label">Rev</span><span class="tb-val">B</span></div>
+      <div><span class="tb-label">Scale</span><span class="tb-val">NTS</span></div>
+      <div><span class="tb-label">Sheet</span><span class="tb-val">1 OF 1</span></div>
+    </div>
+    <h3>📈 Live Timing Diagram</h3>
+    <div class="wave-legend" id="learn_legend"></div>
+    <div class="circuit-box"><svg id="learn_wave_svg" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg">
+      <g id="learn_wave_grid"></g><g id="learn_wave_labels"></g><g id="learn_wave_group"></g>
+    </svg></div>
+    <div class="controls"><button class="ctrl-btn" onclick="clearWave()">🧹 Clear Timing Diagram</button></div>
+  </div>
+
+  <div class="card">
+    <h2>💡 Real-World Applications</h2>
+    <div class="app-box"><h4>🧮 Reliable Counters &amp; Frequency Dividers</h4><p>Chained master-slave JK flip-flops with J=K=1 toggle exactly once per clock, giving predictable divide-by-2 counter stages — the naive JK's race-around would make counting unreliable.</p></div>
+    <div class="app-box"><h4>🔐 Synchronous State Machines</h4><p>Because state changes only on the falling edge, master-slave flip-flops make it safe to build finite state machines where every register updates in lock-step.</p></div>
+    <div class="app-box"><h4>📡 Shift Registers &amp; Legacy Control Logic</h4><p>Before fully edge-triggered flip-flops became standard, master-slave JK flip-flops were the dependable building block for shift registers and control circuits.</p></div>
+    <div class="app-box"><h4>🖥️ Foundation for Edge-Triggered Design</h4><p>The master-slave technique is the conceptual ancestor of the pulse-triggered / edge-triggered flip-flops used throughout modern digital design.</p></div>
+  </div>
+
+</div>
+
+<div id="practice" class="page">
+  <div class="card">
+    <h2>🧪 Build &amp; Verify Step-by-Step</h2>
+    <div class="theory">Set <b>J</b>, <b>K</b>, then click <b>Toggle CLK</b> to step through a rising or falling edge one at a time. The simulator narrates exactly what the Master and the Slave each do — trace it just like you would on paper.</div>
+    <div class="controls" id="practice_controls"></div>
+    <div class="state-grid">
+      <div class="state-card" id="practice_master_enable_card"><div class="state-label">Master</div><div class="state-value" style="font-size:14px">FROZEN</div></div>
+      <div class="state-card" id="practice_slave_enable_card"><div class="state-label">Slave</div><div class="state-value" style="font-size:14px">FROZEN</div></div>
+      <div class="state-card low" id="practice_qm_card"><div class="state-label">Q master</div><div class="state-value">0</div></div>
+      <div class="state-card low" id="practice_q_card"><div class="state-label">Q output</div><div class="state-value">0</div></div>
+    </div>
+    <div class="result" id="practice_result">Set J, K and toggle CLK to begin...</div>
+    <div class="controls">
+      <button class="ctrl-btn ck wide" id="practice_ck_btn" onclick="practiceToggleClk()">⏻ Toggle CLK (currently 0)</button>
+      <button class="ctrl-btn" onclick="practiceReset()">⟲ Reset All</button>
+    </div>
+    <div class="step-log" id="practice_log"><div class="entry">Log will appear here once you toggle the clock.</div></div>
+    <div class="note"><b>Challenge 1:</b> With J=1, K=0, toggle CLK high then low. Confirm the Master sets to 1 while CLK is high, but Q (the Slave) only becomes 1 the moment CLK falls.</div>
+    <div class="note"><b>Challenge 2:</b> With CLK=1 (Master transparent), flip J and K a few times <i>before</i> lowering the clock. The Master keeps following your changes — this is exactly the level-sensitive behaviour that would cause race-around in a plain JK. Only your very last J/K setting before the falling edge reaches Q.</div>
+    <div class="note"><b>Challenge 3:</b> Set J=1, K=1 and toggle CLK high then low repeatedly. Q should toggle exactly once per full clock cycle — never more.</div>
+  </div>
+</div>
+
+<div id="assess" class="page">
+  <div class="card">
+    <h2>🏆 Your Progress</h2>
+    <div class="theory">Complete the assessment below. Your best score is tracked here for this session.</div>
+    <div class="progress-dash" id="progress-dash"></div>
+  </div>
+  <div class="card">
+    <h2>📝 Master-Slave JK Flip-Flop — Assessment</h2>
+    <div class="theory">Answer all 10 questions, then submit to see your score and explanations.</div>
+    <div id="quiz-content"></div>
+    <button class="ctrl-btn wide" onclick="submitQuiz()" style="margin-top:10px">✓ Submit Assessment</button>
+    <div id="score_display"></div>
+  </div>
+</div>
+
+</main>
+
+<div class="fabs"><button class="fab" id="topBtn">↑</button></div>
+
+<footer>
+  <p>MASTER-SLAVE JK FLIP-FLOP · INTERACTIVE SCHEMATIC LAB</p>
+  <p style="margin:6px 0 0;opacity:.75">LEVEL-TRIGGERED MASTER · CLOCK-INVERTED SLAVE · RACE-AROUND ELIMINATED BY DESIGN</p>
+</footer>
+
+<script>
+/* ============ THEME / MODE / SCROLL ============ */
+let theme = (window.matchMedia && matchMedia('(prefers-color-scheme:light)').matches) ? 'light' : 'dark';
+function applyTheme(t){
+  document.body.setAttribute('data-theme', t);
+  document.querySelector('#theme span:first-child').textContent = t==='dark' ? '🌙' : '☀️';
+  document.querySelector('#theme span:last-child').textContent = t==='dark' ? 'Dark' : 'Light';
+}
+applyTheme(theme);
+document.getElementById('theme').onclick = ()=>{ theme = theme==='dark'?'light':'dark'; applyTheme(theme); };
+const topBtn = document.getElementById('topBtn');
+window.addEventListener('scroll', ()=> topBtn.classList.toggle('show', window.scrollY>450));
+topBtn.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
+
+function switchMode(mode, btn){
+  document.querySelectorAll('#main > .page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mode-tabs .mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(mode).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function txt(tag,attrs,text,parent){ const e=el(tag,attrs,parent); e.textContent=text; return e; }
+
+/* ============ CORE MASTER-SLAVE MODEL ============ */
+function freshState(){ return { clk:0, J:0, K:0, master:{q:0,qbar:1}, slave:{q:0,qbar:1} }; }
+const learnState = freshState();
+const practiceState = freshState();
+
+function masterEnabled(s){ return s.clk===1; }
+function slaveEnabled(s){ return s.clk===0; }
+
+function computeMasterFromInputs(s){
+  const {J,K} = s;
+  if (J===0 && K===0){ /* hold */ }
+  else if (J===1 && K===0){ s.master.q=1; }
+  else if (J===0 && K===1){ s.master.q=0; }
+  else { s.master.q = 1 - s.master.q; }
+  s.master.qbar = 1 - s.master.q;
+}
+function syncSlaveFromMaster(s){ s.slave.q = s.master.q; s.slave.qbar = s.master.qbar; }
+function settle(s){
+  if (masterEnabled(s)) computeMasterFromInputs(s);
+  if (slaveEnabled(s)) syncSlaveFromMaster(s);
+}
+function nand(a,b){ return (a===1&&b===1) ? 0 : 1; }
+function nand3(a,b,c){ return (a===1&&b===1&&c===1) ? 0 : 1; }
+function gateEval(s){
+  const clkbar = 1-s.clk;
+  return {
+    g1: nand3(s.J, s.clk, s.master.qbar),
+    g2: nand3(s.master.q, s.clk, s.K),
+    g3: nand(s.master.q, clkbar),
+    g4: nand(clkbar, s.master.qbar),
+    clkbar
+  };
+}
+
+/* ============ LEARN MODE CONTROLS ============ */
+function learnControls(){
+  const c = document.getElementById('learn_controls');
+  c.innerHTML='';
+  const ck = document.createElement('button');
+  ck.className='ctrl-btn ck'; ck.id='learn_ck_btn'; ck.textContent='CLK = 0';
+  ck.onclick=()=>{ learnState.clk^=1; settle(learnState); renderLearn(); };
+  c.appendChild(ck);
+  ['J','K'].forEach(inp=>{
+    const b=document.createElement('button');
+    b.className='ctrl-btn'; b.id='learn_'+inp+'_btn'; b.textContent=inp+' = 0';
+    b.onclick=()=>{ learnState[inp]^=1; settle(learnState); renderLearn(); };
+    c.appendChild(b);
+  });
+  const rb=document.createElement('button');
+  rb.className='ctrl-btn'; rb.textContent='⟲ Reset';
+  rb.onclick=()=>{ Object.assign(learnState, freshState()); waveHistory=[snap(learnState)]; renderLearn(); };
+  c.appendChild(rb);
+
+  const legend = document.getElementById('learn_legend');
+  legend.innerHTML = [['CLK','var(--success)'],['J','var(--master)'],['K','#ff8fb1'],['Qm','var(--warning)'],['Q','var(--accent)']]
+    .map(([l,c2])=>`<span class="wave-legend-item"><span class="wave-legend-swatch" style="background:${c2}"></span>${l}</span>`).join('');
+}
+
+/* ============ BLOCK-LEVEL CIRCUIT (Master/Slave boxes, J-K-Q-Q' pins) ============ */
+function drawWireCls(svg,id,pts,refs,cls){
+  const d = pts.map((p,i)=>(i===0?'M':'L')+` ${p[0]} ${p[1]}`).join(' ');
+  const w = el('path',{d,class:'wire'+(cls?(' '+cls):''),fill:'none',id},svg);
+  refs.wires[id]=w; return w;
+}
+/* vertical wire that "hops" over a perpendicular wire it crosses at hopY, so lines
+   never visually merge unless they are meant to be electrically joined */
+function drawVWireHop(svg,id,x,y1,y2,hopY,refs,cls){
+  const dir = y2>y1 ? 1 : -1;
+  const a = hopY - dir*16, b = hopY + dir*16;
+  const d = `M ${x} ${y1} L ${x} ${a} A 12 12 0 0 1 ${x} ${b} L ${x} ${y2}`;
+  const w = el('path',{d,class:'wire'+(cls?(' '+cls):''),fill:'none',id},svg);
+  refs.wires[id]=w; return w;
+}
+function drawJunction(svg,x,y){ el('circle',{cx:x,cy:y,r:3.6,class:'junction-dot'},svg); }
+function drawBlock(svg,x,y,w,h,label,idPrefix,refs){
+  const rect = el('rect',{x,y,width:w,height:h,rx:6,class:'gate-symbol',id:idPrefix+'_box'},svg);
+  txt('text',{x:x+w/2,y:y-14,class:'wire-label','font-size':16,'font-weight':700,'text-anchor':'middle'},label,svg);
+  refs.gates[idPrefix]=[rect];
+  return {x,y,w,h};
+}
+/* small ">" chevron marking the edge-sensitive clock pin, drawn just outside the block */
+function drawClockArrow(svg,x,y,idPrefix,refs){
+  const p = el('path',{d:`M ${x-30} ${y-16} L ${x} ${y} L ${x-30} ${y+16}`,class:'gate-symbol','stroke-width':2,id:idPrefix+'_arrow'},svg);
+  refs.gates[idPrefix]=[p];
+}
+function drawNotAt(svg,x,y,idPrefix,refs){
+  const path = el('path',{d:`M ${x} ${y-20} L ${x} ${y+20} L ${x+40} ${y} Z`,class:'gate-symbol',id:idPrefix+'_body'},svg);
+  const bub = el('circle',{cx:x+48,cy:y,r:8,fill:'var(--gate-fill)',class:'gate-symbol',id:idPrefix+'_bub'},svg);
+  refs.gates[idPrefix]=[path,bub];
+  return {edgeX:x+56, cy:y};
+}
+
+let circuitRefs = null;
+function buildCircuit(){
+  const svg = document.getElementById('learn_svg');
+  svg.innerHTML='';
+  circuitRefs = { wires:{}, gates:{}, pins:{}, nodes:{} };
+  const refs = circuitRefs;
+
+  const topY=210, botY=470, ckArrowY=340;
+  const mx=400, mw=280, my=140, mh=400;   // Master block
+  const sx=1170, sw=280;                  // Slave block (same y/h as master)
+
+  /* ---- Master block ---- */
+  drawBlock(svg,mx,my,mw,mh,'MASTER','master',refs);
+  txt('text',{x:mx+18,y:topY-8,class:'wire-label','font-size':17,'font-weight':700},'J',svg);
+  txt('text',{x:mx+mw-30,y:topY-8,class:'wire-label','font-size':17,'font-weight':700},'Q',svg);
+  txt('text',{x:mx+18,y:botY-8,class:'wire-label','font-size':17,'font-weight':700},'K',svg);
+  txt('text',{x:mx+mw-36,y:botY-8,class:'wire-label','font-size':17,'font-weight':700},"Q\u2032",svg);
+  drawClockArrow(svg,mx,ckArrowY,'ckarrow_m',refs);
+
+  /* ---- Slave block ---- */
+  drawBlock(svg,sx,my,sw,mh,'SLAVE','slave',refs);
+  txt('text',{x:sx+18,y:topY-8,class:'wire-label','font-size':17,'font-weight':700},'J',svg);
+  txt('text',{x:sx+sw-30,y:topY-8,class:'wire-label','font-size':17,'font-weight':700},'Q',svg);
+  txt('text',{x:sx+18,y:botY-8,class:'wire-label','font-size':17,'font-weight':700},'K',svg);
+  txt('text',{x:sx+sw-36,y:botY-8,class:'wire-label','font-size':17,'font-weight':700},"Q\u2032",svg);
+  drawClockArrow(svg,sx,ckArrowY,'ckarrow_s',refs);
+
+  /* ---- External J, K into Master (straight, top two lanes — no crossings) ---- */
+  const extX=70;
+  txt('text',{x:20,y:topY+5,class:'wire-label','font-size':16,'font-weight':700},'J',svg);
+  drawWireCls(svg,'w_j_in',[[extX,topY],[mx,topY]],refs);
+  txt('text',{x:20,y:botY+5,class:'wire-label','font-size':16,'font-weight':700},'K',svg);
+  drawWireCls(svg,'w_k_in',[[extX,botY],[mx,botY]],refs);
+
+  /* ---- Master Q -> Slave J, Master Q' -> Slave K (straight, no crossings) ---- */
+  drawWireCls(svg,'w_qm_to_slave',[[mx+mw,topY],[sx,topY]],refs);
+  drawWireCls(svg,'w_qmb_to_slave',[[mx+mw,botY],[sx,botY]],refs);
+
+  /* ---- Final outputs ---- */
+  const outX = sx+sw+90;
+  drawWireCls(svg,'w_q_out',[[sx+sw,topY],[outX,topY]],refs);
+  drawWireCls(svg,'w_qbar_out',[[sx+sw,botY],[outX,botY]],refs);
+  txt('text',{x:outX+10,y:topY+6,class:'wire-label','font-size':19,'font-weight':700},'Q',svg);
+  txt('text',{x:outX+10,y:botY+6,class:'wire-label','font-size':19,'font-weight':700},"Q\u2032",svg);
+
+  /* ---- CLK bus: external CLK -> Master clock arrow, and CLK -> NOT -> Slave clock arrow ---- */
+  const clkLabelY = 780, clkRiserX_m = 190, invX=760, invY=clkLabelY;
+  txt('text',{x:20,y:clkLabelY+5,class:'wire-label','font-size':16,'font-weight':700},'CLK',svg);
+  drawWireCls(svg,'w_clk_lead',[[extX,clkLabelY],[clkRiserX_m,clkLabelY]],refs);
+  /* riser up to Master's clock arrow — hops over the K input line it must cross */
+  drawVWireHop(svg,'w_clk_riser_m',clkRiserX_m,clkLabelY,ckArrowY,botY,refs);
+  drawWireCls(svg,'w_clk_to_marrow',[[clkRiserX_m,ckArrowY],[mx-30,ckArrowY]],refs);
+  drawJunction(svg,clkRiserX_m,clkLabelY);
+
+  /* branch continues along the bottom lane to the inverter (clear of everything) */
+  drawWireCls(svg,'w_clk_to_inv',[[clkRiserX_m,clkLabelY],[invX,clkLabelY]],refs);
+  const invRes = drawNotAt(svg,invX,invY,'inv',refs);
+  txt('text',{x:invX-8,y:invY-30,class:'wire-label','font-size':11},'NOT',svg);
+  txt('text',{x:invRes.edgeX+8,y:invY-16,class:'wire-label','font-size':11},'CLK\u0304',svg);
+
+  /* CLK̄ riser up to Slave's clock arrow — hops over the Q'->K line it must cross */
+  const clkRiserX_s = invRes.edgeX+70;
+  drawWireCls(svg,'w_ckbar_lead',[[invRes.edgeX,invY],[clkRiserX_s,invY]],refs);
+  drawJunction(svg,clkRiserX_s,invY);
+  drawVWireHop(svg,'w_ckbar_riser',clkRiserX_s,invY,ckArrowY,botY,refs);
+  drawWireCls(svg,'w_ckbar_to_sarrow',[[clkRiserX_s,ckArrowY],[sx-30,ckArrowY]],refs);
+
+  return refs;
+}
+
+function highlightCircuit(s){
+  if (!circuitRefs) return;
+  const refs = circuitRefs;
+  Object.values(refs.wires).forEach(w=>w.classList.remove('on'));
+  Object.values(refs.gates).forEach(g=>g.forEach(x=>x.classList.remove('active-master','active-slave')));
+
+  const on=(id)=>{ if(refs.wires[id]) refs.wires[id].classList.add('on'); };
+  const glow=(idList,cls)=> idList.forEach(id=>{ if(refs.gates[id]) refs.gates[id].forEach(x=>x.classList.add(cls)); });
+
+  if (s.J===1) on('w_j_in');
+  if (s.K===1) on('w_k_in');
+
+  if (s.clk===1){ on('w_clk_lead'); on('w_clk_riser_m'); on('w_clk_to_marrow'); on('w_clk_to_inv'); }
+  else { on('w_ckbar_lead'); on('w_ckbar_riser'); on('w_ckbar_to_sarrow'); }
+
+  if (s.master.q===1) on('w_qm_to_slave');
+  if (s.master.qbar===1) on('w_qmb_to_slave');
+  if (s.slave.q===1) on('w_q_out');
+  if (s.slave.qbar===1) on('w_qbar_out');
+
+  if (masterEnabled(s)) glow(['master','ckarrow_m'],'active-master');
+  if (slaveEnabled(s)) glow(['slave','ckarrow_s'],'active-slave');
+}
+
+function renderLearn(){
+  const s = learnState;
+  const ckBtn = document.getElementById('learn_ck_btn');
+  ckBtn.textContent='CLK = '+s.clk; ckBtn.classList.toggle('active', s.clk===1);
+  ['J','K'].forEach(inp=>{
+    const b = document.getElementById('learn_'+inp+'_btn');
+    b.textContent = inp+' = '+s[inp]; b.classList.toggle('active', s[inp]===1);
+  });
+  const mEn = masterEnabled(s), sEn = slaveEnabled(s);
+  const mCard = document.getElementById('learn_master_enable_card');
+  mCard.className = 'state-card '+(mEn?'transparent':'frozen');
+  mCard.querySelector('.state-value').textContent = mEn?'TRANSPARENT':'FROZEN';
+  const sCard = document.getElementById('learn_slave_enable_card');
+  sCard.className = 'state-card '+(sEn?'transparent':'frozen');
+  sCard.querySelector('.state-value').textContent = sEn?'TRANSPARENT':'FROZEN';
+  const qmCard = document.getElementById('learn_qm_card');
+  qmCard.className = 'state-card '+(s.master.q===1?'high':'low');
+  qmCard.querySelector('.state-value').textContent = s.master.q;
+  const qCard = document.getElementById('learn_q_card');
+  qCard.className = 'state-card '+(s.slave.q===1?'high':'low');
+  qCard.querySelector('.state-value').textContent = s.slave.q;
+  document.getElementById('learn_result').innerHTML =
+    `<b>Input:</b> CLK=${s.clk}, J=${s.J}, K=${s.K} → <b>Master</b> Qm=${s.master.q} (${mEn?'transparent':'frozen'}) → <b>Output</b> Q=${s.slave.q} (${sEn?'transparent':'frozen'})`;
+  highlightCircuit(s);
+  recordWave(s);
+}
+
+/* ============ TIMING DIAGRAM ============ */
+function snap(s){ return { clk:s.clk, J:s.J, K:s.K, qm:s.master.q, q:s.slave.q }; }
+let waveHistory = [snap(learnState)];
+const WAVE_MAX = 16;
+function recordWave(s){
+  const sn = snap(s);
+  const last = waveHistory[waveHistory.length-1];
+  const same = last && Object.keys(sn).every(k=>last[k]===sn[k]);
+  if (!same){ waveHistory.push(sn); if (waveHistory.length>WAVE_MAX) waveHistory.shift(); }
+  drawWave();
+}
+function clearWave(){ waveHistory=[snap(learnState)]; drawWave(); }
+function drawWave(){
+  const group=document.getElementById('learn_wave_group');
+  const gridGroup=document.getElementById('learn_wave_grid');
+  const labelGroup=document.getElementById('learn_wave_labels');
+  group.innerHTML=''; gridGroup.innerHTML=''; labelGroup.innerHTML='';
+  const rowKeys=['clk','J','K','qm','q'];
+  const rowColors={clk:'var(--success)',J:'var(--master)',K:'#ff8fb1',qm:'var(--warning)',q:'var(--accent)'};
+  const rowLabels={clk:'CLK',J:'J',K:'K',qm:'Qm',q:'Q'};
+  const stepW=60,startX=48,rowH=44,topPad=20;
+  const plotRight = startX + waveHistory.length*stepW + 20;
+  const plotWidth = Math.max(960, plotRight);
+  const plotBottom = topPad + rowKeys.length*rowH + 6;
+
+  rowKeys.forEach((rk,ri)=> txt('text',{x:8,y:topPad+ri*rowH+30,class:'wire-label','font-size':12,'font-weight':700},rowLabels[rk],labelGroup));
+  waveHistory.forEach((sn,i)=>{ if(i%2===1) el('rect',{x:startX+i*stepW,y:topPad-12,width:stepW,height:plotBottom-topPad+12,class:'wave-band'},gridGroup); });
+  for(let i=0;i<=waveHistory.length;i++){ const x=startX+i*stepW; el('line',{x1:x,y1:topPad-12,x2:x,y2:plotBottom,class:'wave-grid-v'},gridGroup); }
+
+  rowKeys.forEach((rk,ri)=>{
+    const baseY=topPad+ri*rowH+24, highY=baseY-20;
+    el('line',{x1:startX,y1:highY,x2:plotWidth-20,y2:highY,class:'wave-grid-h'},gridGroup);
+    el('line',{x1:startX,y1:baseY,x2:plotWidth-20,y2:baseY,class:'wave-grid-h'},gridGroup);
+    txt('text',{x:startX-8,y:highY+3,class:'wave-lvl-label','text-anchor':'end'},'1',gridGroup);
+    txt('text',{x:startX-8,y:baseY+3,class:'wave-lvl-label','text-anchor':'end'},'0',gridGroup);
+    let d='';
+    waveHistory.forEach((sn,i)=>{ const x=startX+i*stepW, xN=x+stepW, y=sn[rk]===1?highY:baseY; d += (i===0?`M ${x} ${y}`:` L ${x} ${y}`) + ` L ${xN} ${y}`; });
+    el('path',{d,class:'wave-line',style:`stroke:${rowColors[rk]}`},group);
+    waveHistory.forEach((sn,i)=>{ const x=startX+i*stepW, y=sn[rk]===1?highY:baseY; const dot=el('circle',{cx:x,cy:y,r:3},group); dot.style.fill='var(--surface)'; dot.style.stroke=rowColors[rk]; dot.style.strokeWidth='2'; });
+  });
+
+  const lastX = startX + (waveHistory.length-1)*stepW;
+  el('line',{x1:lastX,y1:topPad-12,x2:lastX,y2:plotBottom,class:'wave-cursor'},group);
+
+  const svgEl = document.getElementById('learn_wave_svg');
+  svgEl.setAttribute('viewBox', `0 0 ${plotWidth} ${plotBottom+20}`);
+  const box = svgEl.closest('.circuit-box');
+  if (box) box.scrollLeft = box.scrollWidth;
+}
+
+/* ============ RACE-AROUND DEMO ============ */
+let demoRunning=false;
+function runRaceDemo(){
+  if (demoRunning) return;
+  demoRunning=true;
+  const btn=document.getElementById('demo_btn'); btn.disabled=true;
+  const plain=document.getElementById('demo_plain'), ms=document.getElementById('demo_ms');
+  const bar=document.getElementById('demo_bar'), status=document.getElementById('demo_status');
+  const resultBox = document.getElementById('demo_result'); resultBox.style.display='none';
+  plain.classList.remove('on','stable'); ms.classList.remove('on','stable');
+  plain.textContent='0'; ms.textContent='0';
+  status.textContent='CLK RISING...';
+
+  const duration=2000, tick=140;
+  let elapsed=0, plainQ=0, toggles=0, msMasterQ=1;
+  bar.style.width='100%';
+  status.textContent='CLK = HIGH — PULSE IN PROGRESS';
+  const interval = setInterval(()=>{
+    elapsed += tick;
+    bar.style.width = Math.max(0, 100 - (elapsed/duration*100)) + '%';
+    plainQ = 1-plainQ; toggles++;
+    plain.textContent = plainQ;
+    plain.classList.toggle('on', plainQ===1);
+    msMasterQ = 1-msMasterQ;
+    ms.classList.add('on');
+    if (elapsed>=duration){
+      clearInterval(interval);
+      status.textContent='CLK FALLING EDGE...';
+      setTimeout(()=>{
+        plain.classList.remove('on'); if(plainQ===1) plain.classList.add('on');
+        ms.classList.remove('on'); ms.classList.add('stable'); ms.textContent='1';
+        status.textContent='DONE';
+        resultBox.style.display='block';
+        resultBox.className='note warn';
+        resultBox.innerHTML = `<b>Plain JK:</b> toggled ${toggles} times during the pulse — landed on Q=${plainQ}, effectively random depending on gate delays.<br><br><b>Master-Slave JK:</b> the Master toggled internally too, but the Slave stayed frozen the whole time CLK was high. The instant CLK fell, the Slave copied the Master exactly once → Q became <b>1</b>, deterministically, every single time.`;
+        demoRunning=false; btn.disabled=false;
+      }, 380);
+    }
+  }, tick);
+}
+
+/* ============ PRACTICE MODE ============ */
+function practiceControls(){
+  const c=document.getElementById('practice_controls');
+  c.innerHTML='';
+  ['J','K'].forEach(inp=>{
+    const b=document.createElement('button');
+    b.className='ctrl-btn'; b.id='practice_'+inp+'_btn'; b.textContent=inp+' = 0';
+    b.onclick=()=>{ practiceState[inp]^=1; onPracticeInputChange(inp); };
+    c.appendChild(b);
+  });
+}
+function onPracticeInputChange(inp){
+  const s = practiceState;
+  refreshPracticeButtons();
+  if (masterEnabled(s)){
+    logEntry(`<b>${inp} changed</b> while CLK=1 → Master is transparent, it updates immediately with J=${s.J}, K=${s.K}.`, 'm');
+    computeMasterFromInputs(s);
+    logEntry(`Master re-evaluates: Q<sub>m</sub>=${s.master.q}, Q̄<sub>m</sub>=${s.master.qbar}. (Slave is frozen — Q on the output has not changed.)`, 'm');
+  } else {
+    logEntry(`${inp} changed while CLK=0 → Master is frozen, this has <b>no effect</b> until the next rising edge.`);
+  }
+  updatePracticeCards();
+}
+function practiceToggleClk(){
+  const s = practiceState;
+  const prev = s.clk;
+  s.clk ^= 1;
+  const btn=document.getElementById('practice_ck_btn');
+  btn.textContent = `⏻ Toggle CLK (currently ${s.clk})`;
+  btn.classList.toggle('active', s.clk===1);
+  if (prev===0 && s.clk===1){
+    logEntry(`<b>Rising edge:</b> CLK 0→1. Master becomes <span class="badge m">TRANSPARENT</span>, Slave clock = CLK̄ = 0 → Slave <span class="badge">FROZEN</span>.`, 'm');
+    computeMasterFromInputs(s);
+    logEntry(`Master evaluates with J=${s.J}, K=${s.K} → new Q<sub>m</sub>=${s.master.q}, Q̄<sub>m</sub>=${s.master.qbar}.`, 'm');
+    logEntry(`Output Q is unchanged (Slave frozen): Q = ${s.slave.q}.`);
+  } else if (prev===1 && s.clk===0){
+    logEntry(`<b>Falling edge:</b> CLK 1→0. Master becomes <span class="badge">FROZEN</span> at Q<sub>m</sub>=${s.master.q}. Slave clock = CLK̄ = 1 → Slave becomes <span class="badge s">TRANSPARENT</span>.`, 's');
+    syncSlaveFromMaster(s);
+    logEntry(`Slave copies Master exactly once: Q = Q<sub>m</sub> = ${s.slave.q}, Q̄ = ${s.slave.qbar}.`, 's');
+    logEntry(`<b>Final output → Q=${s.slave.q}, Q̄=${s.slave.qbar}</b>`, null, true);
+  }
+  updatePracticeCards();
+}
+function refreshPracticeButtons(){
+  const s = practiceState;
+  ['J','K'].forEach(inp=>{
+    const b = document.getElementById('practice_'+inp+'_btn');
+    b.textContent = inp+' = '+s[inp]; b.classList.toggle('active', s[inp]===1);
+  });
+}
+function updatePracticeCards(){
+  const s = practiceState;
+  const mEn=masterEnabled(s), sEn=slaveEnabled(s);
+  const mCard=document.getElementById('practice_master_enable_card');
+  mCard.className='state-card '+(mEn?'transparent':'frozen');
+  mCard.querySelector('.state-value').textContent = mEn?'TRANSPARENT':'FROZEN';
+  const sCard=document.getElementById('practice_slave_enable_card');
+  sCard.className='state-card '+(sEn?'transparent':'frozen');
+  sCard.querySelector('.state-value').textContent = sEn?'TRANSPARENT':'FROZEN';
+  const qmCard=document.getElementById('practice_qm_card');
+  qmCard.className='state-card '+(s.master.q===1?'high':'low');
+  qmCard.querySelector('.state-value').textContent = s.master.q;
+  const qCard=document.getElementById('practice_q_card');
+  qCard.className='state-card '+(s.slave.q===1?'high':'low');
+  qCard.querySelector('.state-value').textContent = s.slave.q;
+  document.getElementById('practice_result').innerHTML =
+    `<b>Input:</b> CLK=${s.clk}, J=${s.J}, K=${s.K} → <b>Master</b> Qm=${s.master.q} (${mEn?'transparent':'frozen'}) → <b>Output</b> Q=${s.slave.q} (${sEn?'transparent':'frozen'})`;
+}
+function logEntry(html, cls, isFinal){
+  const log=document.getElementById('practice_log');
+  if (log.children.length===1 && log.children[0].textContent.indexOf('Log will appear')===0) log.innerHTML='';
+  const d=document.createElement('div');
+  d.className='entry'+(cls?(' '+cls):'')+(isFinal?' final':'');
+  d.innerHTML=html;
+  log.appendChild(d);
+  log.scrollTop=log.scrollHeight;
+}
+function practiceReset(){
+  Object.assign(practiceState, freshState());
+  refreshPracticeButtons();
+  document.getElementById('practice_ck_btn').textContent='⏻ Toggle CLK (currently 0)';
+  document.getElementById('practice_ck_btn').classList.remove('active');
+  updatePracticeCards();
+  document.getElementById('practice_log').innerHTML = '<div class="entry">Log will appear here once you toggle the clock.</div>';
+}
+
+/* ============ ASSESSMENT ============ */
+const QUIZ = [
+  {q:'What problem does the Master-Slave configuration solve in a JK flip-flop?', options:['Metastability','The race-around condition','Power consumption','Fan-out limitations'], correct:1,
+   explain:'A plain JK flip-flop can toggle repeatedly while CLK=1 and J=K=1 due to feedback through gate delays — this is the race-around condition, which master-slave design eliminates.'},
+  {q:'Why does race-around happen in a simple JK flip-flop?', options:['The clock frequency is too low','Q and Q̄ are fed back into the input gates, re-triggering them while CLK stays high with J=K=1','The flip-flop has no clock input','S and R are both tied to ground'], correct:1,
+   explain:'The feedback of Q and Q̄ into the gating network keeps re-evaluating the output through every propagation delay for as long as the clock pulse is high.'},
+  {q:'In a master-slave JK flip-flop, which stage is positive level-triggered?', options:['The Slave','The Master','Both, simultaneously','Neither — both are edge-triggered'], correct:1,
+   explain:'The Master responds to J and K while CLK is HIGH; it is positive level-triggered.'},
+  {q:'Which stage is negative level-triggered, and why?', options:['The Master, because of an inverter on J','The Slave, because its clock input is the inverted CLK signal','The Slave, because it has no clock at all','The Master, because Q feeds back to K'], correct:1,
+   explain:'The clock signal is inverted before reaching the Slave, so the Slave becomes transparent only while CLK is LOW.'},
+  {q:'What does the NOT gate (inverter) in the master-slave circuit connect to?', options:['The J and K inputs','The clock line, producing CLK̄ for the Slave', 'The output Q, producing Q̄', 'The reset line'], correct:1,
+   explain:'The inverter sits on the clock path: it feeds an inverted clock (CLK̄) to the Slave flip-flop so Master and Slave are never transparent at the same time.'},
+  {q:'How many NAND gates does the standard gate-level master-slave JK circuit use for its two gated latches (excluding the clock inverter)?', options:['4 total','6 total','8 total (4 for Master, 4 for Slave)','2 total'], correct:2,
+   explain:'Each stage uses 2 gating NAND gates + 2 cross-coupled latch NAND gates = 4 gates per stage, 8 gates total, plus 1 NOT gate for the clock = 9 gates overall.'},
+  {q:'When CLK = 1, what happens inside a master-slave JK flip-flop?', options:['The Slave updates from J,K directly','The Master is active and responds to J,K; the Slave is disabled (frozen)','Both Master and Slave update together','Nothing happens until CLK falls to 0'], correct:1,
+   explain:'While CLK is high, the Master is transparent and tracks J,K. Because CLK̄=0 at that time, the Slave is frozen and the output Q does not change yet.'},
+  {q:'When does the final output Q actually change in a master-slave JK flip-flop?', options:['The instant CLK rises to 1','Continuously while CLK is high','The instant CLK falls to 0, when the Slave copies the Master','Only when J and K are both 0'], correct:2,
+   explain:'The output changes exactly once, at the falling edge of CLK, when the now-frozen Master value is transferred into the Slave.'},
+  {q:'With J=1 and K=1 held throughout one full clock cycle, how many times does the master-slave output Q toggle?', options:['Zero times','Exactly once', 'Twice', 'A number that depends on gate delay, same as a plain JK'], correct:1,
+   explain:'Because the Slave only samples the Master once, at the falling edge, Q toggles exactly once per clock cycle — this is precisely how race-around is avoided.'},
+  {q:'What are the inputs of the Slave flip-flop\'s gating gates connected to?', options:['External J and K directly','The Master flip-flop\'s Q and Q̄ outputs, gated by CLK̄', 'The system reset line', 'Ground and Vcc'], correct:1,
+   explain:'The Master\'s Q and Q̄ outputs feed the Slave\'s gating NAND gates, along with the inverted clock CLK̄, cascading the two stages.'}
+];
+function buildQuiz(){
+  const root=document.getElementById('quiz-content');
+  root.innerHTML = QUIZ.map((q,i)=>`
+    <div class="quiz-question">
+      <h4>${i+1}. ${q.q}</h4>
+      <div class="quiz-options">
+        ${q.options.map((o,oi)=>`
+          <label class="quiz-option">
+            <input type="radio" name="q${i}" value="${oi}">
+            <label>${o}</label>
+          </label>`).join('')}
+      </div>
+      <div id="q${i}_feedback"></div>
+    </div>`).join('');
+}
+let bestScore = null;
+function submitQuiz(){
+  let score=0;
+  QUIZ.forEach((q,i)=>{
+    const sel=document.querySelector(`input[name="q${i}"]:checked`);
+    const fb=document.getElementById(`q${i}_feedback`);
+    if (!sel){ fb.className=''; fb.textContent=''; return; }
+    const correct = parseInt(sel.value)===q.correct;
+    if (correct) score++;
+    fb.className='quiz-feedback '+(correct?'correct':'incorrect');
+    fb.innerHTML = (correct?'✓ Correct! ':'✗ Not quite. ') + q.explain;
+  });
+  const total=QUIZ.length, pct=Math.round((score/total)*100);
+  const msg = pct===100?'🏆 Perfect! Mastery achieved!':pct>=80?'🎯 Excellent understanding!':pct>=60?'✓ Good! Keep practicing.':'📚 Review the material and try again.';
+  const disp=document.getElementById('score_display');
+  disp.innerHTML = `<div class="score-display ${pct===100?'perfect':''}"><div class="big">${score}/${total}</div><div class="desc">Score: ${pct}%</div><div style="margin-top:10px;font-size:14px">${msg}</div></div>`;
+  if (bestScore===null || score>bestScore) bestScore=score;
+  renderProgress();
+  disp.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function renderProgress(){
+  const dash=document.getElementById('progress-dash');
+  dash.innerHTML = `<div class="progress-item"><div class="pl">MASTER-SLAVE JK</div><div class="pv" style="color:${bestScore===null?'var(--text-faint)':'var(--accent)'}">${bestScore===null?'—':bestScore+'/'+QUIZ.length}</div></div>`;
+}
+
+/* ============ INIT ============ */
+learnControls();
+buildCircuit();
+renderLearn();
+practiceControls();
+updatePracticeCards();
+buildQuiz();
+renderProgress();
+</script>
+</body>
+</html>
