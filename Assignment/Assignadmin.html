@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Admin Dashboard — Project Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .filters { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .filters input, .filters select { max-width: 220px; }
+  .row-actions { display: flex; gap: 8px; }
+  .rubric-editor-row { display: grid; grid-template-columns: 1fr 2fr 90px; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .rubric-editor-row .lbl { color: var(--ink-dim); font-size: 0.85rem; }
+  .eval-panel { display: none; }
+  .eval-panel.open { display: block; }
+  .eval-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .eval-total-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--navy-900); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin: 16px 0;
+  }
+  .eval-total-bar .num { font-family: var(--font-display); font-size: 1.6rem; color: var(--brass-soft); }
+  .link-chip { font-size: 0.78rem; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; margin-right: 5px; display: inline-block; margin-bottom:4px; }
+  .link-chip.ok { color: var(--ok); border-color: rgba(76,175,125,0.4); }
+  .link-chip.missing { color: var(--ink-faint); }
+</style>
+</head>
+<body>
+
+<div class="page-loader" id="pageLoader"><span class="spinner" style="width:30px;height:30px;border-width:3px;"></span></div>
+
+<div class="topbar">
+  <div class="brand"><span class="mark">PP</span> Project Portal · Admin</div>
+  <div class="user-chip">
+    <span class="avatar" id="avatarInit">A</span>
+    <div><div style="font-weight:600;" id="userNameLbl">—</div><div style="color:var(--ink-faint); font-size:0.72rem;">Administrator</div></div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()" style="margin-left:6px;">Logout</button>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="sidenav">
+    <div class="nav-item active" data-view="overview" onclick="showView('overview')">🏠 Overview</div>
+    <div class="nav-item" data-view="projects" onclick="showView('projects')">📚 Projects</div>
+    <div class="nav-item" data-view="registrations" onclick="showView('registrations')">🧾 Registrations</div>
+    <div class="nav-item" data-view="evaluate" onclick="showView('evaluate')">🧮 Evaluate</div>
+    <div class="nav-item" data-view="rubrics" onclick="showView('rubrics')">⚖️ Rubrics</div>
+    <div class="nav-item" data-view="reports" onclick="showView('reports')">📊 Reports</div>
+  </nav>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <section class="view active" id="view-overview">
+      <div class="page-head"><div class="eyebrow">At a glance</div><h2>Admin overview</h2></div>
+      <div class="grid cols-4" id="statGrid" style="margin-bottom:22px;"></div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3 style="margin-bottom:10px;">Section split (registrations)</h3>
+          <div id="sectionSplitBox"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;">Quick actions</h3>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn btn-ghost btn-block" onclick="showView('projects')">➕ Add a new project title</button>
+            <button class="btn btn-ghost btn-block" onclick="showView('evaluate')">🧮 Evaluate pending submissions</button>
+            <button class="btn btn-ghost btn-block" onclick="showView('rubrics')">⚖️ Edit rubric weights</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="view" id="view-projects">
+      <div class="page-head"><div class="eyebrow">Manage titles</div><h2>Project catalogue</h2></div>
+      <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+        <button class="btn btn-primary" onclick="openAddProjectModal()">➕ Add project title</button>
+      </div>
+      <div class="table-wrap">
+        <table id="projectsTable">
+          <thead><tr><th>ID</th><th>Title</th><th>Unit</th><th>Difficulty</th><th>Status</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- REGISTRATIONS -->
+    <section class="view" id="view-registrations">
+      <div class="page-head"><div class="eyebrow">Who registered what</div><h2>Registrations</h2></div>
+      <div class="filters">
+        <input type="text" id="regSearch" placeholder="Search student or project…" oninput="renderRegistrations()" />
+        <select id="regSectionFilter" onchange="renderRegistrations()">
+          <option value="">All sections</option><option value="A">Section A</option><option value="B">Section B</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Sec</th><th>Project</th><th>Report</th><th>YouTube</th><th>GitHub</th><th>Hardcopy</th><th>Marks</th></tr></thead>
+          <tbody id="regTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- EVALUATE -->
+    <section class="view" id="view-evaluate">
+      <div class="page-head"><div class="eyebrow">Score against the rubric</div><h2>Evaluate students</h2></div>
+      <div class="filters">
+        <input type="text" id="evalSearch" placeholder="Search student or project…" oninput="renderEvalList()" />
+        <select id="evalSectionFilter" onchange="renderEvalList()">
+          <option value="">All sections</option><option value="A">Section A</option><option value="B">Section B</option>
+        </select>
+        <select id="evalStatusFilter" onchange="renderEvalList()">
+          <option value="">All statuses</option><option value="pending">Not evaluated</option><option value="done">Evaluated</option>
+        </select>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3 style="margin-bottom:10px;">Students</h3>
+          <div id="evalList" style="max-height:560px; overflow-y:auto;"></div>
+        </div>
+        <div class="card eval-panel" id="evalPanel">
+          <div id="evalPanelBody"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RUBRICS -->
+    <section class="view" id="view-rubrics">
+      <div class="page-head"><div class="eyebrow">25-mark scheme</div><h2>Evaluation rubrics</h2></div>
+      <div class="card">
+        <div id="rubricEditor"></div>
+        <button class="btn btn-primary" style="margin-top:10px;" onclick="saveRubrics()">Save rubric changes</button>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="view" id="view-reports">
+      <div class="page-head"><div class="eyebrow">Export</div><h2>Consolidated report</h2></div>
+      <div class="card" style="margin-bottom:18px;">
+        <p style="color:var(--ink-dim); font-size:0.9rem; margin-bottom:14px;">Download a CSV containing every student's project, submission links, hardcopy status and marks — ready to paste into a spreadsheet or print.</p>
+        <button class="btn btn-primary" onclick="exportCsv()">⬇️ Download marks report (CSV)</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Sec</th><th>Project</th><th>Total</th></tr></thead>
+          <tbody id="reportsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Add project modal -->
+<div class="modal-backdrop" id="addProjectBackdrop">
+  <div class="modal">
+    <span class="close-x" onclick="closeAddProjectModal()">&times;</span>
+    <h3 style="margin-bottom:16px;">Add a new project title</h3>
+    <div class="field-row">
+      <div class="field"><label>S.No</label><input id="np_sno" type="number" /></div>
+      <div class="field"><label>Unit</label><input id="np_unit" /></div>
+    </div>
+    <div class="field"><label>Topic</label><input id="np_topic" /></div>
+    <div class="field"><label>Project Title</label><input id="np_title" /></div>
+    <div class="field"><label>Real-World Problem / Use Case</label><textarea id="np_problem" rows="2"></textarea></div>
+    <div class="field"><label>Project Description</label><textarea id="np_desc" rows="2"></textarea></div>
+    <div class="field"><label>Implementation Steps</label><textarea id="np_steps" rows="2"></textarea></div>
+    <div class="field"><label>Implementation Instructions</label><textarea id="np_instr" rows="2"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Suggested Software / Tools</label><input id="np_tools" /></div>
+      <div class="field"><label>Difficulty</label>
+        <select id="np_diff"><option>Easy</option><option>Medium</option><option>Hard</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Expected Output / Demo</label><input id="np_output" /></div>
+    <div class="field"><label>Student Deliverables</label><input id="np_deliv" /></div>
+    <div class="field"><label>CO Mapping</label><input id="np_co" /></div>
+    <button class="btn btn-primary btn-block" onclick="submitNewProject()">Add project</button>
+  </div>
+</div>
+
+<div id="toast-stack"></div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+let USER = null;
+let PROJECTS = [], REGISTRATIONS = [], EVAL_BOARD = [], RUBRICS = [];
+let activeEvalStudentId = null;
+
+async function init() {
+  USER = currentUser();
+  if (!USER) return;
+  if (USER.role !== "Admin") { window.location.href = "student.html"; return; }
+  document.getElementById("userNameLbl").textContent = USER.name;
+  document.getElementById("avatarInit").textContent = USER.name.charAt(0).toUpperCase();
+  try {
+    await refreshAll();
+    document.getElementById("pageLoader").classList.add("hidden");
+  } catch (err) {
+    console.error(err);
+    document.getElementById("pageLoader").innerHTML = `
+      <div style="max-width:420px; text-align:center; padding:20px;">
+        <div style="font-size:1.4rem; margin-bottom:10px;">⚠️ Couldn't load the dashboard</div>
+        <div style="color:var(--ink-dim); font-size:0.9rem; margin-bottom:16px;">${escapeHtml(err.message)}</div>
+        <button class="btn btn-primary" onclick="location.reload()">Retry</button>
+      </div>`;
+  }
+}
+
+async function refreshAll() {
+  const [stats, projects, regs, board, rubrics] = await Promise.all([
+    api("getDashboardStats", {}),
+    api("getAllProjects", {}),
+    api("getAllRegistrations", {}),
+    api("getEvaluationBoard", {}),
+    api("getRubrics", {})
+  ]);
+  renderStats(stats);
+  PROJECTS = projects;
+  REGISTRATIONS = regs;
+  EVAL_BOARD = board;
+  RUBRICS = rubrics;
+  renderProjectsTable();
+  renderRegistrations();
+  renderEvalList();
+  renderRubricEditor();
+  renderReports();
+  renderSectionSplit(stats);
+}
+
+function showView(view) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+  document.getElementById("view-" + view).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach((n) => n.classList.toggle("active", n.dataset.view === view));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderStats(stats) {
+  document.getElementById("statGrid").innerHTML = `
+    <div class="stat"><div class="num">${stats.totalProjects}</div><div class="label">Total projects</div></div>
+    <div class="stat"><div class="num">${stats.available}</div><div class="label">Still available</div></div>
+    <div class="stat"><div class="num">${stats.registered}</div><div class="label">Registered</div></div>
+    <div class="stat"><div class="num">${stats.evaluated}</div><div class="label">Evaluated</div></div>
+  `;
+}
+function renderSectionSplit(stats) {
+  const total = stats.sectionA + stats.sectionB || 1;
+  document.getElementById("sectionSplitBox").innerHTML = `
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem;"><span>Section A</span><b>${stats.sectionA}</b></div>
+    <div style="height:8px; border-radius:4px; background:var(--navy-700); overflow:hidden; margin-bottom:14px;">
+      <div style="height:100%; width:${(stats.sectionA/total)*100}%; background:var(--sectionA);"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem;"><span>Section B</span><b>${stats.sectionB}</b></div>
+    <div style="height:8px; border-radius:4px; background:var(--navy-700); overflow:hidden;">
+      <div style="height:100%; width:${(stats.sectionB/total)*100}%; background:var(--sectionB);"></div>
+    </div>
+  `;
+}
+
+function statusPillClass(status) {
+  const s = String(status).toLowerCase();
+  if (s === "available") return "pill-ok";
+  if (s === "registered") return "pill-warn";
+  return "pill-muted"; // Withdrawn / other
+}
+
+function renderProjectsTable() {
+  const tbody = document.querySelector("#projectsTable tbody");
+  if (PROJECTS.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--ink-faint);">No projects yet. Click "Add project title" above to create your first one.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = PROJECTS.map((p) => `
+    <tr>
+      <td>${escapeHtml(p.ProjectID)}</td>
+      <td>${escapeHtml(p["Project Title"])}</td>
+      <td>${escapeHtml(p.Unit)}</td>
+      <td>${escapeHtml(p.Difficulty)}</td>
+      <td><span class="pill ${statusPillClass(p.Status)}">${escapeHtml(p.Status)}</span></td>
+      <td>${String(p.Status).toLowerCase() === "available"
+          ? `<button class="btn btn-ghost btn-sm" onclick="closeProjectManually('${p.ProjectID}')">Withdraw</button>`
+          : String(p.Status).toLowerCase() === "withdrawn"
+            ? `<button class="btn btn-ghost btn-sm" onclick="reopenProject('${p.ProjectID}')">Reopen</button>`
+            : `<span style="color:var(--ink-faint); font-size:0.78rem;">Taken</span>`}
+      </td>
+    </tr>
+  `).join("");
+}
+
+async function closeProjectManually(projectId) {
+  if (!confirm("Remove this project from the available list?")) return;
+  await api("updateProjectStatus", { projectId, status: "Withdrawn" });
+  toast("Project withdrawn.", "success");
+  await refreshAll();
+}
+
+async function reopenProject(projectId) {
+  await api("updateProjectStatus", { projectId, status: "Available" });
+  toast("Project reopened for registration.", "success");
+  await refreshAll();
+}
+
+function openAddProjectModal() { document.getElementById("addProjectBackdrop").classList.add("open"); }
+function closeAddProjectModal() { document.getElementById("addProjectBackdrop").classList.remove("open"); }
+
+async function submitNewProject() {
+  const project = {
+    SNo: document.getElementById("np_sno").value,
+    Unit: document.getElementById("np_unit").value,
+    Topic: document.getElementById("np_topic").value,
+    ProjectTitle: document.getElementById("np_title").value,
+    RealWorldProblem: document.getElementById("np_problem").value,
+    ProjectDescription: document.getElementById("np_desc").value,
+    ImplementationSteps: document.getElementById("np_steps").value,
+    ImplementationInstructions: document.getElementById("np_instr").value,
+    SuggestedTools: document.getElementById("np_tools").value,
+    ExpectedOutput: document.getElementById("np_output").value,
+    StudentDeliverables: document.getElementById("np_deliv").value,
+    Difficulty: document.getElementById("np_diff").value,
+    COMapping: document.getElementById("np_co").value
+  };
+  if (!project.ProjectTitle) { toast("Project title is required.", "error"); return; }
+  await api("addProject", { project });
+  toast("Project added.", "success");
+  closeAddProjectModal();
+  await refreshAll();
+}
+
+function renderRegistrations() {
+  const search = (document.getElementById("regSearch").value || "").toLowerCase();
+  const sectionFilter = document.getElementById("regSectionFilter").value;
+  const tbody = document.getElementById("regTableBody");
+
+  const list = EVAL_BOARD.filter((r) => {
+    const hay = `${r.studentName} ${r.projectTitle}`.toLowerCase();
+    const matchesSearch = hay.includes(search);
+    const matchesSection = !sectionFilter || r.section === sectionFilter;
+    return matchesSearch && matchesSection;
+  });
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--ink-faint);">No registrations found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((r) => `
+    <tr>
+      <td>${escapeHtml(r.studentName)}<div style="color:var(--ink-faint); font-size:0.75rem;">${escapeHtml(r.studentId)}</div></td>
+      <td><span class="section-badge ${r.section}">${escapeHtml(r.section)}</span></td>
+      <td>${escapeHtml(r.projectTitle)}</td>
+      <td>${r.submission && r.submission.ReportDriveLink ? `<a href="${r.submission.ReportDriveLink}" target="_blank">View</a>` : "—"}</td>
+      <td>${r.submission && r.submission.YouTubeLink ? `<a href="${r.submission.YouTubeLink}" target="_blank">Link</a>` : "—"}</td>
+      <td>${r.submission && r.submission.GitHubLink ? `<a href="${r.submission.GitHubLink}" target="_blank">Link</a>` : "—"}</td>
+      <td>${r.submission ? (r.submission.HardcopyStatus || "Pending") : "—"}</td>
+      <td>${r.evaluation ? `<b>${r.evaluation.TotalMarks}</b>/25` : `<span class="pill pill-warn">Pending</span>`}</td>
+    </tr>
+  `).join("");
+}
+
+function renderEvalList() {
+  const search = (document.getElementById("evalSearch").value || "").toLowerCase();
+  const sectionFilter = document.getElementById("evalSectionFilter").value;
+  const statusFilter = document.getElementById("evalStatusFilter").value;
+  const list = document.getElementById("evalList");
+
+  const filtered = EVAL_BOARD.filter((r) => {
+    const hay = `${r.studentName} ${r.projectTitle}`.toLowerCase();
+    const matchesSearch = hay.includes(search);
+    const matchesSection = !sectionFilter || r.section === sectionFilter;
+    const matchesStatus = !statusFilter || (statusFilter === "done" ? !!r.evaluation : !r.evaluation);
+    return matchesSearch && matchesSection && matchesStatus;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="glyph">🧮</div>No students match this filter.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((r) => `
+    <div class="link-row" style="cursor:pointer;" onclick="openEvalPanel('${r.studentId}')">
+      <div class="icon">${r.evaluation ? "✅" : "🕒"}</div>
+      <div class="txt">
+        <div class="name">${escapeHtml(r.studentName)} <span class="section-badge ${r.section}" style="margin-left:4px;">${r.section}</span></div>
+        <div class="val">${escapeHtml(r.projectTitle)}</div>
+      </div>
+      <div style="font-size:0.78rem; color:var(--ink-faint);">${r.evaluation ? r.evaluation.TotalMarks + "/25" : "—"}</div>
+    </div>
+  `).join("");
+}
+
+function openEvalPanel(studentId) {
+  activeEvalStudentId = studentId;
+  const r = EVAL_BOARD.find((x) => x.studentId === studentId);
+  const evl = r.evaluation || {};
+  const sub = r.submission || {};
+  document.getElementById("evalPanel").classList.add("open");
+  document.getElementById("evalPanelBody").innerHTML = `
+    <h3 style="margin-bottom:4px;">${escapeHtml(r.studentName)} <span class="section-badge ${r.section}">${r.section}</span></h3>
+    <div style="color:var(--ink-faint); font-size:0.85rem; margin-bottom:14px;">${escapeHtml(r.projectTitle)}</div>
+
+    <div style="margin-bottom:16px;">
+      <span class="link-chip ${sub.ReportDriveLink ? 'ok' : 'missing'}">${sub.ReportDriveLink ? `<a href="${sub.ReportDriveLink}" target="_blank" style="color:inherit;">📄 Report ✓</a>` : "📄 Report missing"}</span>
+      <span class="link-chip ${sub.YouTubeLink ? 'ok' : 'missing'}">${sub.YouTubeLink ? `<a href="${sub.YouTubeLink}" target="_blank" style="color:inherit;">🎥 YouTube ✓</a>` : "🎥 YouTube missing"}</span>
+      <span class="link-chip ${sub.GitHubLink ? 'ok' : 'missing'}">${sub.GitHubLink ? `<a href="${sub.GitHubLink}" target="_blank" style="color:inherit;">🐙 GitHub ✓</a>` : "🐙 GitHub missing"}</span>
+    </div>
+
+    <div class="field">
+      <label>Hardcopy status</label>
+      <select id="ev_hardcopy">
+        <option value="Pending" ${evl.HardcopyStatus === "Pending" || !sub.HardcopyStatus ? "selected":""}>Pending</option>
+        <option value="Received" ${sub.HardcopyStatus === "Received" ? "selected":""}>Received</option>
+      </select>
+    </div>
+
+    <div class="eval-grid">
+      <div class="field"><label>Submission timeliness (0-5)</label><input type="number" min="0" max="5" id="ev_submission" value="${evl.SubmissionMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+      <div class="field"><label>Creativity (0-5)</label><input type="number" min="0" max="5" id="ev_creativity" value="${evl.CreativityMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+      <div class="field"><label>Aptness of discussion (0-3)</label><input type="number" min="0" max="3" id="ev_aptness" value="${evl.AptnessMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+      <div class="field"><label>Teamwork (0-2)</label><input type="number" min="0" max="2" id="ev_teamwork" value="${evl.TeamworkMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+      <div class="field"><label>Deliverability &amp; clarity (0-5)</label><input type="number" min="0" max="5" id="ev_deliverability" value="${evl.DeliverabilityMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+      <div class="field"><label>Chart work/PPT/writeup (0-5)</label><input type="number" min="0" max="5" id="ev_chartwork" value="${evl.ChartworkMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+    </div>
+
+    <div class="field"><label>Remarks (visible to student)</label><textarea id="ev_remarks" rows="2">${escapeHtml(evl.Remarks || "")}</textarea></div>
+
+    <div class="eval-total-bar">
+      <span>Total</span>
+      <span class="num" id="evalTotalDisplay">${evl.TotalMarks ?? 0} / 25</span>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="saveEvalForStudent()">Save evaluation</button>
+  `;
+}
+
+function recalcEvalTotal() {
+  const vals = ["ev_submission","ev_creativity","ev_aptness","ev_teamwork","ev_deliverability","ev_chartwork"]
+    .map((id) => Number(document.getElementById(id).value || 0));
+  const total = vals.reduce((a,b) => a+b, 0);
+  document.getElementById("evalTotalDisplay").textContent = `${total} / 25`;
+}
+
+async function saveEvalForStudent() {
+  const r = EVAL_BOARD.find((x) => x.studentId === activeEvalStudentId);
+  const payload = {
+    studentId: r.studentId, projectId: r.projectId, section: r.section,
+    submissionMark: document.getElementById("ev_submission").value,
+    creativityMark: document.getElementById("ev_creativity").value,
+    aptnessMark: document.getElementById("ev_aptness").value,
+    teamworkMark: document.getElementById("ev_teamwork").value,
+    deliverabilityMark: document.getElementById("ev_deliverability").value,
+    chartworkMark: document.getElementById("ev_chartwork").value,
+    hardcopyStatus: document.getElementById("ev_hardcopy").value,
+    remarks: document.getElementById("ev_remarks").value,
+    evaluatedBy: USER.name
+  };
+  const res = await api("saveEvaluation", payload);
+  toast(`Saved — total ${res.total}/25`, "success");
+  await refreshAll();
+  openEvalPanel(activeEvalStudentId);
+}
+
+function renderRubricEditor() {
+  const box = document.getElementById("rubricEditor");
+  box.innerHTML = RUBRICS.map((r, i) => `
+    <div class="rubric-editor-row">
+      <div class="lbl">${escapeHtml(r.Category)}</div>
+      <input data-idx="${i}" data-field="SubCategory" value="${escapeHtml(r.SubCategory)}" />
+      <input data-idx="${i}" data-field="MaxMarks" type="number" value="${escapeHtml(r.MaxMarks)}" />
+    </div>
+  `).join("");
+}
+
+async function saveRubrics() {
+  const rows = document.querySelectorAll("#rubricEditor .rubric-editor-row");
+  const updated = RUBRICS.map((r, i) => {
+    const sub = document.querySelector(`[data-idx="${i}"][data-field="SubCategory"]`).value;
+    const max = document.querySelector(`[data-idx="${i}"][data-field="MaxMarks"]`).value;
+    return { Category: r.Category, SubCategory: sub, MaxMarks: max, Notes: r.Notes || "" };
+  });
+  await api("saveRubrics", { rubrics: updated });
+  toast("Rubric weights saved.", "success");
+  await refreshAll();
+}
+
+function renderReports() {
+  const tbody = document.getElementById("reportsTableBody");
+  const evaluated = EVAL_BOARD.filter((r) => r.evaluation);
+  if (evaluated.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--ink-faint);">No evaluations yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = evaluated.map((r) => `
+    <tr><td>${escapeHtml(r.studentName)}</td><td>${escapeHtml(r.section)}</td><td>${escapeHtml(r.projectTitle)}</td><td>${r.evaluation.TotalMarks}/25</td></tr>
+  `).join("");
+}
+
+function exportCsv() {
+  const headers = ["StudentID","StudentName","Section","ProjectID","ProjectTitle","ReportLink","YouTubeLink","GitHubLink","HardcopyStatus","TotalMarks","Remarks"];
+  const rows = EVAL_BOARD.map((r) => [
+    r.studentId, r.studentName, r.section, r.projectId, r.projectTitle,
+    r.submission ? r.submission.ReportDriveLink : "", r.submission ? r.submission.YouTubeLink : "",
+    r.submission ? r.submission.GitHubLink : "", r.submission ? r.submission.HardcopyStatus : "",
+    r.evaluation ? r.evaluation.TotalMarks : "", r.evaluation ? r.evaluation.Remarks : ""
+  ]);
+  const csv = [headers, ...rows].map((row) =>
+    row.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")
+  ).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "project_marks_report.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+init();
+</script>
+</body>
+</html>

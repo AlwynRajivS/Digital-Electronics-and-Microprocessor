@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Student Dashboard — Project Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .search-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-row input { flex: 1; min-width: 220px; }
+  .search-row select { max-width: 180px; }
+
+  .lock-banner {
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.12), transparent);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 20px; margin-bottom: 20px;
+  }
+  .lock-banner .glyph { font-size: 1.4rem; }
+
+  .link-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .link-row:last-child { border-bottom: none; }
+  .link-row .icon { width: 34px; height: 34px; border-radius: 8px; background: var(--navy-700); display: grid; place-items: center; flex-shrink: 0; }
+  .link-row .txt { flex: 1; min-width: 0; }
+  .link-row .txt .name { font-size: 0.88rem; font-weight: 600; }
+  .link-row .txt .val { font-size: 0.78rem; color: var(--ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .upload-drop {
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 26px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease;
+    color: var(--ink-dim);
+    font-size: 0.88rem;
+  }
+  .upload-drop:hover, .upload-drop.drag { border-color: var(--brass); background: rgba(212,175,55,0.05); }
+  .upload-drop.has-file { border-color: var(--ok); color: var(--ok); }
+
+  .marks-hero {
+    display: grid; place-items: center;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .marks-hero .ring {
+    width: 150px; height: 150px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: conic-gradient(var(--brass) calc(var(--pct,0) * 1%), var(--navy-700) 0);
+    margin-bottom: 16px;
+  }
+  .marks-hero .ring-inner {
+    width: 122px; height: 122px; border-radius: 50%;
+    background: var(--navy-800); display: grid; place-items: center; flex-direction: column;
+  }
+  .marks-hero .ring-inner .num { font-family: var(--font-display); font-size: 1.9rem; }
+  .marks-hero .ring-inner .of { font-size: 0.7rem; color: var(--ink-faint); }
+
+  .rubric-mini { width: 100%; font-size: 0.85rem; }
+  .rubric-mini td, .rubric-mini th { padding: 8px 10px; }
+
+  .instr-list { padding-left: 18px; color: var(--ink-dim); font-size: 0.87rem; line-height: 1.8; }
+
+  .format-box {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--navy-900); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .format-box .icon { font-size: 1.6rem; }
+</style>
+</head>
+<body>
+
+<div class="page-loader" id="pageLoader"><span class="spinner" style="width:30px;height:30px;border-width:3px;"></span></div>
+
+<div class="topbar">
+  <div class="brand"><span class="mark">PP</span> Project Portal</div>
+  <div class="user-chip">
+    <span class="avatar" id="avatarInit">S</span>
+    <div>
+      <div style="font-weight:600;" id="userNameLbl">—</div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span class="section-badge" id="sectionBadge">—</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()" style="margin-left:6px;">Logout</button>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="sidenav">
+    <div class="nav-item active" data-view="overview" onclick="showView('overview')">🏠 Overview</div>
+    <div class="nav-item" data-view="browse" onclick="showView('browse')">📚 Browse Projects</div>
+    <div class="nav-item" data-view="myproject" onclick="showView('myproject')">📌 My Project</div>
+    <div class="nav-item" data-view="submit" onclick="showView('submit')">📤 Submit Work</div>
+    <div class="nav-item" data-view="format" onclick="showView('format')">📄 Report Format</div>
+    <div class="nav-item" data-view="marks" onclick="showView('marks')">🏆 My Marks</div>
+  </nav>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <section class="view active" id="view-overview">
+      <div class="page-head">
+        <div class="eyebrow">Welcome</div>
+        <h2 id="welcomeHeading">Hi there 👋</h2>
+      </div>
+      <div class="grid cols-3" style="margin-bottom:22px;">
+        <div class="stat"><div class="num" id="ov-status">—</div><div class="label">Registration status</div></div>
+        <div class="stat"><div class="num" id="ov-submitted">—</div><div class="label">Submission status</div></div>
+        <div class="stat"><div class="num" id="ov-marks">—</div><div class="label">Marks (out of 25)</div></div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px;">Quick guide</h3>
+        <div class="instr-list">
+          <ol>
+            <li>Browse open project titles under <b>Browse Projects</b> and register — first come, first served.</li>
+            <li>Once registered, your project appears under <b>My Project</b> and is locked to you.</li>
+            <li>Download the report format from <b>Report Format</b>, prepare your report, and upload it under <b>Submit Work</b> along with your YouTube and GitHub links.</li>
+            <li>Track your evaluated marks anytime under <b>My Marks</b>.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- BROWSE PROJECTS -->
+    <section class="view" id="view-browse">
+      <div class="page-head">
+        <div class="eyebrow">First come, first served</div>
+        <h2>Browse open projects</h2>
+      </div>
+
+      <div id="alreadyRegisteredBanner" class="lock-banner" style="display:none;">
+        <span class="glyph">🔒</span>
+        <div>You've already registered a project. You can only take up one project — head to <a onclick="showView('myproject')" style="cursor:pointer;">My Project</a> to view it.</div>
+      </div>
+
+      <div class="search-row">
+        <input type="text" id="browseSearch" placeholder="Search by title, unit or topic…" oninput="renderProjects()" />
+        <select id="filterDifficulty" onchange="renderProjects()">
+          <option value="">All difficulties</option>
+          <option>Easy</option><option>Medium</option><option>Hard</option>
+        </select>
+      </div>
+
+      <div id="projectGrid" class="grid cols-3"></div>
+    </section>
+
+    <!-- MY PROJECT -->
+    <section class="view" id="view-myproject">
+      <div class="page-head">
+        <div class="eyebrow">Locked in</div>
+        <h2>My registered project</h2>
+      </div>
+      <div id="myProjectBox"></div>
+    </section>
+
+    <!-- SUBMIT WORK -->
+    <section class="view" id="view-submit">
+      <div class="page-head">
+        <div class="eyebrow">Report · Video · Code</div>
+        <h2>Submit your work</h2>
+      </div>
+      <div id="submitGate"></div>
+      <div class="grid cols-2" id="submitForms" style="display:none;">
+        <div class="card">
+          <h3 style="margin-bottom:14px;">📄 Upload PDF report</h3>
+          <div class="upload-drop" id="dropZone" onclick="document.getElementById('pdfInput').click()">
+            <div id="dropText">Click to choose a PDF, or drag it here<br/><span style="color:var(--ink-faint)">Max 10&nbsp;MB · PDF only</span></div>
+          </div>
+          <input type="file" id="pdfInput" accept="application/pdf" style="display:none" onchange="handleFileSelect(this.files[0])" />
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom:14px;">🔗 Links</h3>
+          <div class="field">
+            <label for="youtubeLink">YouTube demo video link</label>
+            <input type="url" id="youtubeLink" placeholder="https://youtu.be/..." />
+          </div>
+          <div class="field">
+            <label for="githubLink">GitHub repository link</label>
+            <input type="url" id="githubLink" placeholder="https://github.com/username/repo" />
+          </div>
+          <button class="btn btn-primary btn-block" id="submitBtn" onclick="handleSubmitWork()">Submit / Update</button>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+          <h3 style="margin-bottom:12px;">🎥 YouTube instructions</h3>
+          <ol class="instr-list">
+            <li>Record a 3–5 minute screen demo showing your working project end-to-end.</li>
+            <li>Upload it to YouTube as <b>Unlisted</b> (not Private) so evaluators can open the link.</li>
+            <li>Title format: <code>ProjectID - Project Title - Register Number</code></li>
+            <li>Paste the shareable link (youtu.be or youtube.com/watch) above.</li>
+          </ol>
+          <hr class="rule" />
+          <h3 style="margin-bottom:12px;">🐙 GitHub instructions</h3>
+          <ol class="instr-list">
+            <li>Push your complete, working source code to a public GitHub repository.</li>
+            <li>Include a <code>README.md</code> with setup steps and a short project description.</li>
+            <li>Commit history should reflect genuine incremental work, not a single upload.</li>
+            <li>Paste the repository link above (e.g. <code>https://github.com/you/project-name</code>).</li>
+          </ol>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;" id="currentSubmissionCard" style="display:none;">
+          <h3 style="margin-bottom:8px;">Current submission</h3>
+          <div id="currentSubmissionBody"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORT FORMAT -->
+    <section class="view" id="view-format">
+      <div class="page-head">
+        <div class="eyebrow">Before you write</div>
+        <h2>Report preparation format</h2>
+      </div>
+      <div class="card" style="margin-bottom:18px;">
+        <div class="format-box">
+          <div class="icon">📥</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;">Project_Report_Format.docx</div>
+            <div style="color:var(--ink-faint); font-size:0.82rem;">Word template with the required sections pre-structured</div>
+          </div>
+          <a id="downloadFormatBtn" class="btn btn-primary" href="#" target="_blank">Download template</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;">Formatting instructions</h3>
+        <table class="rubric-mini">
+          <tr><th>Element</th><th>Specification</th></tr>
+          <tr><td>Font</td><td><b>Times New Roman</b> throughout the document</td></tr>
+          <tr><td>Body text size</td><td>12&nbsp;pt</td></tr>
+          <tr><td>Heading sizes</td><td>Chapter titles 16&nbsp;pt bold · Section headings 14&nbsp;pt bold</td></tr>
+          <tr><td>Line spacing</td><td>1.5 lines throughout the report</td></tr>
+          <tr><td>Paragraph spacing</td><td>6&nbsp;pt space after each paragraph</td></tr>
+          <tr><td>Margins</td><td>1 inch on all sides (Left margin may be 1.25&quot; for binding)</td></tr>
+          <tr><td>Alignment</td><td>Justified body text</td></tr>
+          <tr><td>Page numbers</td><td>Bottom-center, starting from the Introduction page</td></tr>
+          <tr><td>Required sections</td><td>Title Page, Abstract, Introduction, Problem Statement, Implementation, Screenshots/Output, Conclusion, References</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- MY MARKS -->
+    <section class="view" id="view-marks">
+      <div class="page-head">
+        <div class="eyebrow">Evaluation result</div>
+        <h2>My marks</h2>
+      </div>
+      <div id="marksBox"></div>
+    </section>
+
+  </div>
+</div>
+
+<nav class="mobile-nav">
+  <div class="m-item active" data-view="overview" onclick="showView('overview')">🏠<span>Home</span></div>
+  <div class="m-item" data-view="browse" onclick="showView('browse')">📚<span>Browse</span></div>
+  <div class="m-item" data-view="myproject" onclick="showView('myproject')">📌<span>Mine</span></div>
+  <div class="m-item" data-view="submit" onclick="showView('submit')">📤<span>Submit</span></div>
+  <div class="m-item" data-view="marks" onclick="showView('marks')">🏆<span>Marks</span></div>
+</nav>
+
+<div id="toast-stack"></div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+let USER = null;
+let ALL_PROJECTS = [];
+let MY_REG = null;
+let MY_SUB = null;
+let selectedFile = null;
+
+async function init() {
+  USER = currentUser();
+  if (!USER) return;
+  document.getElementById("userNameLbl").textContent = USER.name;
+  document.getElementById("avatarInit").textContent = USER.name.charAt(0).toUpperCase();
+  document.getElementById("welcomeHeading").textContent = `Hi, ${USER.name.split(" ")[0]} 👋`;
+  const badge = document.getElementById("sectionBadge");
+  badge.textContent = "Section " + (USER.section || "-");
+  badge.className = "section-badge " + (USER.section || "");
+
+  await refreshAll();
+  document.getElementById("pageLoader").classList.add("hidden");
+}
+
+async function refreshAll() {
+  const [regRes, projRes] = await Promise.all([
+    api("getMyRegistration", { studentId: USER.userId }),
+    api("getAvailableProjects")
+  ]);
+  MY_REG = regRes.registered ? regRes : null;
+  ALL_PROJECTS = projRes;
+
+  if (MY_REG) {
+    MY_SUB = await api("getMySubmission", { studentId: USER.userId });
+  }
+
+  renderOverview();
+  renderProjects();
+  renderMyProject();
+  renderSubmitGate();
+  renderMarks();
+}
+
+function showView(view) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+  document.getElementById("view-" + view).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach((n) => n.classList.toggle("active", n.dataset.view === view));
+  document.querySelectorAll(".m-item").forEach((n) => n.classList.toggle("active", n.dataset.view === view));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderOverview() {
+  document.getElementById("ov-status").textContent = MY_REG ? "Registered" : "Not registered";
+  document.getElementById("ov-submitted").textContent = MY_SUB ? "Submitted" : "Pending";
+  const marks = MY_REG && MY_SUB ? null : null;
+  document.getElementById("ov-marks").textContent = "—";
+}
+
+function renderProjects() {
+  const grid = document.getElementById("projectGrid");
+  const banner = document.getElementById("alreadyRegisteredBanner");
+  banner.style.display = MY_REG ? "flex" : "none";
+
+  const search = (document.getElementById("browseSearch").value || "").toLowerCase();
+  const diffFilter = document.getElementById("filterDifficulty").value;
+
+  const list = ALL_PROJECTS.filter((p) => {
+    const hay = `${p["Project Title"]} ${p.Unit} ${p.Topic}`.toLowerCase();
+    const matchesSearch = hay.includes(search);
+    const matchesDiff = !diffFilter || p.Difficulty === diffFilter;
+    return matchesSearch && matchesDiff;
+  });
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="glyph">📭</div>No matching projects available right now.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map((p) => `
+    <div class="proj-card">
+      <div class="tag-row">
+        <span class="tag">${escapeHtml(p.Unit)}</span>
+        <span class="tag diff-${escapeHtml(p.Difficulty)}">${escapeHtml(p.Difficulty)}</span>
+      </div>
+      <h3>${escapeHtml(p["Project Title"])}</h3>
+      <p class="desc">${escapeHtml(truncate(p["Project Description"], 120))}</p>
+      <div class="meta">CO Mapping: ${escapeHtml(p["CO Mapping"] || "-")}</div>
+      <div style="display:flex; gap:8px; margin-top:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="openProjectDetail('${p.ProjectID}')">View details</button>
+        <button class="btn btn-primary btn-sm" ${MY_REG ? "disabled" : ""} onclick="registerFor('${p.ProjectID}')">Register</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function truncate(str, n) {
+  if (!str) return "";
+  return str.length > n ? str.slice(0, n) + "…" : str;
+}
+
+function openProjectDetail(projectId) {
+  const p = ALL_PROJECTS.find((x) => x.ProjectID === projectId);
+  if (!p) return;
+  showDetailModal(p);
+}
+
+function showDetailModal(p) {
+  const backdrop = document.getElementById("detailModalBackdrop") || createModal();
+  document.getElementById("detailModalBody").innerHTML = `
+    <span class="close-x" onclick="closeModal()">&times;</span>
+    <h3>${escapeHtml(p["Project Title"])}</h3>
+    <div style="color:var(--ink-faint); font-size:0.82rem; margin-bottom:16px;">${escapeHtml(p.Unit)} · ${escapeHtml(p.Topic)} · ${escapeHtml(p.Difficulty)}</div>
+    ${detailRow("Real-world problem", p["Real-World Problem / Use Case"])}
+    ${detailRow("Description", p["Project Description"])}
+    ${detailRow("Implementation steps", p["Implementation Steps"])}
+    ${detailRow("Implementation instructions", p["Implementation Instructions"])}
+    ${detailRow("Suggested tools", p["Suggested Software / Tools"])}
+    ${detailRow("Expected output / demo", p["Expected Output / Demo"])}
+    ${detailRow("Student deliverables", p["Student Deliverables"])}
+    ${detailRow("CO Mapping", p["CO Mapping"])}
+    <button class="btn btn-primary btn-block" ${MY_REG ? "disabled" : ""} onclick="registerFor('${p.ProjectID}'); closeModal();" style="margin-top:6px;">Register for this project</button>
+  `;
+  backdrop.classList.add("open");
+}
+function detailRow(k, v) {
+  return `<div class="detail-row"><div class="k">${k}</div><div class="v">${escapeHtml(v || "-")}</div></div>`;
+}
+function createModal() {
+  const div = document.createElement("div");
+  div.id = "detailModalBackdrop";
+  div.className = "modal-backdrop";
+  div.onclick = (e) => { if (e.target === div) closeModal(); };
+  div.innerHTML = `<div class="modal" id="detailModalBody"></div>`;
+  document.body.appendChild(div);
+  return div;
+}
+function closeModal() {
+  const backdrop = document.getElementById("detailModalBackdrop");
+  if (backdrop) backdrop.classList.remove("open");
+}
+
+async function registerFor(projectId) {
+  if (MY_REG) { toast("You've already registered a project.", "error"); return; }
+  if (!confirm("Once registered, this project title cannot be changed. Confirm registration?")) return;
+  try {
+    const res = await api("registerProject", {
+      studentId: USER.userId, studentName: USER.name, section: USER.section, projectId
+    });
+    if (!res.success) { toast(res.message, "error"); await refreshAll(); return; }
+    toast(res.message, "success");
+    await refreshAll();
+    showView("myproject");
+  } catch (err) {
+    toast(err.message, "error");
+  }
+}
+
+function renderMyProject() {
+  const box = document.getElementById("myProjectBox");
+  if (!MY_REG) {
+    box.innerHTML = `<div class="empty-state"><div class="glyph">📌</div>You haven't registered a project yet.<br/><button class="btn btn-primary" style="margin-top:14px;" onclick="showView('browse')">Browse projects</button></div>`;
+    return;
+  }
+  const p = MY_REG.project || {};
+  box.innerHTML = `
+    <div class="card">
+      <div class="tag-row" style="margin-bottom:10px;">
+        <span class="tag">${escapeHtml(p.Unit || "")}</span>
+        <span class="tag diff-${escapeHtml(p.Difficulty || "")}">${escapeHtml(p.Difficulty || "")}</span>
+        <span class="pill pill-ok">Locked to you</span>
+      </div>
+      <h3 style="margin-bottom:12px;">${escapeHtml(p["Project Title"] || MY_REG.registration.ProjectTitle)}</h3>
+      ${detailRow("Real-world problem", p["Real-World Problem / Use Case"])}
+      ${detailRow("Description", p["Project Description"])}
+      ${detailRow("Implementation steps", p["Implementation Steps"])}
+      ${detailRow("Implementation instructions", p["Implementation Instructions"])}
+      ${detailRow("Suggested tools", p["Suggested Software / Tools"])}
+      ${detailRow("Expected output / demo", p["Expected Output / Demo"])}
+      ${detailRow("Student deliverables", p["Student Deliverables"])}
+      ${detailRow("Registered on", fmtDate(MY_REG.registration.RegisteredOn))}
+    </div>
+  `;
+}
+
+function renderSubmitGate() {
+  const gate = document.getElementById("submitGate");
+  const forms = document.getElementById("submitForms");
+  if (!MY_REG) {
+    gate.innerHTML = `<div class="empty-state"><div class="glyph">🔒</div>Register a project first before you can submit your work.</div>`;
+    forms.style.display = "none";
+    return;
+  }
+  gate.innerHTML = "";
+  forms.style.display = "grid";
+
+  const card = document.getElementById("currentSubmissionCard");
+  const body = document.getElementById("currentSubmissionBody");
+  if (MY_SUB) {
+    card.style.display = "block";
+    body.innerHTML = `
+      <div class="link-row"><div class="icon">📄</div><div class="txt"><div class="name">Report PDF</div><div class="val">${MY_SUB.ReportDriveLink ? `<a href="${MY_SUB.ReportDriveLink}" target="_blank">Open in Drive</a>` : "Not uploaded yet"}</div></div></div>
+      <div class="link-row"><div class="icon">🎥</div><div class="txt"><div class="name">YouTube</div><div class="val">${MY_SUB.YouTubeLink ? `<a href="${MY_SUB.YouTubeLink}" target="_blank">${MY_SUB.YouTubeLink}</a>` : "Not added yet"}</div></div></div>
+      <div class="link-row"><div class="icon">🐙</div><div class="txt"><div class="name">GitHub</div><div class="val">${MY_SUB.GitHubLink ? `<a href="${MY_SUB.GitHubLink}" target="_blank">${MY_SUB.GitHubLink}</a>` : "Not added yet"}</div></div></div>
+      <div class="link-row"><div class="icon">🗓️</div><div class="txt"><div class="name">Last updated</div><div class="val">${fmtDate(MY_SUB.SubmittedOn)}</div></div></div>
+      <div class="link-row"><div class="icon">📦</div><div class="txt"><div class="name">Hardcopy status</div><div class="val">${MY_SUB.HardcopyStatus || "Pending"}</div></div></div>
+    `;
+    document.getElementById("youtubeLink").value = MY_SUB.YouTubeLink || "";
+    document.getElementById("githubLink").value = MY_SUB.GitHubLink || "";
+  } else {
+    card.style.display = "none";
+  }
+}
+
+// drag & drop
+const dropZone = document.getElementById("dropZone");
+["dragover", "dragenter"].forEach((evt) =>
+  dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.add("drag"); })
+);
+["dragleave", "drop"].forEach((evt) =>
+  dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.remove("drag"); })
+);
+dropZone.addEventListener("drop", (e) => {
+  const file = e.dataTransfer.files[0];
+  if (file) handleFileSelect(file);
+});
+
+function handleFileSelect(file) {
+  if (!file) return;
+  if (file.type !== "application/pdf") { toast("Please upload a PDF file.", "error"); return; }
+  if (file.size > CONFIG.MAX_PDF_SIZE_MB * 1024 * 1024) { toast(`File exceeds ${CONFIG.MAX_PDF_SIZE_MB}MB limit.`, "error"); return; }
+  selectedFile = file;
+  dropZone.classList.add("has-file");
+  document.getElementById("dropText").innerHTML = `✅ ${escapeHtml(file.name)}<br/><span style="color:var(--ink-faint)">Click to replace</span>`;
+}
+
+async function handleSubmitWork() {
+  const youtubeLink = document.getElementById("youtubeLink").value.trim();
+  const githubLink = document.getElementById("githubLink").value.trim();
+
+  if (!selectedFile && !MY_SUB) { toast("Please attach your PDF report.", "error"); return; }
+  if (youtubeLink && !youtubeLink.includes("yout")) { toast("That doesn't look like a YouTube link.", "error"); return; }
+  if (githubLink && !githubLink.includes("github.com")) { toast("That doesn't look like a GitHub link.", "error"); return; }
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Uploading…';
+
+  try {
+    let fileBase64 = null, fileName = null, mimeType = null;
+    if (selectedFile) {
+      fileBase64 = await fileToBase64(selectedFile);
+      fileName = selectedFile.name;
+      mimeType = selectedFile.type;
+    }
+    const res = await api("submitReport", {
+      studentId: USER.userId, projectId: MY_REG.registration.ProjectID,
+      fileBase64, fileName, mimeType, youtubeLink, githubLink
+    });
+    toast(res.message, "success");
+    selectedFile = null;
+    await refreshAll();
+  } catch (err) {
+    toast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Submit / Update";
+  }
+}
+
+function renderMarks() {
+  const box = document.getElementById("marksBox");
+  api("getMyMarks", { studentId: USER.userId }).then((evl) => {
+    if (!evl) {
+      box.innerHTML = `<div class="empty-state"><div class="glyph">🕒</div>Not evaluated yet. Check back after your admin reviews your submission.</div>`;
+      document.getElementById("ov-marks").textContent = "Pending";
+      return;
+    }
+    const pct = Math.round((Number(evl.TotalMarks) / 25) * 100);
+    document.getElementById("ov-marks").textContent = `${evl.TotalMarks} / 25`;
+    box.innerHTML = `
+      <div class="grid cols-2">
+        <div class="card marks-hero">
+          <div class="ring" style="--pct:${pct};"><div class="ring-inner"><div class="num">${evl.TotalMarks}</div><div class="of">out of 25</div></div></div>
+          <div style="color:var(--ink-dim); font-size:0.85rem;">${evl.Remarks ? escapeHtml(evl.Remarks) : "No remarks added."}</div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:12px;">Mark breakdown</h3>
+          <table class="rubric-mini">
+            <tr><td>Submission timeliness</td><td style="text-align:right;">${evl.SubmissionMark} / 5</td></tr>
+            <tr><td>Creativity</td><td style="text-align:right;">${evl.CreativityMark} / 5</td></tr>
+            <tr><td>Aptness of discussion &amp; conclusion</td><td style="text-align:right;">${evl.AptnessMark} / 3</td></tr>
+            <tr><td>Teamwork</td><td style="text-align:right;">${evl.TeamworkMark} / 2</td></tr>
+            <tr><td>Deliverability &amp; clarity</td><td style="text-align:right;">${evl.DeliverabilityMark} / 5</td></tr>
+            <tr><td>Chart work / PPT / writeup</td><td style="text-align:right;">${evl.ChartworkMark} / 5</td></tr>
+            <tr style="font-weight:700;"><td>Total</td><td style="text-align:right;">${evl.TotalMarks} / 25</td></tr>
+          </table>
+        </div>
+      </div>
+    `;
+  });
+}
+
+document.getElementById("downloadFormatBtn").href = CONFIG.REPORT_TEMPLATE_LINK;
+
+init();
+</script>
+</body>
+</html>
