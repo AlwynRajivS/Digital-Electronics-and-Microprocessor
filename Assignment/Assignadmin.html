@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   .filters { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
   .filters input, .filters select { max-width: 220px; }
@@ -25,6 +27,70 @@
   .link-chip { font-size: 0.78rem; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; margin-right: 5px; display: inline-block; margin-bottom:4px; }
   .link-chip.ok { color: var(--ok); border-color: rgba(76,175,125,0.4); }
   .link-chip.missing { color: var(--ink-faint); }
+
+  /* ---- Submitted materials block (separate, easy-to-scan panel) ---- */
+  .submission-panel {
+    background: var(--navy-900);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+  .submission-panel .sp-title {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--ink-faint); margin-bottom: 12px; font-weight: 700;
+  }
+  .sp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .sp-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--navy-800); border: 1px solid var(--line); border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .sp-item .sp-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .sp-item .sp-body { min-width: 0; flex: 1; }
+  .sp-item .sp-label { font-size: 0.72rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.3px; }
+  .sp-item .sp-value { font-size: 0.85rem; font-weight: 600; }
+  .sp-item .sp-value a { color: var(--ok); }
+  .sp-item.missing .sp-value { color: var(--ink-faint); font-weight: 500; }
+  .sp-item.ok { border-color: rgba(76,175,125,0.35); }
+  .hardcopy-inline { display:flex; align-items:center; gap:10px; margin-top:12px; }
+  .hardcopy-inline label { margin: 0; }
+  .hardcopy-inline .field { margin: 0; flex: 1; max-width: 220px; }
+
+  .score-panel {
+    background: var(--navy-800);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .score-panel .sp-title {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--ink-faint); margin-bottom: 12px; font-weight: 700;
+  }
+
+  .report-section-head {
+    display: flex; align-items: center; gap: 10px; margin: 22px 0 10px;
+  }
+  .report-section-head h3 { font-size: 1.05rem; }
+  .report-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+
+  /* ---------- Mobile responsiveness ---------- */
+  @media (max-width: 860px) {
+    .sp-grid { grid-template-columns: 1fr; }
+    .eval-grid { grid-template-columns: repeat(2, 1fr); }
+    .rubric-editor-row { grid-template-columns: 1fr; gap: 6px; }
+    .rubric-editor-row .lbl { margin-top: 4px; }
+    .shell { padding-bottom: 64px; }
+    .main { padding-bottom: 90px; }
+    .grid.cols-2.eval-layout { grid-template-columns: 1fr; }
+    .report-actions { flex-direction: column; }
+    .report-actions .btn { width: 100%; }
+  }
+  @media (max-width: 480px) {
+    .eval-grid { grid-template-columns: 1fr; }
+    .hardcopy-inline { flex-direction: column; align-items: stretch; }
+    .hardcopy-inline .field { max-width: none; }
+  }
 </style>
 </head>
 <body>
@@ -115,7 +181,7 @@
           <option value="">All statuses</option><option value="pending">Not evaluated</option><option value="done">Evaluated</option>
         </select>
       </div>
-      <div class="grid cols-2">
+      <div class="grid cols-2 eval-layout">
         <div class="card">
           <h3 style="margin-bottom:10px;">Students</h3>
           <div id="evalList" style="max-height:560px; overflow-y:auto;"></div>
@@ -139,13 +205,27 @@
     <section class="view" id="view-reports">
       <div class="page-head"><div class="eyebrow">Export</div><h2>Consolidated report</h2></div>
       <div class="card" style="margin-bottom:18px;">
-        <p style="color:var(--ink-dim); font-size:0.9rem; margin-bottom:14px;">Download a CSV containing every student's project, submission links, hardcopy status and marks — ready to paste into a spreadsheet or print.</p>
-        <button class="btn btn-primary" onclick="exportCsv()">⬇️ Download marks report (CSV)</button>
+        <p style="color:var(--ink-dim); font-size:0.9rem; margin-bottom:14px;">Reports are sorted by register number (roll no.) within each section, and include the full rubric-wise mark breakdown — not just the total.</p>
+        <div class="report-actions">
+          <button class="btn btn-primary" onclick="exportPdf()">⬇️ Download marks report (PDF)</button>
+          <button class="btn btn-primary" onclick="exportLinksPdf()">⬇️ Download submission links (PDF)</button>
+          <button class="btn btn-ghost" onclick="exportCsv()">⬇️ Download raw data (CSV)</button>
+        </div>
       </div>
+
+      <div class="report-section-head"><span class="section-badge A">A</span><h3>Section A</h3></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Student</th><th>Sec</th><th>Project</th><th>Total</th></tr></thead>
-          <tbody id="reportsTableBody"></tbody>
+          <thead><tr><th>Roll No.</th><th>Student</th><th>Project</th><th id="rubricHeadA"></th><th>Total</th></tr></thead>
+          <tbody id="reportsTableBodyA"></tbody>
+        </table>
+      </div>
+
+      <div class="report-section-head"><span class="section-badge B">B</span><h3>Section B</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Roll No.</th><th>Student</th><th>Project</th><th id="rubricHeadB"></th><th>Total</th></tr></thead>
+          <tbody id="reportsTableBodyB"></tbody>
         </table>
       </div>
     </section>
@@ -179,6 +259,16 @@
     <div class="field"><label>CO Mapping</label><input id="np_co" /></div>
     <button class="btn btn-primary btn-block" onclick="submitNewProject()">Add project</button>
   </div>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mobile-nav" id="mobileNav">
+  <div class="m-item active" data-view="overview" onclick="showView('overview')"><span>🏠</span>Home</div>
+  <div class="m-item" data-view="projects" onclick="showView('projects')"><span>📚</span>Projects</div>
+  <div class="m-item" data-view="registrations" onclick="showView('registrations')"><span>🧾</span>Regs</div>
+  <div class="m-item" data-view="evaluate" onclick="showView('evaluate')"><span>🧮</span>Evaluate</div>
+  <div class="m-item" data-view="rubrics" onclick="showView('rubrics')"><span>⚖️</span>Rubrics</div>
+  <div class="m-item" data-view="reports" onclick="showView('reports')"><span>📊</span>Reports</div>
 </div>
 
 <div id="toast-stack"></div>
@@ -235,6 +325,7 @@ function showView(view) {
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
   document.getElementById("view-" + view).classList.add("active");
   document.querySelectorAll(".nav-item").forEach((n) => n.classList.toggle("active", n.dataset.view === view));
+  document.querySelectorAll(".mobile-nav .m-item").forEach((n) => n.classList.toggle("active", n.dataset.view === view));
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -334,12 +425,12 @@ function renderRegistrations() {
   const sectionFilter = document.getElementById("regSectionFilter").value;
   const tbody = document.getElementById("regTableBody");
 
-  const list = EVAL_BOARD.filter((r) => {
+  const list = sortByRollNo(EVAL_BOARD.filter((r) => {
     const hay = `${r.studentName} ${r.projectTitle}`.toLowerCase();
     const matchesSearch = hay.includes(search);
     const matchesSection = !sectionFilter || r.section === sectionFilter;
     return matchesSearch && matchesSection;
-  });
+  }));
 
   if (list.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--ink-faint);">No registrations found.</td></tr>`;
@@ -348,7 +439,7 @@ function renderRegistrations() {
 
   tbody.innerHTML = list.map((r) => `
     <tr>
-      <td>${escapeHtml(r.studentName)}<div style="color:var(--ink-faint); font-size:0.75rem;">${escapeHtml(r.studentId)}</div></td>
+      <td>${escapeHtml(r.studentName)}<div style="color:var(--ink-faint); font-size:0.75rem;">${escapeHtml(r.registerNumber || r.studentId)}</div></td>
       <td><span class="section-badge ${r.section}">${escapeHtml(r.section)}</span></td>
       <td>${escapeHtml(r.projectTitle)}</td>
       <td>${r.submission && r.submission.ReportDriveLink ? `<a href="${r.submission.ReportDriveLink}" target="_blank">View</a>` : "—"}</td>
@@ -366,13 +457,13 @@ function renderEvalList() {
   const statusFilter = document.getElementById("evalStatusFilter").value;
   const list = document.getElementById("evalList");
 
-  const filtered = EVAL_BOARD.filter((r) => {
+  const filtered = sortByRollNo(EVAL_BOARD.filter((r) => {
     const hay = `${r.studentName} ${r.projectTitle}`.toLowerCase();
     const matchesSearch = hay.includes(search);
     const matchesSection = !sectionFilter || r.section === sectionFilter;
     const matchesStatus = !statusFilter || (statusFilter === "done" ? !!r.evaluation : !r.evaluation);
     return matchesSearch && matchesSection && matchesStatus;
-  });
+  }));
 
   if (filtered.length === 0) {
     list.innerHTML = `<div class="empty-state"><div class="glyph">🧮</div>No students match this filter.</div>`;
@@ -384,11 +475,44 @@ function renderEvalList() {
       <div class="icon">${r.evaluation ? "✅" : "🕒"}</div>
       <div class="txt">
         <div class="name">${escapeHtml(r.studentName)} <span class="section-badge ${r.section}" style="margin-left:4px;">${r.section}</span></div>
-        <div class="val">${escapeHtml(r.projectTitle)}</div>
+        <div class="val">${r.registerNumber ? escapeHtml(r.registerNumber) + " · " : ""}${escapeHtml(r.projectTitle)}</div>
       </div>
       <div style="font-size:0.78rem; color:var(--ink-faint);">${r.evaluation ? r.evaluation.TotalMarks + "/25" : "—"}</div>
     </div>
   `).join("");
+}
+
+// Builds the "Submitted Materials" block — kept visually separate from the
+// scoring form below it so the evaluator can check everything that was
+// submitted first, then move on to scoring.
+function renderSubmissionPanel(sub) {
+  sub = sub || {};
+  const item = (icon, label, value, url) => `
+    <div class="sp-item ${value ? 'ok' : 'missing'}">
+      <div class="sp-icon">${icon}</div>
+      <div class="sp-body">
+        <div class="sp-label">${label}</div>
+        <div class="sp-value">${value ? `<a href="${url}" target="_blank" rel="noopener">Open ↗</a>` : "Not submitted"}</div>
+      </div>
+    </div>`;
+  return `
+    <div class="submission-panel">
+      <div class="sp-title">Submitted materials</div>
+      <div class="sp-grid">
+        ${item("📄", "Project report (PDF)", sub.ReportDriveLink, sub.ReportDriveLink)}
+        ${item("🎥", "YouTube demo", sub.YouTubeLink, sub.YouTubeLink)}
+        ${item("🐙", "GitHub repository", sub.GitHubLink, sub.GitHubLink)}
+      </div>
+      <div class="hardcopy-inline">
+        <label style="margin:0; white-space:nowrap;">Hardcopy status</label>
+        <div class="field">
+          <select id="ev_hardcopy">
+            <option value="Pending" ${(!sub.HardcopyStatus || sub.HardcopyStatus === "Pending") ? "selected":""}>Pending</option>
+            <option value="Received" ${sub.HardcopyStatus === "Received" ? "selected":""}>Received</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
 }
 
 function openEvalPanel(studentId) {
@@ -399,39 +523,30 @@ function openEvalPanel(studentId) {
   document.getElementById("evalPanel").classList.add("open");
   document.getElementById("evalPanelBody").innerHTML = `
     <h3 style="margin-bottom:4px;">${escapeHtml(r.studentName)} <span class="section-badge ${r.section}">${r.section}</span></h3>
-    <div style="color:var(--ink-faint); font-size:0.85rem; margin-bottom:14px;">${escapeHtml(r.projectTitle)}</div>
+    <div style="color:var(--ink-faint); font-size:0.85rem; margin-bottom:14px;">${escapeHtml(r.projectTitle)}${r.registerNumber ? ` · Roll No. ${escapeHtml(r.registerNumber)}` : ""}</div>
 
-    <div style="margin-bottom:16px;">
-      <span class="link-chip ${sub.ReportDriveLink ? 'ok' : 'missing'}">${sub.ReportDriveLink ? `<a href="${sub.ReportDriveLink}" target="_blank" style="color:inherit;">📄 Report ✓</a>` : "📄 Report missing"}</span>
-      <span class="link-chip ${sub.YouTubeLink ? 'ok' : 'missing'}">${sub.YouTubeLink ? `<a href="${sub.YouTubeLink}" target="_blank" style="color:inherit;">🎥 YouTube ✓</a>` : "🎥 YouTube missing"}</span>
-      <span class="link-chip ${sub.GitHubLink ? 'ok' : 'missing'}">${sub.GitHubLink ? `<a href="${sub.GitHubLink}" target="_blank" style="color:inherit;">🐙 GitHub ✓</a>` : "🐙 GitHub missing"}</span>
+    ${renderSubmissionPanel(sub)}
+
+    <div class="score-panel">
+      <div class="sp-title">Rubric scoring</div>
+      <div class="eval-grid">
+        <div class="field"><label>Submission timeliness (0-5)</label><input type="number" min="0" max="5" id="ev_submission" value="${evl.SubmissionMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+        <div class="field"><label>Creativity (0-5)</label><input type="number" min="0" max="5" id="ev_creativity" value="${evl.CreativityMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+        <div class="field"><label>Aptness of discussion (0-3)</label><input type="number" min="0" max="3" id="ev_aptness" value="${evl.AptnessMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+        <div class="field"><label>Teamwork (0-2)</label><input type="number" min="0" max="2" id="ev_teamwork" value="${evl.TeamworkMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+        <div class="field"><label>Deliverability &amp; clarity (0-5)</label><input type="number" min="0" max="5" id="ev_deliverability" value="${evl.DeliverabilityMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+        <div class="field"><label>Chart work/PPT/writeup (0-5)</label><input type="number" min="0" max="5" id="ev_chartwork" value="${evl.ChartworkMark ?? ''}" oninput="recalcEvalTotal()" /></div>
+      </div>
+
+      <div class="field"><label>Remarks (visible to student)</label><textarea id="ev_remarks" rows="2">${escapeHtml(evl.Remarks || "")}</textarea></div>
+
+      <div class="eval-total-bar">
+        <span>Total</span>
+        <span class="num" id="evalTotalDisplay">${evl.TotalMarks ?? 0} / 25</span>
+      </div>
+
+      <button class="btn btn-primary btn-block" onclick="saveEvalForStudent()">Save evaluation</button>
     </div>
-
-    <div class="field">
-      <label>Hardcopy status</label>
-      <select id="ev_hardcopy">
-        <option value="Pending" ${evl.HardcopyStatus === "Pending" || !sub.HardcopyStatus ? "selected":""}>Pending</option>
-        <option value="Received" ${sub.HardcopyStatus === "Received" ? "selected":""}>Received</option>
-      </select>
-    </div>
-
-    <div class="eval-grid">
-      <div class="field"><label>Submission timeliness (0-5)</label><input type="number" min="0" max="5" id="ev_submission" value="${evl.SubmissionMark ?? ''}" oninput="recalcEvalTotal()" /></div>
-      <div class="field"><label>Creativity (0-5)</label><input type="number" min="0" max="5" id="ev_creativity" value="${evl.CreativityMark ?? ''}" oninput="recalcEvalTotal()" /></div>
-      <div class="field"><label>Aptness of discussion (0-3)</label><input type="number" min="0" max="3" id="ev_aptness" value="${evl.AptnessMark ?? ''}" oninput="recalcEvalTotal()" /></div>
-      <div class="field"><label>Teamwork (0-2)</label><input type="number" min="0" max="2" id="ev_teamwork" value="${evl.TeamworkMark ?? ''}" oninput="recalcEvalTotal()" /></div>
-      <div class="field"><label>Deliverability &amp; clarity (0-5)</label><input type="number" min="0" max="5" id="ev_deliverability" value="${evl.DeliverabilityMark ?? ''}" oninput="recalcEvalTotal()" /></div>
-      <div class="field"><label>Chart work/PPT/writeup (0-5)</label><input type="number" min="0" max="5" id="ev_chartwork" value="${evl.ChartworkMark ?? ''}" oninput="recalcEvalTotal()" /></div>
-    </div>
-
-    <div class="field"><label>Remarks (visible to student)</label><textarea id="ev_remarks" rows="2">${escapeHtml(evl.Remarks || "")}</textarea></div>
-
-    <div class="eval-total-bar">
-      <span>Total</span>
-      <span class="num" id="evalTotalDisplay">${evl.TotalMarks ?? 0} / 25</span>
-    </div>
-
-    <button class="btn btn-primary btn-block" onclick="saveEvalForStudent()">Save evaluation</button>
   `;
 }
 
@@ -485,24 +600,61 @@ async function saveRubrics() {
   await refreshAll();
 }
 
+// ---------- Reports: sorted by roll no., split by section, full rubric marks ----------
+
+// Sorts by register number (roll no.) — numeric-aware, so "9" sorts before "10".
+function sortByRollNo(list) {
+  return [...list].sort((a, b) =>
+    String(a.registerNumber || "").localeCompare(String(b.registerNumber || ""), undefined, { numeric: true, sensitivity: "base" })
+  );
+}
+
+const RUBRIC_FIELDS = [
+  { key: "SubmissionMark", label: "Submission" },
+  { key: "CreativityMark", label: "Creativity" },
+  { key: "AptnessMark", label: "Aptness" },
+  { key: "TeamworkMark", label: "Teamwork" },
+  { key: "DeliverabilityMark", label: "Deliverability" },
+  { key: "ChartworkMark", label: "Chart/PPT" }
+];
+
 function renderReports() {
-  const tbody = document.getElementById("reportsTableBody");
   const evaluated = EVAL_BOARD.filter((r) => r.evaluation);
-  if (evaluated.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--ink-faint);">No evaluations yet.</td></tr>`;
-    return;
+  const rubricHeadCells = RUBRIC_FIELDS.map((f) => `<span style="display:inline-block;min-width:64px;">${f.label}</span>`).join("");
+  document.getElementById("rubricHeadA").innerHTML = rubricHeadCells;
+  document.getElementById("rubricHeadB").innerHTML = rubricHeadCells;
+
+  function renderSectionRows(section, tbodyId) {
+    const rows = sortByRollNo(evaluated.filter((r) => String(r.section).toUpperCase() === section));
+    const tbody = document.getElementById(tbodyId);
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--ink-faint);">No evaluations yet for Section ${section}.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((r) => {
+      const marks = RUBRIC_FIELDS.map((f) => `<span style="display:inline-block;min-width:64px;">${r.evaluation[f.key] ?? "-"}</span>`).join("");
+      return `<tr>
+        <td>${escapeHtml(r.registerNumber || "—")}</td>
+        <td>${escapeHtml(r.studentName)}</td>
+        <td>${escapeHtml(r.projectTitle)}</td>
+        <td>${marks}</td>
+        <td><b>${r.evaluation.TotalMarks}</b>/25</td>
+      </tr>`;
+    }).join("");
   }
-  tbody.innerHTML = evaluated.map((r) => `
-    <tr><td>${escapeHtml(r.studentName)}</td><td>${escapeHtml(r.section)}</td><td>${escapeHtml(r.projectTitle)}</td><td>${r.evaluation.TotalMarks}/25</td></tr>
-  `).join("");
+
+  renderSectionRows("A", "reportsTableBodyA");
+  renderSectionRows("B", "reportsTableBodyB");
 }
 
 function exportCsv() {
-  const headers = ["StudentID","StudentName","Section","ProjectID","ProjectTitle","ReportLink","YouTubeLink","GitHubLink","HardcopyStatus","TotalMarks","Remarks"];
-  const rows = EVAL_BOARD.map((r) => [
-    r.studentId, r.studentName, r.section, r.projectId, r.projectTitle,
+  const headers = ["RollNo","StudentID","StudentName","Section","ProjectID","ProjectTitle","ReportLink","YouTubeLink","GitHubLink","HardcopyStatus",
+    ...RUBRIC_FIELDS.map(f => f.label), "TotalMarks","Remarks"];
+  const rows = sortByRollNo(EVAL_BOARD).map((r) => [
+    r.registerNumber || "", r.studentId, r.studentName, r.section, r.projectId, r.projectTitle,
     r.submission ? r.submission.ReportDriveLink : "", r.submission ? r.submission.YouTubeLink : "",
     r.submission ? r.submission.GitHubLink : "", r.submission ? r.submission.HardcopyStatus : "",
+    ...RUBRIC_FIELDS.map(f => r.evaluation ? (r.evaluation[f.key] ?? "") : ""),
     r.evaluation ? r.evaluation.TotalMarks : "", r.evaluation ? r.evaluation.Remarks : ""
   ]);
   const csv = [headers, ...rows].map((row) =>
@@ -513,6 +665,157 @@ function exportCsv() {
   const a = document.createElement("a");
   a.href = url; a.download = "project_marks_report.csv"; a.click();
   URL.revokeObjectURL(url);
+}
+
+// Generates a PDF report: one table per section (A, then B), rows sorted by
+// roll no., with every rubric column plus the total — for printing/filing.
+function exportPdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+  const evaluated = EVAL_BOARD.filter((r) => r.evaluation);
+  const columns = ["Roll No.", "Student", "Project", ...RUBRIC_FIELDS.map(f => f.label), "Total"];
+
+  doc.setFontSize(16);
+  doc.text("Project Portal — Consolidated Evaluation Report", 40, 40);
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text(`Generated ${new Date().toLocaleString()}`, 40, 56);
+
+  let cursorY = 75;
+
+  ["A", "B"].forEach((section) => {
+    const rows = sortByRollNo(evaluated.filter((r) => String(r.section).toUpperCase() === section))
+      .map((r) => [
+        r.registerNumber || "—", r.studentName, r.projectTitle,
+        ...RUBRIC_FIELDS.map(f => r.evaluation[f.key] ?? "-"),
+        r.evaluation.TotalMarks + "/25"
+      ]);
+
+    doc.setFontSize(12);
+    doc.setTextColor(20);
+    doc.text(`Section ${section}`, 40, cursorY);
+
+    doc.autoTable({
+      head: [columns],
+      body: rows.length ? rows : [["—", "No evaluations yet", "", "", "", "", "", "", "", ""]],
+      startY: cursorY + 8,
+      margin: { left: 40, right: 40 },
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [15, 29, 48], textColor: 255 },
+      theme: "grid"
+    });
+
+    cursorY = doc.lastAutoTable.finalY + 30;
+    if (cursorY > 480) { doc.addPage(); cursorY = 40; }
+  });
+
+  doc.save("project_evaluation_report.pdf");
+}
+
+// Generates a clean, section-wise PDF listing Roll No., Student Name, Project
+// Title, YouTube link and GitHub link — sorted by roll no. within each
+// section. Link cells are clickable (they open the actual submitted URL),
+// not just printed text.
+function exportLinksPdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const columns = ["Roll No.", "Student Name", "Project Title", "YouTube Link", "GitHub Link"];
+
+  const headerDrawnOnPage = new Set();
+  function drawHeader() {
+    const pageNo = doc.internal.getNumberOfPages();
+    if (headerDrawnOnPage.has(pageNo)) return; // avoid redrawing on the same page
+    headerDrawnOnPage.add(pageNo);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(15, 29, 48);
+    doc.text("Project Portal — Submission Links Report", 40, 42);
+    doc.setDrawColor(212, 175, 55);
+    doc.setLineWidth(1.4);
+    doc.line(40, 50, pageW - 40, 50);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Generated ${new Date().toLocaleString()}`, 40, 64);
+  }
+
+  drawHeader();
+  let cursorY = 84;
+
+  ["A", "B"].forEach((section) => {
+    const rows = sortByRollNo(EVAL_BOARD.filter((r) => String(r.section).toUpperCase() === section));
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(20);
+    doc.text(`Section ${section}`, 40, cursorY);
+
+    const body = rows.length
+      ? rows.map((r) => [
+          r.registerNumber || "—",
+          r.studentName,
+          r.projectTitle,
+          (r.submission && r.submission.YouTubeLink) || "Not submitted",
+          (r.submission && r.submission.GitHubLink) || "Not submitted"
+        ])
+      : [["—", "No registrations yet", "", "", ""]];
+
+    doc.autoTable({
+      head: [columns],
+      body,
+      startY: cursorY + 8,
+      margin: { left: 40, right: 40 },
+      styles: { fontSize: 8.5, cellPadding: 5, overflow: "linebreak", valign: "middle" },
+      columnStyles: {
+        0: { cellWidth: 55 },
+        1: { cellWidth: 115 },
+        2: { cellWidth: 185 },
+        3: { cellWidth: 210 },
+        4: { cellWidth: 210 }
+      },
+      headStyles: { fillColor: [15, 29, 48], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [246, 246, 244] },
+      theme: "grid",
+      didParseCell: (data) => {
+        // Style link cells: blue + underline when a real link is present, muted grey when missing.
+        if (data.section === "body" && (data.column.index === 3 || data.column.index === 4)) {
+          if (data.cell.raw === "Not submitted") {
+            data.cell.styles.textColor = [160, 160, 160];
+            data.cell.styles.fontStyle = "italic";
+          } else {
+            data.cell.styles.textColor = [30, 100, 190];
+          }
+        }
+      },
+      didDrawCell: (data) => {
+        // Overlay an actual clickable link on top of the YouTube/GitHub cells.
+        if (data.section === "body" && (data.column.index === 3 || data.column.index === 4)) {
+          const r = rows[data.row.index];
+          const url = data.column.index === 3
+            ? (r && r.submission && r.submission.YouTubeLink)
+            : (r && r.submission && r.submission.GitHubLink);
+          if (url) doc.link(data.cell.x, data.cell.y, data.cell.width, data.cell.height, { url });
+        }
+      },
+      didDrawPage: () => { drawHeader(); }
+    });
+
+    cursorY = doc.lastAutoTable.finalY + 26;
+    if (cursorY > pageH - 100) { doc.addPage(); cursorY = 84; }
+  });
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(140);
+    doc.text(`Page ${i} of ${pageCount}`, pageW - 90, pageH - 20);
+  }
+
+  doc.save("project_submission_links_report.pdf");
 }
 
 init();
