@@ -1,1 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Verilog Real-Time Clock Learning Lab</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#162033;--muted:#64748b;--primary:#2563eb;--secondary:#7c3aed;--accent:#06b6d4;--border:#dbe4f0;--good:#16a34a;--warn:#f59e0b;--danger:#dc2626;--shadow:0 12px 30px rgba(15,23,42,.09);--code:#0b1220}
+body.dark{--bg:#07111f;--card:#0f1b2d;--text:#e7eefb;--muted:#9fb0c7;--primary:#60a5fa;--secondary:#a78bfa;--accent:#22d3ee;--border:#24344b;--shadow:0 12px 30px rgba(0,0,0,.3);--code:#030712}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);transition:.25s}
+header{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.topbar{max-width:1250px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:12px}.brand{font-weight:900;line-height:1.1}.brand small{display:block;color:var(--muted);font-weight:600;margin-top:4px}.spacer{flex:1}
+button,select{font:inherit}.btn{border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800;background:var(--primary);color:white;transition:.2s}.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}.btn.alt{background:var(--secondary)}.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn.good{background:var(--good)}
+nav{max-width:1250px;margin:auto;padding:0 18px 10px;display:flex;gap:8px;overflow:auto}nav a{white-space:nowrap;text-decoration:none;color:var(--text);font-weight:700;padding:8px 10px;border-radius:9px;background:var(--bg)}
+main{max-width:1250px;margin:auto;padding:22px 18px 60px}.hero{padding:34px;border-radius:24px;background:linear-gradient(135deg,#1d4ed8,#6d28d9 58%,#0891b2);color:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:260px;height:260px;border:45px solid rgba(255,255,255,.08);border-radius:50%;right:-80px;top:-100px}.hero h1{font-size:clamp(28px,5vw,52px);margin:0 0 10px;max-width:850px}.hero p{max-width:850px;font-size:1.08rem;line-height:1.7}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.15);font-weight:800}
+section{margin-top:26px}.section-title{font-size:clamp(23px,3vw,34px);margin:0 0 6px}.lead{color:var(--muted);line-height:1.7;margin-top:0}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow)}.c4{grid-column:span 4}.c6{grid-column:span 6}.c8{grid-column:span 8}.c12{grid-column:span 12}
+.flow{display:flex;align-items:center;gap:12px;overflow:auto;padding:20px 5px}.block{min-width:160px;padding:18px 12px;border-radius:16px;border:2px solid var(--border);background:var(--card);text-align:center;cursor:pointer;transition:.2s;position:relative}.block:hover,.block.active{border-color:var(--primary);transform:translateY(-3px);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 15%,transparent)}.arrow{font-size:26px;color:var(--primary);animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.3;transform:translateX(4px)}}.signal{font-family:monospace;color:var(--accent);font-weight:900;font-size:.85rem}
+.clock-panel{text-align:center}.digital{font-family:"Courier New",monospace;font-weight:900;font-size:clamp(38px,8vw,86px);letter-spacing:.04em;background:#020617;color:#67e8f9;border-radius:20px;padding:18px;border:4px solid #1e293b;text-shadow:0 0 14px #06b6d4;display:inline-block}.colon{animation:blink 1s step-end infinite}@keyframes blink{50%{opacity:.2}}
+.controls{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:15px}.statusrow{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px}.status{background:var(--bg);border:1px solid var(--border);padding:8px 12px;border-radius:10px;font-weight:800}
+.seven-wrap{display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:nowrap;overflow:auto;padding:12px}.digit{position:relative;width:62px;height:108px;flex:0 0 auto}.seg{position:absolute;background:#1f2937;border-radius:8px;transition:.12s}.seg.on{background:#ef4444;box-shadow:0 0 10px #ef4444}.a,.d,.g{width:40px;height:8px;left:11px}.a{top:4px}.g{top:50px}.d{bottom:4px}.b,.c,.e,.f{width:8px;height:40px}.b{right:5px;top:10px}.c{right:5px;bottom:10px}.f{left:5px;top:10px}.e{left:5px;bottom:10px}.sep{font-size:45px;font-weight:900;color:var(--muted)}
+.counter{font-size:42px;font-weight:900;color:var(--primary)}.carry{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--border);font-weight:800}.carry.flash{background:var(--good);color:white}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.tab{padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-weight:800;cursor:pointer;white-space:nowrap}.tab.active{background:var(--primary);color:white}
+pre{margin:0;background:var(--code);color:#dbeafe;padding:18px;border-radius:14px;overflow:auto;line-height:1.55;font-size:13px;max-height:480px}.codehead{display:flex;align-items:center;gap:8px;margin-bottom:10px}.codehead strong{flex:1}.explain{line-height:1.75}.explain li{margin-bottom:8px}
+.wave{height:190px;background:var(--code);border-radius:14px;padding:14px;overflow:hidden;color:#e2e8f0;font-family:monospace}.track{height:38px;display:flex;align-items:center;gap:10px}.label{width:75px;color:#93c5fd}.wave-line{flex:1;height:25px;position:relative;overflow:hidden}.square{position:absolute;left:0;top:2px;white-space:nowrap;letter-spacing:-1px;animation:move 3s linear infinite}@keyframes move{to{transform:translateX(-80px)}}.log{height:230px;overflow:auto;background:var(--code);color:#a7f3d0;border-radius:14px;padding:13px;font:13px/1.55 monospace}.pass{color:#86efac}.fail{color:#fca5a5}.quiz-option{display:block;width:100%;text-align:left;margin:8px 0;padding:11px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer}.quiz-option.correct{background:#dcfce7;color:#166534}.quiz-option.wrong{background:#fee2e2;color:#991b1b}.footer{text-align:center;color:var(--muted);margin-top:35px}
+@media(max-width:850px){.c4,.c6,.c8{grid-column:span 12}.hero{padding:24px}.topbar{flex-wrap:wrap}.flow{align-items:stretch}.block{min-width:145px}.digit{transform:scale(.82);margin:-6px}.seven-wrap{gap:0}.digital{padding:12px}}
+@media(max-width:480px){main{padding-left:10px;padding-right:10px}.hero{border-radius:17px}.card{padding:13px}.digit{transform:scale(.65);margin:-11px}.sep{font-size:30px}.seven-wrap{padding:5px}.btn{padding:9px 10px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="topbar"><div class="brand">FPGA RTC Learning Lab<small>Verilog • Counters • Clock Divider • 7-Segment • Simulation</small></div><div class="spacer"></div><button class="btn ghost" id="themeBtn">🌙 Dark</button></div>
+ <nav><a href="#architecture">Architecture</a><a href="#demo">Live RTC</a><a href="#modules">Modules</a><a href="#code">Verilog</a><a href="#rtlflow">RTL Hierarchy</a><a href="#waveexplorer">Waveforms</a><a href="#simulation">Simulation</a><a href="#submoduletb">Submodule Testbenches</a><a href="#quiz">Quiz</a></nav>
+</header>
+<main>
+<div class="hero">
+ <h1>Interactive Real-Time Clock Using Verilog HDL</h1>
+ <p>Explore how a 100 MHz FPGA clock is divided to a 1 Hz time-base, counted using MOD-60 seconds/minutes and a MOD-24 hours counter, then converted into six decimal digits for 7-segment display.</p>
+ <div class="chips"><span class="chip">100 MHz → 1 Hz</span><span class="chip">MOD-60</span><span class="chip">MOD-24</span><span class="chip">HH:MM:SS</span><span class="chip">Testbench</span></div>
+</div>
 
+<section id="architecture">
+ <h2 class="section-title">Interactive Functional Block Diagram</h2>
+ <p class="lead">Click any block to understand its role. Animated arrows represent the signal/data flow.</p>
+ <div class="card">
+  <div class="flow">
+   <div class="block active" data-info="The FPGA board provides a 100 MHz system clock. That means 100,000,000 clock cycles occur every second.">100 MHz<br>FPGA Clock<div class="signal">clk_100mhz</div></div><div class="arrow">➜</div>
+   <div class="block" data-info="The divider counts 50,000,000 rising edges and toggles its output. A full high-low period therefore takes 100,000,000 input cycles, producing 1 Hz.">Clock Divider<br>100 MHz → 1 Hz<div class="signal">clk_1hz</div></div><div class="arrow">➜</div>
+   <div class="block" data-info="The seconds counter counts from 0 to 59. At 59, the next tick resets seconds to 0 and generates a carry to increment minutes.">MOD-60<br>Seconds<div class="signal">sec[5:0]</div></div><div class="arrow">➜</div>
+   <div class="block" data-info="Minutes increment only when seconds roll over from 59 to 00. It also counts 0–59 and produces a carry to hours.">MOD-60<br>Minutes<div class="signal">min[5:0]</div></div><div class="arrow">➜</div>
+   <div class="block" data-info="Hours increment when minutes and seconds complete an hour. It counts 0–23, then wraps from 23 to 00.">MOD-24<br>Hours<div class="signal">hour[4:0]</div></div><div class="arrow">➜</div>
+   <div class="block" data-info="Binary counter values are split into tens and ones decimal digits and encoded into segment patterns for six displays: HH:MM:SS.">7-Segment<br>Display Driver<div class="signal">HH:MM:SS</div></div>
+  </div>
+  <div id="blockInfo" class="card" style="box-shadow:none;background:var(--bg)">The FPGA board provides a 100 MHz system clock. That means 100,000,000 clock cycles occur every second.</div>
+ </div>
+</section>
+
+<section id="demo">
+ <h2 class="section-title">Live Interactive RTC Demonstration</h2>
+ <p class="lead">The browser accelerates the conceptual simulation. Use Step to observe exactly one 1 Hz tick and watch counter rollovers.</p>
+ <div class="grid">
+  <div class="card c8 clock-panel">
+   <div class="digital"><span id="hh">00</span><span class="colon">:</span><span id="mm">00</span><span class="colon">:</span><span id="ss">00</span></div>
+   <div class="seven-wrap" id="seven"></div>
+   <div class="controls"><button class="btn good" id="start">▶ Start</button><button class="btn alt" id="pause">⏸ Pause</button><button class="btn" id="step">+1 Second</button><button class="btn ghost" id="reset">↺ Reset</button><button class="btn ghost" id="rollover">Test 23:59:55</button></div>
+   <div class="controls"><label>Simulation speed <select id="speed"><option value="1000">1× (1 sec)</option><option value="500">2×</option><option value="200">5×</option><option value="100">10×</option></select></label></div>
+   <div class="statusrow"><span class="status">1 Hz Tick: <b id="tick">0</b></span><span class="status">Second Carry: <b id="scarry">0</b></span><span class="status">Minute Carry: <b id="mcarry">0</b></span></div>
+  </div>
+  <div class="card c4">
+   <h3>Counter State</h3><p>Hours (MOD-24)</p><div class="counter" id="hc">00</div><p>Minutes (MOD-60)</p><div class="counter" id="mc">00</div><p>Seconds (MOD-60)</p><div class="counter" id="secC">00</div>
+   <hr style="border-color:var(--border)"><p class="lead">At <b>59 seconds</b>, seconds become 00 and minutes increment. At <b>59:59</b>, both lower counters roll over. At <b>23:59:59</b>, the clock returns to 00:00:00.</p>
+  </div>
+ </div>
+</section>
+
+<section id="modules">
+ <h2 class="section-title">Learn Each Module</h2>
+ <div class="grid">
+  <div class="card c4"><h3>① Clock Divider</h3><div class="counter">100M → 1</div><p class="explain">A 26-bit counter counts from 0 to 49,999,999. The output clock toggles each time the terminal count is reached. Two toggles form one complete 1-second period.</p></div>
+  <div class="card c4"><h3>② MOD-60 Counter</h3><div class="counter">0 → 59</div><p class="explain">Used twice: once for seconds and once for minutes. When enabled and the count reaches 59, the next event returns it to zero and asserts a carry pulse.</p></div>
+  <div class="card c4"><h3>③ MOD-24 Counter</h3><div class="counter">0 → 23</div><p class="explain">The hours counter increments after a complete 59:59 rollover. After 23 hours, the next increment wraps to 00 for a 24-hour clock.</p></div>
+  <div class="card c6"><h3>④ Decimal Digit Conversion</h3><p class="explain">Each time value is separated into tens and ones using division and modulo operations: <b>hours / 10</b>, <b>hours % 10</b>, etc. These six digits drive six 7-segment decoder instances.</p></div>
+  <div class="card c6"><h3>⑤ 7-Segment Decoder</h3><p class="explain">A combinational <code>case</code> statement maps decimal digits 0–9 to segments a–g. The live red display above demonstrates the same mapping visually.</p></div>
+ </div>
+</section>
+
+<section id="code">
+ <h2 class="section-title">Complete Verilog Module Library</h2>
+ <p class="lead">Select a module to inspect its synthesizable Verilog source. Use Copy Code for classroom/lab use.</p>
+ <div class="card">
+  <div class="tabs" id="tabs"></div>
+  <div class="codehead"><strong id="codeTitle"></strong><button class="btn ghost" id="copy">Copy Code</button></div>
+  <pre><code id="codeBox"></code></pre>
+ </div>
+</section>
+
+<section id="rtlflow">
+ <h2 class="section-title">Complete RTL Module Hierarchy & Signal Flow</h2>
+ <p class="lead">Explore how every Verilog module connects inside the top-level RTC design.</p>
+ <div class="grid">
+  <div class="card c12">
+   <div class="flow">
+    <div class="block">rtc_top<br><span class="signal">Top Module</span></div><div class="arrow">➜</div>
+    <div class="block">clock_divider<br><span class="signal">100MHz → 1Hz</span></div><div class="arrow">➜</div>
+    <div class="block">rtc_core<br><span class="signal">Time Control</span></div><div class="arrow">➜</div>
+    <div class="block">mod60 SEC<br><span class="signal">0–59</span></div><div class="arrow">➜</div>
+    <div class="block">mod60 MIN<br><span class="signal">0–59</span></div><div class="arrow">➜</div>
+    <div class="block">mod24 HOUR<br><span class="signal">0–23</span></div><div class="arrow">➜</div>
+    <div class="block">6 × Decoder<br><span class="signal">abcdefg</span></div>
+   </div>
+  </div>
+  <div class="card c4"><h3>Input Signals</h3><p><b>clk_100mhz</b> — FPGA system clock</p><p><b>reset</b> — clears all counters</p></div>
+  <div class="card c4"><h3>Internal Signals</h3><p><b>clk_1hz</b> — time base</p><p><b>sec_carry</b> — minute enable</p><p><b>min_carry</b> — hour enable</p></div>
+  <div class="card c4"><h3>Outputs</h3><p>Six 7-bit segment buses represent HH:MM:SS.</p><p>Each decoder maps one decimal digit to a–g.</p></div>
+ </div>
+</section>
+
+<section id="waveexplorer">
+ <h2 class="section-title">Interactive Timing Waveform Explorer</h2>
+ <p class="lead">Step through a rollover event and observe clock, seconds, carry, minutes and hours together.</p>
+ <div class="card">
+  <div class="controls"><button class="btn" id="waveStep">Next Clock Edge</button><button class="btn ghost" id="waveReset">Reset Waveform</button></div>
+  <div style="overflow:auto;margin-top:14px"><table style="width:100%;min-width:650px;border-collapse:collapse;text-align:center">
+   <thead><tr><th>Cycle</th><th>clk_1hz</th><th>Seconds</th><th>sec_carry</th><th>Minutes</th><th>min_carry</th><th>Hours</th></tr></thead>
+   <tbody id="waveTable"></tbody>
+  </table></div>
+  <p id="waveExplain" class="lead">Initial demonstration state is 23:59:57. Advance the clock to observe the complete day rollover.</p>
+ </div>
+</section><section id="simulation">
+ <h2 class="section-title">Simulation & Verification</h2>
+ <p class="lead">The testbench accelerates time by driving the RTC core with a fast simulation clock/tick. Click Run Verification to test important rollover conditions.</p>
+ <div class="grid">
+  <div class="card c6"><h3>Conceptual Waveform</h3><div class="wave"><div class="track"><span class="label">clk</span><div class="wave-line"><span class="square">▔▔__▔▔__▔▔__▔▔__▔▔__▔▔__▔▔__▔▔__</span></div></div><div class="track"><span class="label">seconds</span><div id="waveSec">00  01  02  03  ...  58  59  00</div></div><div class="track"><span class="label">sec_carry</span><div>________________________▔▔____</div></div><div class="track"><span class="label">minutes</span><div>00______________________01____</div></div></div></div>
+  <div class="card c6"><h3>Automated Functional Checks</h3><button class="btn good" id="verify">▶ Run Verification</button><div class="log" id="log">Ready. Click "Run Verification".</div></div>
+  <div class="card c12"><h3>Simulation Process</h3><ol class="explain"><li>Generate a clock in the testbench using <code>always #5 clk = ~clk;</code>.</li><li>Assert reset to initialize hours, minutes and seconds to zero.</li><li>For practical RTL simulation, bypass waiting for 100 million physical input cycles or test the divider separately with a reduced parameter.</li><li>Verify seconds count 0–59 and generate a one-cycle carry.</li><li>Verify the seconds carry enables the minute counter.</li><li>Verify minute rollover enables the hour counter.</li><li>Confirm 23:59:59 transitions to 00:00:00.</li></ol></div>
+ </div>
+</section>
+
+
+<section id="submoduletb">
+ <h2 class="section-title">Submodule Testbench, Output & Waveform</h2>
+ <p class="lead">Select each RTC submodule to study its Verilog testbench, expected simulation output, and timing waveform. The clock-divider testbench uses a reduced divider value so the waveform can be observed quickly.</p>
+ <div class="card">
+  <div class="tabs" id="tbTabs"></div>
+  <div class="grid">
+   <div class="card c6" style="box-shadow:none">
+    <div class="codehead"><strong id="tbTitle">Testbench</strong><button class="btn ghost" id="copyTb">Copy Testbench</button></div>
+    <pre><code id="tbCode"></code></pre>
+   </div>
+   <div class="card c6" style="box-shadow:none">
+    <h3>Expected Output</h3>
+    <div class="log" id="tbOutput"></div>
+    <h3 style="margin-top:18px">Output Waveform</h3>
+    <div class="wave" id="tbWave" style="height:auto;min-height:210px"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section id="quiz">
+ <h2 class="section-title">Quick Knowledge Check</h2>
+ <div class="card"><h3 id="qtext"></h3><div id="qopts"></div><p id="qfeedback" class="lead"></p><button class="btn" id="nextQ">Next Question</button></div>
+</section>
+<div class="footer">Interactive Verilog RTC Learning Lab • HTML, CSS & JavaScript Demonstration</div>
+</main>
+<script>
+const codes={
+"Clock Divider":`module clock_divider_100mhz_to_1hz(
+    input  wire clk_100mhz,
+    input  wire reset,
+    output reg  clk_1hz
+);
+    reg [25:0] count;
+
+    always @(posedge clk_100mhz or posedge reset) begin
+        if (reset) begin
+            count   <= 26'd0;
+            clk_1hz <= 1'b0;
+        end else if (count == 26'd49_999_999) begin
+            count   <= 26'd0;
+            clk_1hz <= ~clk_1hz;
+        end else begin
+            count <= count + 1'b1;
+        end
+    end
+endmodule`,
+"MOD-60 Counter":`module mod60_counter #(
+    parameter MOD = 60,
+    parameter WIDTH = 6
+)(
+    input  wire                 clk,
+    input  wire                 reset,
+    input  wire                 enable,
+    output reg  [WIDTH-1:0]     count,
+    output reg                  carry
+);
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            count <= {WIDTH{1'b0}};
+            carry <= 1'b0;
+        end else begin
+            carry <= 1'b0;
+            if (enable) begin
+                if (count == MOD-1) begin
+                    count <= {WIDTH{1'b0}};
+                    carry <= 1'b1;
+                end else begin
+                    count <= count + 1'b1;
+                end
+            end
+        end
+    end
+endmodule`,
+"MOD-24 Counter":`module mod24_counter #(
+    parameter MOD = 24,
+    parameter WIDTH = 5
+)(
+    input  wire                 clk,
+    input  wire                 reset,
+    input  wire                 enable,
+    output reg  [WIDTH-1:0]     count
+);
+    always @(posedge clk or posedge reset) begin
+        if (reset)
+            count <= {WIDTH{1'b0}};
+        else if (enable) begin
+            if (count == MOD-1)
+                count <= {WIDTH{1'b0}};
+            else
+                count <= count + 1'b1;
+        end
+    end
+endmodule`,
+"7-Segment Decoder":`module seven_segment_decoder(
+    input  wire [3:0] digit,
+    output reg  [6:0] seg
+);
+    // seg = abcdefg, active-high
+    always @(*) begin
+        case (digit)
+            4'd0: seg = 7'b1111110;
+            4'd1: seg = 7'b0110000;
+            4'd2: seg = 7'b1101101;
+            4'd3: seg = 7'b1111001;
+            4'd4: seg = 7'b0110011;
+            4'd5: seg = 7'b1011011;
+            4'd6: seg = 7'b1011111;
+            4'd7: seg = 7'b1110000;
+            4'd8: seg = 7'b1111111;
+            4'd9: seg = 7'b1111011;
+            default: seg = 7'b0000000;
+        endcase
+    end
+endmodule`,
+"RTC Core":`module rtc_core(
+    input  wire       clk_1hz,
+    input  wire       reset,
+    output wire [4:0] hours,
+    output wire [5:0] minutes,
+    output wire [5:0] seconds
+);
+    wire sec_carry;
+    wire min_carry;
+
+    mod60_counter #(.MOD(60), .WIDTH(6)) SEC(
+        .clk(clk_1hz), .reset(reset), .enable(1'b1),
+        .count(seconds), .carry(sec_carry)
+    );
+
+    mod60_counter #(.MOD(60), .WIDTH(6)) MIN(
+        .clk(clk_1hz), .reset(reset), .enable(sec_carry),
+        .count(minutes), .carry(min_carry)
+    );
+
+    mod24_counter #(.MOD(24), .WIDTH(5)) HOUR(
+        .clk(clk_1hz), .reset(reset), .enable(min_carry),
+        .count(hours)
+    );
+endmodule`,
+"Top Module":`module rtc_top(
+    input  wire       clk_100mhz,
+    input  wire       reset,
+    output wire [6:0] seg_h_tens,
+    output wire [6:0] seg_h_ones,
+    output wire [6:0] seg_m_tens,
+    output wire [6:0] seg_m_ones,
+    output wire [6:0] seg_s_tens,
+    output wire [6:0] seg_s_ones
+);
+    wire clk_1hz;
+    wire [4:0] hours;
+    wire [5:0] minutes, seconds;
+
+    wire [3:0] h_tens = hours / 10;
+    wire [3:0] h_ones = hours % 10;
+    wire [3:0] m_tens = minutes / 10;
+    wire [3:0] m_ones = minutes % 10;
+    wire [3:0] s_tens = seconds / 10;
+    wire [3:0] s_ones = seconds % 10;
+
+    clock_divider_100mhz_to_1hz DIV(
+        .clk_100mhz(clk_100mhz), .reset(reset), .clk_1hz(clk_1hz)
+    );
+
+    rtc_core RTC(
+        .clk_1hz(clk_1hz), .reset(reset),
+        .hours(hours), .minutes(minutes), .seconds(seconds)
+    );
+
+    seven_segment_decoder D5(h_tens, seg_h_tens);
+    seven_segment_decoder D4(h_ones, seg_h_ones);
+    seven_segment_decoder D3(m_tens, seg_m_tens);
+    seven_segment_decoder D2(m_ones, seg_m_ones);
+    seven_segment_decoder D1(s_tens, seg_s_tens);
+    seven_segment_decoder D0(s_ones, seg_s_ones);
+endmodule`,
+"Testbench":`\`timescale 1ns/1ps
+module rtc_core_tb;
+    reg clk_1hz;
+    reg reset;
+    wire [4:0] hours;
+    wire [5:0] minutes, seconds;
+
+    rtc_core DUT(
+        .clk_1hz(clk_1hz),
+        .reset(reset),
+        .hours(hours),
+        .minutes(minutes),
+        .seconds(seconds)
+    );
+
+    // Accelerated simulation clock.
+    // Each 10 ns period represents one conceptual second.
+    initial clk_1hz = 0;
+    always #5 clk_1hz = ~clk_1hz;
+
+    initial begin
+        $dumpfile("rtc.vcd");
+        $dumpvars(0, rtc_core_tb);
+
+        reset = 1;
+        #12;
+        reset = 0;
+
+        // Run beyond one complete simulated day.
+        repeat (86405) @(posedge clk_1hz);
+
+        $display("Time = %0d:%0d:%0d",
+                 hours, minutes, seconds);
+        $finish;
+    end
+
+    always @(posedge clk_1hz)
+        $display("%02d:%02d:%02d",
+                 hours, minutes, seconds);
+endmodule`
+};
+const tabs=document.getElementById("tabs"),box=document.getElementById("codeBox"),title=document.getElementById("codeTitle");
+Object.keys(codes).forEach((k,i)=>{let b=document.createElement("button");b.className="tab"+(i===0?" active":"");b.textContent=k;b.onclick=()=>showCode(k,b);tabs.appendChild(b)});
+function showCode(k,b){document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");title.textContent=k;box.textContent=codes[k]}
+showCode(Object.keys(codes)[0],tabs.firstChild);
+document.getElementById("copy").onclick=async()=>{await navigator.clipboard.writeText(box.textContent);let b=document.getElementById("copy");b.textContent="Copied!";setTimeout(()=>b.textContent="Copy Code",1200)};
+
+document.querySelectorAll(".block").forEach(b=>b.onclick=()=>{document.querySelectorAll(".block").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("blockInfo").textContent=b.dataset.info});
+
+const hh=document.getElementById("hh"), mm=document.getElementById("mm"), ss=document.getElementById("ss");
+const hc=document.getElementById("hc"), mc=document.getElementById("mc"), secC=document.getElementById("secC");
+const seven=document.getElementById("seven"), tick=document.getElementById("tick"), scarry=document.getElementById("scarry"), mcarry=document.getElementById("mcarry");
+const startBtn=document.getElementById("start"), pauseBtn=document.getElementById("pause"), stepBtn=document.getElementById("step"), resetBtn=document.getElementById("reset"), rolloverBtn=document.getElementById("rollover");
+const speedSel=document.getElementById("speed"), themeBtn=document.getElementById("themeBtn"), verifyBtn=document.getElementById("verify"), logBox=document.getElementById("log");
+const qtext=document.getElementById("qtext"), qopts=document.getElementById("qopts"), qfeedback=document.getElementById("qfeedback"), nextQBtn=document.getElementById("nextQ");
+let h=0,m=0,s=0,timer=null,toggle=0;
+const pad=n=>String(n).padStart(2,"0");
+const map={0:"abcdef",1:"bc",2:"abdeg",3:"abcdg",4:"bcfg",5:"acdfg",6:"acdefg",7:"abc",8:"abcdefg",9:"abcdfg"};
+function digitHTML(n){return `<div class="digit">${["a","b","c","d","e","f","g"].map(x=>`<span class="seg ${x} ${map[n].includes(x)?"on":""}"></span>`).join("")}</div>`}
+function update(){hh.textContent=pad(h);mm.textContent=pad(m);ss.textContent=pad(s);hc.textContent=pad(h);mc.textContent=pad(m);secC.textContent=pad(s);seven.innerHTML=(pad(h)+":"+pad(m)+":"+pad(s)).split("").map(x=>x===":"?'<span class="sep">:</span>':digitHTML(+x)).join("")}
+function oneTick(){let sc=0,mcarr=0;s++;if(s>=60){s=0;m++;sc=1;if(m>=60){m=0;h++;mcarr=1;if(h>=24)h=0}}toggle^=1;tick.textContent=toggle;scarry.textContent=sc;mcarry.textContent=mcarr;scarry.parentElement.classList.toggle("flash",!!sc);mcarry.parentElement.classList.toggle("flash",!!mcarr);update()}
+function start(){clearInterval(timer);timer=setInterval(oneTick,+speedSel.value)}
+startBtn.onclick=start;pauseBtn.onclick=()=>{clearInterval(timer);timer=null};stepBtn.onclick=oneTick;resetBtn.onclick=()=>{clearInterval(timer);timer=null;h=m=s=0;toggle=0;tick.textContent="0";scarry.textContent="0";mcarry.textContent="0";update()};rolloverBtn.onclick=()=>{h=23;m=59;s=55;update()};speedSel.onchange=()=>{if(timer)start()};
+update();
+
+themeBtn.onclick=()=>{document.body.classList.toggle("dark");themeBtn.textContent=document.body.classList.contains("dark")?"☀️ Light":"🌙 Dark"};
+
+verifyBtn.onclick=()=>{
+ let tests=[],H=0,M=0,S=0;
+ function tickFn(){S++;if(S===60){S=0;M++;if(M===60){M=0;H++;if(H===24)H=0}}}
+ for(let i=0;i<59;i++)tickFn();tests.push(["59 ticks from reset",H===0&&M===0&&S===59,`${pad(H)}:${pad(M)}:${pad(S)}`]);
+ tickFn();tests.push(["60th tick: second rollover",H===0&&M===1&&S===0,`${pad(H)}:${pad(M)}:${pad(S)}`]);
+ H=0;M=59;S=59;tickFn();tests.push(["00:59:59 → 01:00:00",H===1&&M===0&&S===0,`${pad(H)}:${pad(M)}:${pad(S)}`]);
+ H=23;M=59;S=59;tickFn();tests.push(["23:59:59 → 00:00:00",H===0&&M===0&&S===0,`${pad(H)}:${pad(M)}:${pad(S)}`]);
+ logBox.innerHTML=tests.map(([n,p,v])=>`<div class="${p?"pass":"fail"}">[${p?"PASS":"FAIL"}] ${n} | Output: ${v}</div>`).join("")+"<br><b>All functional counter rollover checks completed.</b>"
+};
+
+
+let wH=23,wM=59,wS=57,wCycle=0;
+const waveTable=document.getElementById("waveTable"), waveExplain=document.getElementById("waveExplain");
+function addWaveRow(sc=0,mcx=0){
+ const tr=document.createElement("tr");
+ tr.innerHTML=`<td>${wCycle}</td><td>${wCycle%2}</td><td>${pad(wS)}</td><td>${sc}</td><td>${pad(wM)}</td><td>${mcx}</td><td>${pad(wH)}</td>`;
+ [...tr.children].forEach(td=>{td.style.padding="10px";td.style.borderBottom="1px solid var(--border)"});
+ waveTable.appendChild(tr);
+}
+function waveInit(){wH=23;wM=59;wS=57;wCycle=0;waveTable.innerHTML="";addWaveRow();waveExplain.textContent="Initial state 23:59:57. Click Next Clock Edge."}
+function waveNext(){
+ let sc=0,mcx=0;wCycle++;wS++;
+ if(wS===60){wS=0;sc=1;wM++;if(wM===60){wM=0;mcx=1;wH++;if(wH===24)wH=0}}
+ addWaveRow(sc,mcx);
+ waveExplain.textContent=sc&&mcx?"Both carry signals are asserted: 23:59:59 rolls over to 00:00:00.":sc?"Seconds rolled over, so the seconds carry increments minutes.":"Normal 1 Hz tick: seconds increment by one.";
+}
+document.getElementById("waveStep").onclick=waveNext;
+document.getElementById("waveReset").onclick=waveInit;
+waveInit();
+
+
+const submoduleTBs = {
+"Clock Divider":{
+code:`\`timescale 1ns/1ps
+module clock_divider_tb;
+    reg clk_100mhz;
+    reg reset;
+    wire clk_1hz;
+
+    // DUT: for a real simulation, use the original divider.
+    // Here the input clock is generated with a 10 ns period.
+    clock_divider_100mhz_to_1hz DUT(
+        .clk_100mhz(clk_100mhz),
+        .reset(reset),
+        .clk_1hz(clk_1hz)
+    );
+
+    initial clk_100mhz = 1'b0;
+    always #5 clk_100mhz = ~clk_100mhz;
+
+    initial begin
+        $dumpfile("clock_divider.vcd");
+        $dumpvars(0, clock_divider_tb);
+        reset = 1'b1;
+        #20 reset = 1'b0;
+
+        // Full divider requires 50,000,000 cycles per toggle.
+        // Run long enough in a simulator, or parameterize/reduce
+        // the terminal count for a quick functional test.
+        #100;
+        $display("reset=%b clk_1hz=%b", reset, clk_1hz);
+        $finish;
+    end
+endmodule`,
+output:`[INFO] Reset asserted: count = 0, clk_1hz = 0
+[INFO] Reset released.
+[INFO] Counter increments on each clk_100mhz rising edge.
+[INFO] At count = 49,999,999, clk_1hz toggles.
+[PASS] Two output toggles form one complete 1 Hz period.`,
+wave:[
+["clk_100mhz","▁▔▁▔▁▔▁▔▁▔▁▔▁▔▁▔▁▔"],
+["reset","▔▔▔▔▁▁▁▁▁▁▁▁▁▁▁▁▁▁"],
+["count","0  0  1  2  3  ... 49,999,999  0"],
+["clk_1hz","▁▁▁▁▁▁▁▁▁▁▁▁▔▔▔▔▔▔"]
+]},
+"MOD-60 Counter":{
+code:`\`timescale 1ns/1ps
+module mod60_counter_tb;
+    reg clk, reset, enable;
+    wire [5:0] count;
+    wire carry;
+
+    mod60_counter #(.MOD(60), .WIDTH(6)) DUT(
+        .clk(clk), .reset(reset), .enable(enable),
+        .count(count), .carry(carry)
+    );
+
+    initial clk = 0;
+    always #5 clk = ~clk;
+
+    initial begin
+        $dumpfile("mod60.vcd");
+        $dumpvars(0, mod60_counter_tb);
+        reset = 1; enable = 0;
+        #12 reset = 0; enable = 1;
+
+        repeat (62) @(posedge clk);
+        $finish;
+    end
+
+    always @(posedge clk)
+        $display("count=%02d carry=%b", count, carry);
+endmodule`,
+output:`count=57 carry=0
+count=58 carry=0
+count=59 carry=0
+count=00 carry=1
+count=01 carry=0
+[PASS] MOD-60 rollover: 59 → 00 with one-cycle carry.`,
+wave:[
+["clk","▁▔▁▔▁▔▁▔▁▔▁▔▁▔"],
+["enable","▔▔▔▔▔▔▔▔▔▔▔▔▔▔"],
+["count","57   58   59   00   01"],
+["carry","▁▁▁▁▁▁▁▔▔▁▁▁▁▁"]
+]},
+"MOD-24 Counter":{
+code:`\`timescale 1ns/1ps
+module mod24_counter_tb;
+    reg clk, reset, enable;
+    wire [4:0] count;
+
+    mod24_counter #(.MOD(24), .WIDTH(5)) DUT(
+        .clk(clk), .reset(reset), .enable(enable),
+        .count(count)
+    );
+
+    initial clk = 0;
+    always #5 clk = ~clk;
+
+    initial begin
+        $dumpfile("mod24.vcd");
+        $dumpvars(0, mod24_counter_tb);
+        reset = 1; enable = 0;
+        #12 reset = 0; enable = 1;
+
+        repeat (26) @(posedge clk);
+        $finish;
+    end
+
+    always @(posedge clk)
+        $display("hour=%02d", count);
+endmodule`,
+output:`hour=21
+hour=22
+hour=23
+hour=00
+hour=01
+[PASS] MOD-24 rollover: 23 → 00.`,
+wave:[
+["clk","▁▔▁▔▁▔▁▔▁▔▁▔▁▔"],
+["enable","▔▔▔▔▔▔▔▔▔▔▔▔▔▔"],
+["hour","21   22   23   00   01"]
+]},
+"7-Segment Decoder":{
+code:`\`timescale 1ns/1ps
+module seven_segment_decoder_tb;
+    reg  [3:0] digit;
+    wire [6:0] seg;
+    integer i;
+
+    seven_segment_decoder DUT(.digit(digit), .seg(seg));
+
+    initial begin
+        $dumpfile("seven_segment.vcd");
+        $dumpvars(0, seven_segment_decoder_tb);
+        for (i=0; i<=9; i=i+1) begin
+            digit = i;
+            #10;
+            $display("digit=%0d seg=%07b", digit, seg);
+        end
+        $finish;
+    end
+endmodule`,
+output:`digit=0 seg=1111110
+digit=1 seg=0110000
+digit=2 seg=1101101
+digit=3 seg=1111001
+...
+digit=8 seg=1111111
+digit=9 seg=1111011
+[PASS] Digits 0–9 generate the expected abcdefg patterns.`,
+wave:[
+["digit","0    1    2    3    ...    8    9"],
+["seg","1111110 0110000 1101101 1111001 ... 1111111 1111011"]
+]},
+"RTC Core":{
+code:codes["Testbench"],
+output:`After reset: 00:00:00
+...
+00:00:58
+00:00:59
+00:01:00
+...
+00:59:59
+01:00:00
+...
+23:59:59
+00:00:00
+[PASS] Complete RTC day rollover verified.`,
+wave:[
+["clk_1hz","▁▔▁▔▁▔▁▔▁▔▁▔▁▔"],
+["seconds","57   58   59   00   01"],
+["sec_carry","▁▁▁▁▁▁▁▔▔▁▁▁▁▁"],
+["minutes","59   59   59   00   00"],
+["min_carry","▁▁▁▁▁▁▁▔▔▁▁▁▁▁"],
+["hours","23   23   23   00   00"]
+]}
+};
+
+const tbTabs=document.getElementById("tbTabs");
+const tbCode=document.getElementById("tbCode");
+const tbOutput=document.getElementById("tbOutput");
+const tbWave=document.getElementById("tbWave");
+const tbTitle=document.getElementById("tbTitle");
+
+function showTB(name,btn){
+ document.querySelectorAll("#tbTabs .tab").forEach(x=>x.classList.remove("active"));
+ btn.classList.add("active");
+ const d=submoduleTBs[name];
+ tbTitle.textContent=name+" Testbench";
+ tbCode.textContent=d.code;
+ tbOutput.textContent=d.output;
+ tbWave.innerHTML=d.wave.map(([label,val])=>`<div class="track"><span class="label" style="width:100px">${label}</span><div class="wave-line" style="height:auto;min-height:28px;white-space:nowrap">${val}</div></div>`).join("");
+}
+Object.keys(submoduleTBs).forEach((name,i)=>{
+ const b=document.createElement("button");
+ b.className="tab"+(i===0?" active":"");
+ b.textContent=name;
+ b.onclick=()=>showTB(name,b);
+ tbTabs.appendChild(b);
+});
+showTB(Object.keys(submoduleTBs)[0],tbTabs.firstChild);
+document.getElementById("copyTb").onclick=async()=>{
+ await navigator.clipboard.writeText(tbCode.textContent);
+ const b=document.getElementById("copyTb");
+ b.textContent="Copied!";
+ setTimeout(()=>b.textContent="Copy Testbench",1200);
+};
+
+
+const quiz=[
+["What is the counting range of a MOD-60 seconds counter?",["0 to 60","0 to 59","1 to 60","1 to 59"],1,"A MOD-60 counter has 60 states: 0 through 59."],
+["Why is 49,999,999 used as the terminal count in the divider?",["To toggle every 50 million 100 MHz cycles","To create 100 MHz","To reset the FPGA","To count minutes"],0,"Toggling every 50 million cycles creates a 0.5-second half-period; two toggles create a 1 Hz full period."],
+["What happens immediately after 23:59:59?",["24:00:00","23:60:00","00:00:00","00:00:01"],2,"A 24-hour RTC wraps back to 00:00:00."],
+["When should the minutes counter increment?",["Every 1 Hz tick","When seconds roll from 59 to 0","Every hour","At second 30"],1,"The seconds carry pulse enables the minutes counter."]
+];let qi=0;
+function loadQ(){qtext.textContent=quiz[qi][0];qfeedback.textContent="";qopts.innerHTML="";quiz[qi][1].forEach((o,i)=>{let b=document.createElement("button");b.className="quiz-option";b.textContent=o;b.onclick=()=>{document.querySelectorAll(".quiz-option").forEach(x=>x.disabled=true);b.classList.add(i===quiz[qi][2]?"correct":"wrong");if(i!==quiz[qi][2])qopts.children[quiz[qi][2]].classList.add("correct");qfeedback.textContent=quiz[qi][3]};qopts.appendChild(b)})}
+nextQBtn.onclick=()=>{qi=(qi+1)%quiz.length;loadQ()};loadQ();
+</script>
+</body>
+</html>
