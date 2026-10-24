@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>8086 Instruction Set Lab – Learn, Practice, Assess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+
+:root{--bg:#EDF1F4;--sf:#fff;--sf2:#E3E9EE;--ln:#C9D4DC;--ink:#0E2231;--mu:#4C6575;--ac:#A85F00;--onac:#fff;--tr:#0B7285;--ok:#167A45;--bad:#C0392B;--sh:0 8px 28px rgba(14,34,49,.10);
+--fd:"Bricolage Grotesque",system-ui,sans-serif;--fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1822;--sf:#12232F;--sf2:#182E3C;--ln:#27424F;--ink:#E6EEF2;--mu:#93ABB8;--ac:#F0B45A;--onac:#0C1822;--tr:#5CC8D7;--ok:#5FD08F;--bad:#FF7A6B;--sh:0 8px 28px rgba(0,0,0,.35);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0C1822;--sf:#12232F;--sf2:#182E3C;--ln:#27424F;--ink:#E6EEF2;--mu:#93ABB8;--ac:#F0B45A;--onac:#0C1822;--tr:#5CC8D7;--ok:#5FD08F;--bad:#FF7A6B;--sh:0 8px 28px rgba(0,0,0,.35);color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.6 var(--fd);min-height:100%;transition:background .25s,color .25s}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+h1,h2,h3{line-height:1.15;margin:0 0 .5em;letter-spacing:-.01em}h2{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800}h3{font-size:1.1rem;font-weight:600}
+p{margin:0 0 1em;max-width:70ch}code,.m{font-family:var(--fm)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--tr);outline-offset:2px;border-radius:6px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
+.bar{max-width:1100px;margin:auto;display:flex;align-items:center;gap:16px;padding:10px 18px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem}
+.logo svg{width:30px;height:30px}
+nav.top{display:flex;gap:4px;margin-left:auto}
+nav button{background:none;border:0;padding:8px 16px;border-radius:99px;font-weight:600;color:var(--mu)}
+nav button[aria-current=page]{background:var(--ac);color:var(--onac)}
+#theme{margin-left:8px;width:40px;height:40px;border-radius:50%;border:1px solid var(--ln);background:var(--sf);display:grid;place-items:center}
+#theme svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2}
+main{max-width:1100px;margin:auto;padding:24px max(18px,env(safe-area-inset-right,0px)) 40px max(18px,env(safe-area-inset-left,0px))}
+section[hidden]{display:none}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:16px;padding:20px;box-shadow:var(--sh)}
+.btn{background:var(--ac);color:var(--onac);border:0;border-radius:10px;padding:10px 18px;font-weight:600}
+.btn.g{background:var(--sf2);color:var(--ink);border:1px solid var(--ln)}.btn:disabled{opacity:.45;cursor:not-allowed}
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:center;margin-bottom:28px}
+.hero h1{font-size:clamp(2.2rem,7vw,4rem);font-weight:800;margin-bottom:.3em}
+.hero p{color:var(--mu);font-size:1.1rem}
+.die{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:16px;display:grid;gap:10px;box-shadow:var(--sh)}
+.die .u{border:2px solid var(--tr);border-radius:12px;padding:10px 12px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.die .u.e{border-color:var(--ac)}.die small{color:var(--mu);font-weight:400}
+.q{display:flex;gap:5px}.q i{width:22px;height:22px;border-radius:5px;background:var(--sf2);border:1px solid var(--ln);animation:fl 3.6s infinite}
+.q i:nth-child(2){animation-delay:.3s}.q i:nth-child(3){animation-delay:.6s}.q i:nth-child(4){animation-delay:.9s}.q i:nth-child(5){animation-delay:1.2s}.q i:nth-child(6){animation-delay:1.5s}
+@keyframes fl{0%,35%{background:var(--tr);border-color:var(--tr)}50%,100%{background:var(--sf2);border-color:var(--ln)}}
+/* learn */
+.lg{display:grid;grid-template-columns:260px minmax(0,1fr);gap:22px;align-items:start}
+.mods{display:grid;gap:6px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px)}
+.mods button{text-align:left;background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;font-weight:600}
+.mods button[aria-current=true]{border-color:var(--ac);box-shadow:inset 4px 0 0 var(--ac)}
+.mods .dot{margin-left:auto;width:18px;height:18px;border-radius:50%;border:2px solid var(--ln);flex:none}.mods .done .dot{background:var(--ok);border-color:var(--ok)}
+.prog{height:8px;background:var(--sf2);border-radius:9px;overflow:hidden;margin-bottom:6px}.prog i{display:block;height:100%;background:var(--tr);width:0;transition:width .4s}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--sf2);border-radius:12px;padding:12px}.stat b{display:block;font:600 1.35rem var(--fm);color:var(--tr)}.stat span{font-size:.85rem;color:var(--mu)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lg>*,.hero>*,.two>*{min-width:0}
+body{overflow-x:hidden}
+ul.k{padding-left:1.1em;margin:0 0 1em}ul.k li{margin:.3em 0}
+.tip{border-left:4px solid var(--ac);background:var(--sf2);padding:12px 14px;border-radius:0 10px 10px 0;margin:14px 0}
+.tw{overflow-x:auto;border:1px solid var(--ln);border-radius:12px}table{border-collapse:collapse;width:100%;min-width:420px}
+td,th{padding:9px 12px;border-bottom:1px solid var(--ln);text-align:left;vertical-align:top}tr:last-child td{border:0}td:first-child{font:600 .95rem var(--fm);color:var(--ac);white-space:nowrap}
+.fs{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin:10px 0;font:600 .7rem var(--fm);text-align:center}
+.fs span{padding:8px 0;border-radius:6px;background:var(--sf2);color:var(--mu)}.fs .c{background:var(--tr);color:var(--bg)}.fs .t{background:var(--ac);color:var(--onac)}
+.mem{position:relative;height:46px;background:var(--sf2);border-radius:10px;margin:36px 0 26px;border:1px solid var(--ln)}
+.mem b{position:absolute;top:0;bottom:0;display:grid;place-items:center;font:600 .8rem var(--fm);background:var(--tr);color:var(--bg);border-radius:6px;min-width:26px}
+.mem b.cs{background:var(--ac);color:var(--onac)}.mem em{position:absolute;top:50px;font:.65rem var(--fm);color:var(--mu);font-style:normal;transform:translateX(-30%)}
+.hl{position:absolute;border:3px solid #E0245E;border-radius:8px;box-shadow:0 0 0 9999px rgba(255,255,255,.55);transition:all .35s;pointer-events:none;opacity:0}.hl.on{opacity:1}
+.hots{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 10px}.hots button{border:1px solid var(--ln);background:var(--sf2);border-radius:99px;padding:7px 14px;font-weight:600;font-size:.9rem}.hots button[aria-pressed=true]{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+.hint{font-size:.85rem;color:var(--mu);margin:6px 0 0}.dd{min-height:84px}
+#lb{position:fixed;inset:0;z-index:50;background:rgba(5,12,18,.88);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px))}#lb[hidden]{display:none}
+.lbs{flex:1;overflow:auto;background:#fff;border-radius:12px;margin-top:10px;-webkit-overflow-scrolling:touch}.lbs img{display:block;width:160%;min-width:900px;max-width:none;height:auto}
+.dgb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.nav2{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+/* practice */
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px}.tabs button{white-space:nowrap;border:1px solid var(--ln);background:var(--sf);border-radius:99px;padding:8px 16px;font-weight:600}
+.tabs button[aria-selected=true]{background:var(--tr);color:var(--bg);border-color:var(--tr)}
+label{display:grid;gap:4px;font-weight:600;font-size:.9rem}input,select{font:600 1.1rem var(--fm);padding:10px 12px;border-radius:10px;border:1px solid var(--ln);background:var(--bg);color:var(--ink);width:100%}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:12px 0}
+.out{font:600 clamp(1.6rem,6vw,2.6rem) var(--fm);color:var(--ac);word-break:break-all}.sub{font:.9rem var(--fm);color:var(--mu);word-break:break-all}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:8px;margin-top:12px}
+.chip{border:2px solid var(--ln);border-radius:12px;padding:10px;text-align:center;font:600 .8rem var(--fm);color:var(--mu)}.chip b{display:block;font-size:1.5rem}.chip.on{border-color:var(--ac);color:var(--ac);background:var(--sf2)}
+.qs{display:flex;gap:6px;margin:14px 0;min-height:30px}.qs span{flex:1;height:44px;border-radius:8px;border:1px dashed var(--ln);display:grid;place-items:center;font:600 .8rem var(--fm)}.qs .f{background:var(--tr);color:var(--bg);border:0}
+.flip{perspective:900px;height:200px;cursor:pointer;width:100%;border:0;background:none;padding:0}.fi{position:relative;height:100%;transition:transform .5s;transform-style:preserve-3d}.flip.o .fi{transform:rotateY(180deg)}
+.fi>div{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;border:1px solid var(--ln);display:grid;place-items:center;padding:20px;text-align:center;background:var(--sf2)}
+.fi .b{transform:rotateY(180deg);background:var(--sf);border-color:var(--ac)}.fi .a{font:800 3rem var(--fm);color:var(--ac)}
+/* assess */
+.opt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--ln);border-radius:12px;padding:12px 14px;margin:8px 0;font-weight:600}
+.opt:hover{border-color:var(--tr)}.opt[aria-checked=true]{border-color:var(--ac);background:var(--sf2)}
+.opt.ok{border-color:var(--ok)}.opt.no{border-color:var(--bad)}
+.ring{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;font:800 2.4rem var(--fm);background:conic-gradient(var(--tr) calc(var(--p)*1%),var(--sf2) 0)}.ring span{width:118px;height:118px;border-radius:50%;background:var(--sf);display:grid;place-items:center}
+.rv{padding:12px 0;border-bottom:1px solid var(--ln)}.rv .ex{color:var(--mu);font-size:.92rem}.tag{font:600 .8rem var(--fm)}.ok-t{color:var(--ok)}.bad-t{color:var(--bad)}
+.bn{display:none}
+@media (max-width:760px){
+ .hero,.lg,.two{grid-template-columns:minmax(0,1fr)}.dg{min-width:0}table{min-width:0}td:first-child{white-space:normal}
+ .tabs button,.mods button,.btn,.nav2 .btn,.hots button{min-height:44px}.card{padding:16px}.hero{gap:18px;margin-bottom:20px}
+ #theme{width:44px;height:44px}.ring{width:120px;height:120px}.ring span{width:92px;height:92px;font-size:1.8rem}
+ .flip{height:230px}.qs span{height:38px;font-size:.7rem}.chips{grid-template-columns:repeat(3,1fr)}.opt{padding:14px}.stats{grid-template-columns:repeat(2,1fr)}.stat b{font-size:1.1rem}
+
+ .hero,.lg,.two{grid-template-columns:1fr}.mods{position:static;grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto;padding-bottom:6px}.mods button{white-space:nowrap}
+ nav.top{display:none}main{padding-bottom:96px}.logo span{font-size:1.05rem}#theme{margin-left:auto}
+ .bn{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--sf);border-top:1px solid var(--ln);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+ .bn button{flex:1;background:none;border:0;padding:10px 0;font-weight:600;color:var(--mu);border-radius:10px}.bn button[aria-current=page]{color:var(--ac);background:var(--sf2)}
+ .fs{grid-template-columns:repeat(8,1fr);font-size:.7rem}
+}
+@media (max-width:380px){h2{font-size:1.4rem}}@media (max-width:330px){.logo span{display:none}.stats{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+section{scroll-margin-top:90px}section:not([hidden]){animation:in .45s both}@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.tk{display:flex;gap:8px;flex-wrap:wrap}.tk span{font:600 1.05rem var(--fm);padding:8px 12px;border-radius:10px;border:2px solid var(--ln);animation:tk 5s infinite}
+.tk span:nth-child(2){animation-delay:.8s}.tk span:nth-child(3){animation-delay:1.6s}.tk span:nth-child(4){animation-delay:2.4s}
+@keyframes tk{0%,22%{border-color:var(--ac);background:var(--sf2);color:var(--ac);transform:translateY(-3px)}34%,100%{border-color:var(--ln);background:transparent;color:var(--ink);transform:none}}
+.flow{display:grid;gap:8px;margin-top:12px}
+.st{display:flex;gap:12px;padding:10px 12px;border:1px solid var(--ln);border-radius:12px;background:var(--sf2);opacity:.28;transform:translateY(10px);transition:opacity .45s,transform .45s,border-color .45s}
+.st.on{opacity:1;transform:none;border-color:var(--tr)}.st.on:last-child{border-color:var(--ac);box-shadow:var(--sh)}
+.nb{flex:none;width:26px;height:26px;border-radius:50%;background:var(--tr);color:var(--bg);display:grid;place-items:center;font:600 .8rem var(--fm)}.st>div{min-width:0}
+.dt{font:.9rem/1.6 var(--fm);color:var(--mu);word-break:break-word}.dt b{color:var(--ac)}
+.bc{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--ln);border-radius:8px;padding:2px 8px;margin:3px 4px 3px 0;font:.8rem var(--fm);color:var(--ink)}.bc b{color:var(--onac);background:var(--ac);padding:0 6px;border-radius:5px}
+.ex{border:1px solid var(--ln);border-radius:14px;padding:12px;margin:12px 0;background:var(--bg)}.exh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.exh code{font-size:1.05rem;font-weight:600;color:var(--tr);word-break:break-all}
+.tree ul{list-style:none;margin:0;padding-left:16px;border-left:2px solid var(--ln)}.tree>ul{border:0;padding:0}.tree li{margin:7px 0}.tree li>span{display:inline-block;padding:4px 10px;border-radius:8px;background:var(--sf2);border:1px solid var(--ln);font-weight:600;font-size:.9rem}
+.fm{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:12px 0}.fm div{background:var(--sf2);border-radius:12px;padding:12px;font:600 .9rem/1.5 var(--fm)}.fm small{display:block;font:400 .8rem var(--fd);color:var(--mu)}
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0}.mg .opt{margin:0}
+.fi .a2{font:800 1.7rem var(--fd);color:var(--ac)}.fi .b code{display:block;margin-top:8px;color:var(--tr);font-weight:600}
+@media (max-width:760px){.mg{grid-template-columns:repeat(2,minmax(0,1fr))}.mg .opt{overflow-wrap:anywhere;font-size:.9rem;padding:12px 10px}.tk span{font-size:.95rem}.st{padding:10px}}
+
+.sw{position:relative;height:2.3rem;font:600 1.5rem var(--fm);text-align:center}.sw span{position:absolute;inset:0;animation:swa 5s infinite}.sw span+span{animation-name:swb;color:var(--ac)}
+@keyframes swa{0%,45%{opacity:1;transform:none}55%,95%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:none}}
+@keyframes swb{0%,45%{opacity:0;transform:translateY(8px)}55%,95%{opacity:1;transform:none}100%{opacity:0;transform:translateY(8px)}}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.07);box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 30%,transparent)}100%{transform:scale(1)}}
+.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:12px 0}
+.rc{border:1px solid var(--ln);border-radius:12px;padding:8px 10px;background:var(--sf2);font:600 .78rem var(--fm);color:var(--mu)}.rc span{display:block;font-size:1.1rem;color:var(--ink)}.rc i{font-style:normal;color:var(--ac);font-size:1.1rem}
+.rc.chg{border-color:var(--ac);animation:pop .8s}.rc.chg span{text-decoration:line-through;opacity:.55;font-size:.9rem}
+.fg{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.fc{font:600 .8rem var(--fm);padding:5px 10px;border-radius:99px;border:1px solid var(--ln);color:var(--mu)}.fc.on{color:var(--tr);border-color:var(--tr)}.fc.chg{background:var(--ac);color:var(--onac);border-color:var(--ac);animation:pop .8s}
+.bits{display:grid;gap:8px;margin:12px 0}.bits small{display:block;color:var(--mu);font:600 .75rem var(--fm);margin-bottom:3px}.bt{display:flex;flex-wrap:wrap;gap:4px 10px}.n4{display:flex;gap:3px}
+.n4 i{font:600 .95rem var(--fm);font-style:normal;width:21px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--sf2);border:1px solid var(--ln)}.n4 i.d{background:var(--ac);color:var(--onac);border-color:var(--ac);animation:pop .8s}
+.sr{display:flex;gap:10px;align-items:center;font:.88rem var(--fm);padding:3px 6px}.sr code{width:64px}.sr b{background:var(--sf2);padding:2px 10px;border-radius:6px;min-width:36px;text-align:center}.sr.chg b{background:var(--ac);color:var(--onac);animation:pop .8s}.sr em{color:var(--tr);font-style:normal;font-size:.8rem}
+.tl{border:1px solid var(--ln);border-radius:12px;padding:8px;background:var(--bg);margin:10px 0}.tl div{padding:5px 10px;border-radius:8px;font:.92rem var(--fm);transition:.3s}.tl .lb{color:var(--tr);font-weight:600}.tl .on{background:var(--ac);color:var(--onac);transform:translateX(6px)}.tl .sk{opacity:.4;text-decoration:line-through}
+.cells{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}.cells span{width:44px;height:44px;border:2px solid var(--ln);border-radius:10px;display:grid;place-items:center;font:600 .85rem var(--fm);transition:.3s}.cells .on{border-color:var(--tr);background:var(--sf2)}.cells .cp{background:var(--ac);color:var(--onac);border-color:var(--ac)}
+.anat{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin:12px 0}.anat div{text-align:center}.anat b{display:block;font:600 1.4rem var(--fm);padding:8px 14px;border-radius:10px;border:2px solid var(--tr)}.anat div:nth-child(2) b,.anat div:nth-child(3) b{border-color:var(--ac)}.anat small{color:var(--mu);font-size:.78rem}
+.pills{display:flex;flex-wrap:wrap;gap:6px}.pill{font:600 .8rem var(--fm);padding:4px 10px;border-radius:99px;background:var(--sf2);border:1px solid var(--ln)}
+.cat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:12px 0}.cat button{border:1px solid var(--ln);background:var(--sf2);border-radius:12px;padding:12px;text-align:left;font-weight:600;min-height:44px}.cat button:hover{border-color:var(--ac)}
+.jg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;margin-top:12px}.jg div{border:2px solid var(--ln);border-radius:10px;padding:8px;text-align:center;font:600 .82rem var(--fm);opacity:0;animation:jin .4s forwards}.jg div b{display:block;font-size:.9rem}.jg .y{border-color:var(--ok);color:var(--ok)}.jg .n{color:var(--mu)}
+@keyframes jin{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+.cp2{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.cp2 button{border:1px solid var(--ln);background:var(--sf2);border-radius:99px;padding:8px 12px;font:600 .82rem var(--fm);min-height:40px}
+.ti{display:flex;gap:8px}.ti input{flex:1;min-width:0;text-transform:uppercase}
+@media (max-width:760px){.mg{grid-template-columns:1fr 1fr}.n4 i{width:17px;height:26px;font-size:.8rem}.sw{font-size:1.25rem}.ti{flex-direction:column}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+ <div class="logo"><svg viewBox="0 0 32 32" fill="none" stroke="var(--ac)" stroke-width="2"><rect x="8" y="8" width="16" height="16" rx="3"/><path d="M12 4v4M16 4v4M20 4v4M12 24v4M16 24v4M20 24v4M4 12h4M4 16h4M4 20h4M24 12h4M24 16h4M24 20h4"/><circle cx="16" cy="16" r="3" stroke="var(--tr)"/></svg><span>Instruction Set Lab</span></div>
+ <nav class="top" aria-label="Sections"><button data-go="learn">Learn</button><button data-go="practice">Practice</button><button data-go="assess">Assess</button></nav>
+ <button id="theme" aria-label="Switch between light and dark theme"><svg viewBox="0 0 24 24" id="ti"></svg></button>
+</div></header>
+<main>
+<section id="learn">
+ <div class="hero"><div><h1>Speak the 8086’s language.</h1><p>From MOV to INT: learn the eight families of instructions, run every slide example on a live mini-CPU, then take the 20-question assessment.</p>
+ <button class="btn" onclick="openMod(0)">Start module 1</button></div>
+ <div class="die" aria-hidden="true"><div class="u"><span>Instruction <small>ADD AX,BX</small></span></div><div class="sw"><span>AX = 1025H</span><span>AX = 4055H</span></div><div class="u e"><span>Flags <small>CF 0 · ZF 0 · SF 0</small></span></div></div></div>
+ <div class="lg"><div><div class="prog" role="progressbar" aria-label="Modules completed"><i id="pg"></i></div><small id="pgt" class="m"></small><div class="mods" id="mods" style="margin-top:10px"></div></div>
+ <article class="card" id="mod" tabindex="-1"></article></div>
+</section>
+<section id="practice" hidden><h2>Practice lab</h2><div class="tabs" role="tablist" id="ptabs"></div><div id="pbody"></div></section>
+<section id="assess" hidden><h2>Assessment</h2><div class="card" id="abody"></div></section>
+</main>
+<nav class="bn" aria-label="Sections"><button data-go="learn">Learn</button><button data-go="practice">Practice</button><button data-go="assess">Assess</button></nav>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],rn=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const H=(n,l=4)=>(n>>>0).toString(16).toUpperCase().padStart(l,"0")+"H",X=n=>(n&255).toString(16).toUpperCase().padStart(2,"0");
+const store={g(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+/* theme */
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',moon='<path d="M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z"/>';
+const curTheme=()=>document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"),setIcon=()=>$("#ti").innerHTML=curTheme()==="dark"?sun:moon;
+$("#theme").onclick=()=>{const n=curTheme()==="dark"?"light":"dark";document.documentElement.dataset.theme=n;store.s("th",n);setIcon()};
+{const t=store.g("th",null);if(t)document.documentElement.dataset.theme=t;setIcon()}
+/* ---------- mini 8086 engine ---------- */
+const R16=["AX","BX","CX","DX","SI","DI","BP","SP","DS","ES"],R8=["AL","AH","BL","BH","CL","CH","DL","DH"],FL=["CF","ZF","SF","OF","PF","AF","DF"];
+const DEF={R:{AX:0x1025,BX:0x3030,CX:0x2070,DX:5,SI:0,DI:0,BP:0,SP:0x100,DS:0,ES:0},F:{CF:0,PF:0,AF:0,ZF:0,SF:0,OF:0,DF:0},M:{},P:{}};
+const mkS=o=>{const S=JSON.parse(JSON.stringify(DEF));for(const k of["R","F","M","P"])Object.assign(S[k],(o||{})[k]||{});return S};
+const rg=(S,n)=>R16.includes(n)?S.R[n]:(n[1]=="L"?S.R[n[0]+"X"]&255:S.R[n[0]+"X"]>>8);
+const wr=(S,n,v)=>{if(R16.includes(n)){S.R[n]=v&0xFFFF;return}const p=n[0]+"X",o=S.R[p];S.R[p]=n[1]=="L"?(o&0xFF00)|(v&255):(o&255)|((v&255)<<8)};
+const mrd=(S,a,w)=>w==8?(S.M[a&0xFFFF]||0):(S.M[a&0xFFFF]||0)|((S.M[(a+1)&0xFFFF]||0)<<8);
+const mwr=(S,a,w,v)=>{S.M[a&0xFFFF]=v&255;if(w==16)S.M[(a+1)&0xFFFF]=(v>>8)&255};
+const num=s=>/^[0-9A-F]+H$/.test(s)?parseInt(s,16):/^[0-9]+$/.test(s)?parseInt(s,10):/^0X[0-9A-F]+$/.test(s)?parseInt(s,16):NaN;
+function od(S,s){s=s.trim().toUpperCase();if(R16.includes(s))return{k:"r",n:s,w:16};if(R8.includes(s))return{k:"r",n:s,w:8};
+ const m=s.match(/^\[(.+)\]$/);if(m){let a=0;for(const t of m[1].split("+")){const x=t.trim();if(["BX","BP","SI","DI"].includes(x))a+=S.R[x];else{const v=num(x);if(isNaN(v))return null;a+=v}}return{k:"m",a:a&0xFFFF,w:0}}
+ const v=num(s);return isNaN(v)?null:{k:"i",v,w:0}}
+const MK=w=>w==8?255:0xFFFF,SG=w=>w==8?128:0x8000,hv=(v,w)=>H(v,w==8?2:4),sx=(v,w)=>w==8?(v<<24>>24):(v<<16>>16);
+const par=v=>{let n=0;for(let i=0;i<8;i++)n+=(v>>i)&1;return n%2==0?1:0};
+const fl=(S,r,w)=>{S.F.ZF=+(r===0);S.F.SF=+!!(r&SG(w));S.F.PF=par(r&255)};
+const nm=o=>o.k=="r"?o.n:o.k=="m"?"["+H(o.a)+"]":H(o.v,o.v>255?4:2);
+const gt=(S,o,w)=>o.k=="r"?rg(S,o.n):o.k=="m"?mrd(S,o.a,w):o.v&MK(w),pt=(S,o,w,v)=>o.k=="r"?wr(S,o.n,v):mwr(S,o.a,w,v);
+function exec(txt,S0){
+ const S=JSON.parse(JSON.stringify(S0)),t=txt.trim().toUpperCase().replace(/\s+/g," "),E=m=>({err:m});if(!t)return E("Type an instruction first.");
+ const sp=t.indexOf(" "),mn=sp<0?t:t.slice(0,sp),ar=sp<0?[]:t.slice(sp+1).split(",").map(x=>x.trim()),A=ar.map(x=>od(S,x)),a=A[0],b=A[1],F=S.F;
+ const r={S,mn,steps:[["Instruction","<code>"+t+"</code>"]]},st=(x,y)=>r.steps.push([x,y]),ft=()=>"CF="+F.CF+" ZF="+F.ZF+" SF="+F.SF+" OF="+F.OF+" PF="+F.PF+" AF="+F.AF;
+ if(A.includes(null))return E("Operand not recognised. Use registers (AX, BL), hex like 3030H, or memory like [5000H].");
+ const need=n=>A.length===n?null:E(mn+" takes "+n+" operand"+(n==1?"":"s")+".");let e;
+ if(["CLC","STC","CMC","STD","CLD","CBW","CWD","LAHF","SAHF"].includes(mn)){if(e=need(0))return e;
+  if(/^(CLC|STC|CMC)$/.test(mn)){const o=F.CF;F.CF=mn=="CLC"?0:mn=="STC"?1:1-o;st("Update the carry flag",`CF: ${o} → <b>${F.CF}</b>`)}
+  else if(mn=="STD"||mn=="CLD"){const o=F.DF;F.DF=+(mn=="STD");st("Update the direction flag",`DF: ${o} → <b>${F.DF}</b>`)}
+  else if(mn=="CBW"){const al=rg(S,"AL");S.R.AX=al&128?0xFF00|al:al;st("Copy the sign bit of AL into AH",`AL = ${H(al,2)}, so <b>AX = ${H(S.R.AX)}</b>`)}
+  else if(mn=="CWD"){S.R.DX=S.R.AX&0x8000?0xFFFF:0;st("Copy the sign bit of AX into DX",`AX = ${H(S.R.AX)}, so <b>DX = ${H(S.R.DX)}</b>`)}
+  else if(mn=="LAHF"){const v=F.SF<<7|F.ZF<<6|F.AF<<4|F.PF<<2|2|F.CF;wr(S,"AH",v);st("Copy the low flag byte into AH",`SF ZF – AF – PF – CF → <b>AH = ${H(v,2)}</b>`)}
+  else{const v=rg(S,"AH");F.SF=v>>7&1;F.ZF=v>>6&1;F.AF=v>>4&1;F.PF=v>>2&1;F.CF=v&1;st("Load the low flag byte from AH",`AH = ${H(v,2)} → <b>${ft()}</b>`)}
+  return r}
+ if(/^(ADD|ADC|SUB|SBB|CMP|AND|OR|XOR|TEST|MOV|XCHG)$/.test(mn)){if(e=need(2))return e;
+  if(a.k=="i")return E("The destination cannot be an immediate value.");if(a.k=="m"&&b.k=="m")return E("Source and destination cannot both be memory locations.");
+  if(a.w&&b.w&&a.w!==b.w)return E("Operand sizes must match: 8-bit with 8-bit, or 16-bit with 16-bit.");
+  if(/^(DS|ES)$/.test(a.n)&&b.k!="r")return E("A segment register can only be loaded from a general register.");
+  const w=a.w||b.w||16;if(b.k=="i"&&b.v>MK(w))return E("The value does not fit in "+w+" bits.");
+  const x=gt(S,a,w),y=gt(S,b,w),mk=MK(w),sg=SG(w);
+  if(mn=="MOV"){pt(S,a,w,y);st("Read the source",`${nm(b)} = <b>${hv(y,w)}</b>`);st("Copy to the destination",`${nm(a)} ← ${hv(y,w)}<br>The source is unchanged and no flags are affected.`);r.d={n:nm(a),w,b:x,a:y};return r}
+  if(mn=="XCHG"){if(b.k=="i")return E("XCHG needs two registers, or a register and memory.");pt(S,a,w,y);pt(S,b,w,x);st("Read both operands",`${nm(a)} = ${hv(x,w)}, ${nm(b)} = ${hv(y,w)}`);st("Swap them",`<b>${nm(a)} = ${hv(y,w)}, ${nm(b)} = ${hv(x,w)}</b>`);return r}
+  if(/^(AND|OR|XOR|TEST)$/.test(mn)){const v=mn=="AND"||mn=="TEST"?x&y:mn=="OR"?x|y:x^y;if(mn!="TEST")pt(S,a,w,v);F.CF=F.OF=0;fl(S,v,w);
+   st("Read both operands",`${nm(a)} = ${hv(x,w)}, source = ${hv(y,w)}`);st("Apply the operation to every bit pair",`${hv(x,w)} ${mn} ${hv(y,w)} = <b>${hv(v,w)}</b>`);st(mn=="TEST"?"Discard the result":"Store the result",mn=="TEST"?"TEST only updates flags; neither operand changes.":`${nm(a)} ← ${hv(v,w)}`);st("Update flags",`CF and OF are cleared. ${ft()}`);if(mn!="TEST")r.d={n:nm(a),w,b:x,a:v};return r}
+  const c=mn=="ADC"||mn=="SBB"?F.CF:0,ad=mn=="ADD"||mn=="ADC",p=ad?x+y+c:x-y-c,res=p&mk;
+  F.CF=+(ad?p>mk:p<0);F.AF=+(ad?((x&15)+(y&15)+c)>15:((x&15)-(y&15)-c)<0);F.OF=+(ad?!!((x^res)&(y^res)&sg):!!((x^y)&(x^res)&sg));fl(S,res,w);
+  st("Read both operands",`${nm(a)} = ${hv(x,w)}, source = ${hv(y,w)}${c?", CF = 1":""}`);st("Compute",`${hv(x,w)} ${ad?"+":"−"} ${hv(y,w)}${c?(ad?" + 1":" − 1"):""} = <b>${hv(res,w)}</b>${F.CF?(ad?" (carry out)":" (borrow)"):""}`);
+  if(mn=="CMP")st("Discard the result",`CMP only sets flags. ${x==y?"Equal":x>y?"Destination > source":"Destination < source"}.`);else{pt(S,a,w,res);st("Store the result",`${nm(a)} ← ${hv(res,w)}`);r.d={n:nm(a),w,b:x,a:res}}
+  st("Update flags",ft());return r}
+ if(/^(INC|DEC|NEG|NOT)$/.test(mn)){if(e=need(1))return e;if(a.k=="i")return E("The operand cannot be an immediate value.");const w=a.w||16,mk=MK(w),sg=SG(w),x=gt(S,a,w);let res;
+  st("Read the operand",`${nm(a)} = ${hv(x,w)}`);
+  if(mn=="NOT"){res=~x&mk;st("Invert every bit",`<b>${hv(res,w)}</b>. No flags are affected.`)}
+  else if(mn=="NEG"){res=(0-x)&mk;F.CF=+(x!==0);F.AF=+((x&15)!==0);F.OF=+(x===sg);fl(S,res,w);st("Two’s complement (0 − operand)",`0 − ${hv(x,w)} = <b>${hv(res,w)}</b>`);st("Update flags",ft())}
+  else{const d=mn=="INC"?1:-1;res=(x+d)&mk;F.AF=+(d>0?(x&15)==15:(x&15)==0);F.OF=+(d>0?x===sg-1:x===sg);fl(S,res,w);st(mn=="INC"?"Add 1":"Subtract 1",`${hv(x,w)} ${d>0?"+":"−"} 1 = <b>${hv(res,w)}</b>`);st("Update flags",`${ft()}<br>CF is not affected by INC and DEC.`)}
+  pt(S,a,w,res);st("Store the result",`${nm(a)} ← ${hv(res,w)}`);r.d={n:nm(a),w,b:x,a:res};return r}
+ if(/^(SHL|SAL|SHR|SAR|ROL|ROR|RCL|RCR)$/.test(mn)){if(e=need(2))return e;if(a.k=="i")return E("The destination cannot be an immediate value.");
+  const w=a.w||16,mk=MK(w),sg=SG(w),cl=ar[1]=="CL";if(!cl&&!(b.k=="i"&&b.v===1))return E("The 8086 shifts and rotates by 1, or by the count in CL.");
+  const n=cl?S.R.CX&255:1,x=gt(S,a,w);let v=x,cf=F.CF;
+  for(let i=0;i<n;i++){const ms=v&sg?1:0,ls=v&1;
+   if(mn=="SHL"||mn=="SAL"){cf=ms;v=(v<<1)&mk}else if(mn=="SHR"){cf=ls;v=v>>1}else if(mn=="SAR"){cf=ls;v=(v>>1)|(v&sg)}
+   else if(mn=="ROL"){cf=ms;v=((v<<1)&mk)|ms}else if(mn=="ROR"){cf=ls;v=(v>>1)|(ls?sg:0)}
+   else if(mn=="RCL"){const c=cf;cf=ms;v=((v<<1)&mk)|c}else{const c=cf;cf=ls;v=(v>>1)|(c?sg:0)}}
+  F.CF=cf;if(n==1)F.OF=/^(SHL|SAL|RCL|ROL)$/.test(mn)?+(((v&sg)?1:0)^cf):mn=="SHR"?+!!(x&sg):mn=="SAR"?0:+!!(((v&sg)?1:0)^((v&(sg>>1))?1:0));
+  if(/^(SHL|SAL|SHR|SAR)$/.test(mn))fl(S,v,w);pt(S,a,w,v);
+  const D={SHL:"Every bit moves one place left. The old MSB goes to CF and a 0 enters the LSB.",SAL:"Same as SHL.",SHR:"Every bit moves one place right. The old LSB goes to CF and a 0 enters the MSB.",SAR:"Every bit moves right. The old LSB goes to CF and the MSB is copied (sign kept).",ROL:"Bits rotate left: the MSB goes to CF and also back into the LSB.",ROR:"Bits rotate right: the LSB goes to CF and also back into the MSB.",RCL:"Rotate left through carry: MSB → CF, and the old CF → LSB.",RCR:"Rotate right through carry: LSB → CF, and the old CF → MSB."};
+  st("Read the operand",`${nm(a)} = ${hv(x,w)}${n>1?`, count = ${n}`:""}${/^RC/.test(mn)?`, CF = ${S0.F.CF}`:""}`);st(mn+" ×"+n,D[mn]);st("Store the result",`${nm(a)} ← <b>${hv(v,w)}</b>`);st("Update flags",`<b>CF = ${F.CF}</b>${/^(SHL|SAL|SHR|SAR)$/.test(mn)?"; SF, ZF and PF follow the result":""}`);r.d={n:nm(a),w,b:x,a:v};return r}
+ if(/^(MUL|IMUL|DIV|IDIV)$/.test(mn)){if(e=need(1))return e;if(a.k=="i")return E("The operand must be a register or memory.");const w=a.w||16,s=gt(S,a,w),ig=mn[0]=="I";
+  if(mn.endsWith("MUL")){const x=w==8?rg(S,"AL"):S.R.AX,p=ig?sx(x,w)*sx(s,w):x*s;
+   if(w==8){S.R.AX=p&0xFFFF;F.CF=F.OF=+(ig?p!==sx(p&255,8):(p>>8)!==0)}else{const u=p>>>0;S.R.AX=u&0xFFFF;S.R.DX=(u>>>16)&0xFFFF;F.CF=F.OF=+(ig?p!==sx(u&0xFFFF,16):S.R.DX!==0)}
+   st("Fetch the operands",`${w==8?"AL":"AX"} = ${hv(x,w)}, ${nm(a)} = ${hv(s,w)}`);st("Multiply"+(ig?" (signed)":""),`${ig?`${sx(x,w)} × ${sx(s,w)} = ${p}`:`${hv(x,w)} × ${hv(s,w)}`} → <b>${w==8?H(p&0xFFFF,4):H(p>>>0,8)}</b>`);
+   st("Store the double-width product",w==8?`AX = <b>${H(S.R.AX)}</b>`:`DX:AX = <b>${H(S.R.DX)}:${H(S.R.AX)}</b>`);st("Update flags",`CF = OF = ${F.CF} (1 means the upper half is significant)`);return r}
+  if(s===0)return E("Divide error: the divisor is zero. The 8086 would raise interrupt 0.");
+  const dd=w==8?S.R.AX:S.R.DX*65536+S.R.AX,d=ig?sx(s,w):s,n=ig?(w==8?sx(dd,16):(dd|0)):dd,q=ig?Math.trunc(n/d):Math.floor(n/d),rm=n-q*d,lim=ig?(w==8?[-128,127]:[-32768,32767]):[0,MK(w)];
+  if(q<lim[0]||q>lim[1])return E("Divide error: the quotient does not fit in "+(w==8?"AL":"AX")+". The 8086 would raise interrupt 0.");
+  if(w==8)S.R.AX=((rm&255)<<8)|(q&255);else{S.R.AX=q&0xFFFF;S.R.DX=rm&0xFFFF}
+  st("Fetch dividend and divisor",`${w==8?"AX":"DX:AX"} = ${w==8?H(dd):H(dd,8)}, ${nm(a)} = ${hv(s,w)}`);st("Divide"+(ig?" (signed)":""),`${ig?`${n} ÷ ${d}`:`${dd} ÷ ${s}`} = quotient <b>${hv(q&MK(w),w)}</b>, remainder <b>${hv(rm&MK(w),w)}</b>`);
+  st("Store the results",w==8?`AL ← quotient, AH ← remainder<br><b>AX = ${H(S.R.AX)}</b>`:`AX ← quotient, DX ← remainder<br><b>AX = ${H(S.R.AX)}, DX = ${H(S.R.DX)}</b>`);return r}
+ if(mn=="PUSH"||mn=="POP"){if(e=need(1))return e;if(a.k!="r"||a.w!=16)return E(mn+" works on a 16-bit register in this simulator.");
+  const s0=S.R.SP;
+  if(mn=="PUSH"){const v=S.R[a.n];S.R.SP=(s0-2)&0xFFFF;S.M[(s0-1)&0xFFFF]=v>>8;S.M[S.R.SP]=v&255;
+   st("Decrement SP by 2",`SP = ${H(s0)} − 2 = <b>${H(S.R.SP)}</b>`);st("Push the high byte first (SP+1)",`${a.n} high byte ${H(v>>8,2)} → [${H((s0-1)&0xFFFF)}]`);st("Then the low byte (SP)",`${a.n} low byte ${H(v&255,2)} → [${H(S.R.SP)}]`)}
+  else{const lo=S.M[s0]||0,hi=S.M[(s0+1)&0xFFFF]||0;S.R[a.n]=(hi<<8)|lo;S.R.SP=(s0+2)&0xFFFF;
+   st("Pop the low byte first",`[${H(s0)}] = ${H(lo,2)} → low byte of ${a.n}`);st("Then the high byte",`[${H(s0+1)}] = ${H(hi,2)} → high byte of ${a.n}`);st("Increment SP by 2",`SP = ${H(s0)} + 2 = <b>${H(S.R.SP)}</b><br><b>${a.n} = ${H(S.R[a.n])}</b>`)}
+  r.stack=[s0,S.R.SP];return r}
+ if(mn=="IN"||mn=="OUT"){if(e=need(2))return e;const io=mn=="IN"?b:a,rr=mn=="IN"?a:b;
+  if(rr.k!="r"||!/^(AL|AX)$/.test(rr.n))return E(mn+" uses AL (byte) or AX (word).");if(!(io.k=="i"||io.n=="DX"))return E("The port is an 8-bit number or the DX register.");
+  const w=rr.w,p=io.k=="i"?io.v&255:S.R.DX,src=io.k=="i"?`port number ${H(p,2)} is in the instruction`:`DX = ${H(p)} holds the port address`;
+  if(mn=="IN"){const v=(S.P[p]||0)|(w==16?(S.P[p+1]||0)<<8:0);wr(S,rr.n,v);st("Port address",src);st("Read the port",`${rr.n} ← port ${H(p,2)}: <b>${rr.n} = ${hv(v,w)}</b>`)}
+  else{const v=rg(S,rr.n);S.P[p]=v&255;if(w==16)S.P[p+1]=v>>8;st("Port address",src);st("Write the port",`port ${H(p,2)} ← ${rr.n} = <b>${hv(v,w)}</b>`)}return r}
+ if(mn=="LEA"||mn=="LDS"||mn=="LES"){if(e=need(2))return e;if(a.k!="r"||a.w!=16||b.k!="m")return E(mn+" needs a 16-bit register and a memory operand, like "+mn+" BX,[5000H].");
+  if(mn=="LEA"){S.R[a.n]=b.a;st("Work out the effective address",`EA of ${ar[1]} = <b>${H(b.a)}</b> (the address itself, not the data)`);st("Load it",`${a.n} ← ${H(b.a)}`);return r}
+  const o=mrd(S,b.a,16),sg=mrd(S,b.a+2,16);S.R[a.n]=o;S.R[mn=="LDS"?"DS":"ES"]=sg;
+  st("Load the offset",`${a.n} ← word at [${H(b.a)}] = <b>${H(o)}</b>`);st("Load the segment",`${mn=="LDS"?"DS":"ES"} ← word at [${H(b.a+2)}] = <b>${H(sg)}</b>`);return r}
+ return E("This simulator runs the data-transfer, arithmetic, logic, shift and flag instructions. Try MOV, ADD, MUL, AND, SHL, PUSH, XCHG, STC…")}
+/* ---------- result view ---------- */
+function bitsH(v,o,w){let s="";for(let g=w/4-1;g>=0;g--){s+='<span class="n4">';for(let i=3;i>=0;i--){const k=g*4+i,x=(v>>k)&1;s+=`<i class="${o!==null&&x!==((o>>k)&1)?"d":""}">${x}</i>`}s+="</span>"}return`<div class="bt">${s}</div>`}
+function flow(el,st){clearTimeout(el._t);el.innerHTML=st.map((s,i)=>`<div class="st"><span class="nb">${i+1}</span><div><b>${s[0]}</b><div class="dt">${s[1]}</div></div></div>`).join("");const a=[...el.children];let i=0;const nx=()=>{if(a[i]){a[i++].classList.add("on");el._t=setTimeout(nx,650)}};el._t=setTimeout(nx,80)}
+function show(el,r,S0){if(r.err){el.innerHTML=`<div class="tip" style="border-color:var(--bad)"><b>Can’t run that.</b> ${r.err}</div>`;return}
+ const S=r.S,nr=["AX","BX","CX","DX"].concat(["SI","DI","BP","SP","DS","ES"].filter(n=>S.R[n]!==S0.R[n]));
+ let h=`<div class="rg">${nr.map(n=>{const c=S.R[n]!==S0.R[n];return`<div class="rc ${c?"chg":""}"><b>${n}</b><span>${H(S0.R[n])}</span>${c?`<i>${H(S.R[n])}</i>`:""}</div>`}).join("")}</div>`;
+ h+=`<div class="fg">${FL.map(f=>{const c=S.F[f]!==S0.F[f];return`<span class="fc ${S.F[f]?"on":""} ${c?"chg":""}">${f} ${c?S0.F[f]+"→":""}${S.F[f]}</span>`}).join("")}</div>`;
+ const ks=[...new Set([...Object.keys(S0.M),...Object.keys(S.M)])].filter(k=>(S0.M[k]||0)!==(S.M[k]||0)),pk=[...new Set([...Object.keys(S0.P),...Object.keys(S.P)])].filter(k=>(S0.P[k]||0)!==(S.P[k]||0));
+ if((ks.length||pk.length)&&!r.stack)h+=`<p class="sub" style="margin:8px 0">${ks.map(k=>`memory [${H(+k)}]: ${X(S0.M[k]||0)} → <b>${X(S.M[k]||0)}</b>`).concat(pk.map(k=>`port ${H(+k,2)}: ${X(S0.P[k]||0)} → <b>${X(S.P[k]||0)}</b>`)).join("<br>")}</p>`;
+ if(r.stack){const[a,b]=r.stack,lo=Math.min(a,b);h+=`<div style="margin:10px 0"><small class="m sub">Stack (top of the page = higher address)</small>${[3,2,1,0].map(i=>{const ad=lo+i,c=(S0.M[ad]||0)!==(S.M[ad]||0);return`<div class="sr ${c?"chg":""}"><code>${H(ad)}</code><b>${X(S.M[ad]||0)}</b><em>${ad==a?"◄ SP before ":""}${ad==b?"◄ SP after":""}</em></div>`}).join("")}</div>`}
+ if(r.d){const{w,b,a,n}=r.d;h+=`<div class="bits"><div><small>${n} BEFORE (${H(b,w/4)})</small>${bitsH(b,null,w)}</div><div><small>${n} AFTER (${H(a,w/4)}) – changed bits are highlighted</small>${bitsH(a,b,w)}</div></div>`}
+ el.innerHTML=h+'<div class="flow"></div>';flow(el.querySelector(".flow"),r.steps)}
+/* learn examples */
+const bf=o=>{const p=[];for(const[k,v]of Object.entries(o.R||{}))p.push(k+" = "+H(v));for(const[k,v]of Object.entries(o.F||{}))p.push(k+" = "+v);for(const[k,v]of Object.entries(o.M||{}))p.push("["+H(+k)+"] = "+X(v));for(const[k,v]of Object.entries(o.P||{}))p.push("port "+H(+k,2)+" = "+X(v));return p.length?"Initial: "+p.join(", "):"Initial: AX = 1025H, BX = 3030H, CX = 2070H, SP = 0100H"};
+let UID=0,EX={};
+function exI(t,o={}){const u=++UID;EX[u]=[t,o];return`<div class="ex"><div class="exh"><code>${t}</code><button class="btn" onclick="runEI(${u})">Run example</button></div><div class="sub" style="margin-top:6px">${bf(o)}</div><div id="fx${u}" aria-live="polite"></div></div>`}
+function runEI(u){const[t,o]=EX[u],S=mkS(o);show($("#fx"+u),exec(t,S),S)}
+/* traces */
+const TRS={call:{L:["MAIN:","MOV AX,1","CALL PROC","MOV BX,2","HLT","PROC:","ADD AX,AX","RET"],q:[[1,"MOV AX,1 executes.","Stack: empty"],[2,"CALL pushes the return address (the next instruction) on the stack.","Stack: return → MOV BX,2"],[6,"IP jumps into the procedure, which runs.","Stack: return → MOV BX,2"],[7,"RET pops the return address from the stack.","Stack: empty"],[3,"Execution resumes right after the CALL.","Stack: empty"]]},
+ jmp:{L:["START:","MOV AX,1","JMP BB","MOV AX,99","BB:","MOV BX,2"],sk:[3],q:[[1,"MOV AX,1 executes.",""],[2,"JMP always jumps to BB.",""],[5,"The skipped part is never executed.",""]]},
+ jcc:{L:["CMP AX,BX","JE BB","MOV CX,1","BB:","MOV DX,2"],q:null}};
+function traceH(k){const u=++UID,T=TRS[k];EX[u]={k,c:1};return`<div class="ex"><div class="exh"><span class="sub">${k=="call"?"CALL and RET":k=="jmp"?"Unconditional jump":"Conditional jump (JE)"}</span><span>${k=="jcc"?`<button class="btn g" id="tc${u}" onclick="EX[${u}].c^=1;this.textContent='Condition: '+(EX[${u}].c?'true (equal)':'false (not equal)')">Condition: true (equal)</button> `:""}<button class="btn" onclick="runTr(${u})">Run</button></span></div><div class="tl" id="tl${u}">${T.L.map((l,i)=>`<div class="${/:$/.test(l)?"lb":""} ${(T.sk||[]).includes(i)?"sk":""}" data-i="${i}">${l}</div>`).join("")}</div><div class="dt" id="tn${u}" style="min-height:3em" aria-live="polite">Press Run to follow the program counter.</div></div>`}
+function runTr(u){const{k,c}=EX[u],T=TRS[k],q=k=="jcc"?(c?[[0,"CMP sets the flags: the values are equal, so ZF = 1.",""],[1,"JE sees ZF = 1, so the jump is taken.",""],[4,"Control lands at BB. MOV CX,1 was skipped.",""]]:[[0,"CMP sets the flags: the values differ, so ZF = 0.",""],[1,"JE sees ZF = 0, so no jump is made.",""],[2,"The next instruction runs normally.",""],[4,"Execution continues to BB.",""]]):T.q,L=$$("#tl"+u+" div");clearTimeout(EX[u].t);L.forEach(x=>x.classList.remove("on"));let i=0;const nx=()=>{if(!EX[u]||!$("#tn"+u))return;L.forEach(x=>x.classList.remove("on"));if(q[i]){L[q[i][0]].classList.add("on");$("#tn"+u).innerHTML=q[i][1]+(q[i][2]?"<br><b>"+q[i][2]+"</b>":"");i++;EX[u].t=setTimeout(nx,1300)}};nx()}
+function strDemo(){const u=++UID,s="HELLO";EX[u]={};return`<div class="ex"><div class="exh"><code>REP MOVSB</code><button class="btn" onclick="runStr(${u})">Run example</button></div><div class="sub" style="margin-top:6px">CX = 5, DF = 0, DS:SI → "HELLO", ES:DI → empty</div><small class="m sub">Source</small><div class="cells" id="ss${u}">${[...s].map(c=>`<span>${c}</span>`).join("")}</div><small class="m sub">Destination</small><div class="cells" id="sd${u}">${[...s].map(()=>"<span></span>").join("")}</div><div class="dt" id="sr${u}">SI = 0000H, DI = 0000H, CX = 5</div></div>`}
+function runStr(u){const s="HELLO",A=$$("#ss"+u+" span"),B=$$("#sd"+u+" span"),o=$("#sr"+u);clearTimeout(EX[u].t);A.forEach(x=>x.className="");B.forEach(x=>{x.className="";x.textContent=""});let i=0;const nx=()=>{if(!EX[u]||!o.isConnected)return;if(i<5){A.forEach(x=>x.classList.remove("on"));A[i].classList.add("on");B[i].textContent=s[i];B[i].classList.add("cp");i++;o.innerHTML=`Copied byte ${i}. <b>SI = ${H(i)}, DI = ${H(i)}, CX = ${5-i}</b>`;EX[u].t=setTimeout(nx,750)}else o.innerHTML+=" — CX = 0, so REP stops."};nx()}
+/* tables */
+const T={word:[["MOV","Copy a byte or word from source to destination."],["PUSH","Put a word on the top of the stack."],["POP","Get a word from the top of the stack to a location."],["PUSHA","Put all the registers on the stack."],["POPA","Get words from the stack into all registers."],["XCHG","Exchange the data of two locations."],["XLAT","Translate a byte in AL using a table in memory."]],
+io:[["IN","Read a byte or word from a port into the accumulator."],["OUT","Send a byte or word from the accumulator to a port."]],addr:[["LEA","Load the address of an operand into a register."],["LDS","Load the DS register (and a register) from memory."],["LES","Load the ES register (and a register) from memory."]],
+flag:[["LAHF","Load AH with the low byte of the flag register."],["SAHF","Store AH into the low byte of the flag register."],["PUSHF","Copy the flag register to the top of the stack."],["POPF","Copy the word at the top of the stack into the flag register."]],
+add:[["ADD","Add byte to byte or word to word."],["ADC","Add with carry."],["INC","Increment the byte or word by 1."],["AAA","After adding two ASCII digits, correct the result in AL to unpacked BCD."],["DAA","After adding two packed BCD numbers, correct the result in AL to packed BCD."]],
+sub:[["SUB","Subtract byte from byte or word from word."],["SBB","Subtract with borrow."],["DEC","Decrement the byte or word by 1."],["NEG","Negate: replace the operand with its two’s complement."],["CMP","Compare two bytes or words (flags only)."],["AAS","After subtracting two ASCII digits, correct AL to unpacked BCD."],["DAS","After subtracting two packed BCD numbers, correct AL to packed BCD."]],
+mul:[["MUL","Multiply unsigned byte by byte or word by word."],["IMUL","Multiply signed byte by byte or word by word."],["AAM","After multiplying two unpacked BCD digits, convert the binary result in AX to unpacked BCD."]],
+div:[["DIV","Divide an unsigned word by a byte, or an unsigned double word by a word."],["IDIV","Divide a signed word by a byte, or a signed double word by a word."],["AAD","Convert the unpacked BCD digits in AH and AL to binary in AL, before a division."],["CBW","Fill the upper byte of a word with copies of the sign bit of the lower byte."],["CWD","Fill the upper word of a double word with the sign bit of the lower word."]],
+logic:[["NOT","Invert each bit of a byte or word."],["AND","AND each bit with the matching bit of another byte or word."],["OR","OR each bit with the matching bit of another byte or word."],["XOR","Exclusive-OR each bit with the matching bit of another byte or word."],["TEST","AND the operands to update flags without changing them."]],
+shift:[["SHL/SAL","Shift bits left and put zeros in the LSBs."],["SHR","Shift bits right and put zeros in the MSBs."],["SAR","Shift bits right and copy the old MSB into the new MSB."]],
+rot:[["ROL","Rotate left: MSB to LSB and to the carry flag."],["ROR","Rotate right: LSB to MSB and to the carry flag."],["RCL","Rotate left through carry: MSB to CF and CF to LSB."],["RCR","Rotate right through carry: LSB to CF and CF to MSB."]],
+str:[["REP","Repeat the instruction while CX ≠ 0."],["REPE/REPZ","Repeat while CX ≠ 0 and ZF = 1."],["REPNE/REPNZ","Repeat while CX ≠ 0 and ZF = 0."],["MOVS/MOVSB/MOVSW","Move a byte or word from one string to another."],["CMPS/CMPSB/CMPSW","Compare two string bytes or words."],["INS/INSB/INSW","Input a string, byte or word from an I/O port to memory."],["OUTS/OUTSB/OUTSW","Output a string, byte or word from memory to an I/O port."],["SCAS/SCASB/SCASW","Scan a string, comparing each byte with AL or each word with AX."],["LODS/LODSB/LODSW","Load a string byte into AL or a string word into AX."]],
+br:[["CALL","Call a procedure and save the return address on the stack."],["RET","Return from the procedure to the main program."],["JMP","Jump to the given address and continue from there."]],
+jcc:[["JE/JZ","Jump if equal / ZF = 1"],["JNE/JNZ","Jump if not equal / ZF = 0"],["JC","Jump if carry, CF = 1"],["JNC","Jump if no carry, CF = 0"],["JA","Jump if above, CF = 0 and ZF = 0"],["JB","Jump if below, CF = 1"],["JAE","Jump if above or equal, CF = 0"],["JBE","Jump if below or equal, CF = 1 or ZF = 1"],["JG","Jump if greater (signed)"],["JL","Jump if less (signed)"],["JGE","Jump if greater or equal (signed)"],["JLE","Jump if less or equal (signed)"],["JP","Jump if parity even, PF = 1"],["JNP","Jump if parity odd, PF = 0"],["JS","Jump if signed, SF = 1"],["JNS","Jump if not signed, SF = 0"],["JO","Jump if overflow, OF = 1"],["JNO","Jump if not overflow, OF = 0"]],
+pc:[["STC","Set the carry flag, CF = 1."],["CLC","Clear the carry flag, CF = 0."],["CMC","Complement the carry flag."],["STD","Set the direction flag, DF = 1."],["CLD","Clear the direction flag, DF = 0."],["STI","Set the interrupt flag, enabling the INTR input."],["CLI","Clear the interrupt flag, disabling the INTR input."]],
+it:[["LOOP","Loop a group of instructions until CX = 0."],["LOOPE/LOOPZ","Loop while ZF = 1 and CX ≠ 0."],["LOOPNE/LOOPNZ","Loop while ZF = 0 and CX ≠ 0."],["JCXZ","Jump to the address if CX = 0."]],
+int:[["INT","Interrupt the program and call a service routine."],["INTO","Interrupt if OF = 1."],["IRET","Return from the interrupt service routine to the main program."]]};
+const tb=k=>`<div class="tw"><table>${T[k].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table></div>`;
+const JC=[["JE/JZ",f=>f.ZF],["JNE/JNZ",f=>!f.ZF],["JC",f=>f.CF],["JNC",f=>!f.CF],["JA",f=>!f.CF&&!f.ZF],["JB",f=>f.CF],["JAE",f=>!f.CF],["JBE",f=>f.CF||f.ZF],["JG",f=>!f.ZF&&f.SF==f.OF],["JL",f=>f.SF!=f.OF],["JGE",f=>f.SF==f.OF],["JLE",f=>f.ZF||f.SF!=f.OF],["JP",f=>f.PF],["JNP",f=>!f.PF],["JS",f=>f.SF],["JNS",f=>!f.SF],["JO",f=>f.OF],["JNO",f=>!f.OF]];
+const CAT=[["Data transfer",1,"MOV PUSH POP PUSHA POPA XCHG XLAT IN OUT LEA LDS LES LAHF SAHF PUSHF POPF"],["Arithmetic",3,"ADD ADC INC AAA DAA SUB SBB DEC NEG CMP AAS DAS MUL IMUL AAM DIV IDIV AAD CBW CWD"],["Bit manipulation",6,"NOT AND OR XOR TEST SHL SAL SHR SAR ROL ROR RCL RCR"],["String",8,"REP REPE REPNE MOVS CMPS INS OUTS SCAS LODS"],["Branch & loop",9,"CALL RET JMP JE JNE JC JNC JA JB JG JL …"],["Processor control",10,"STC CLC CMC STD CLD STI CLI"],["Iteration control",10,"LOOP LOOPE LOOPNE JCXZ"],["Interrupt",10,"INT INTO IRET"]];
+/* learn modules */
+const M=[
+["Instruction set basics",()=>`<p>An <b>instruction</b> is a binary pattern designed inside the microprocessor to perform a specific function. Every instruction has two kinds of field:</p><div class="anat"><div><b>MOV</b><small>mnemonic → opcode</small></div><div><b>AX</b><small>destination operand</small></div><div><b>BX</b><small>source operand</small></div></div>
+<ul class="k"><li><b>Opcode</b> (operational code): says what operation the CPU must perform. It is the first field of the machine-language instruction.</li><li><b>Operand:</b> the data the operation acts on. It may be a register value or a memory value, 8 or 16 bits wide.</li><li><b>Mnemonic:</b> a symbolic code for an instruction, such as MOV, ADD or SUB.</li><li><b>Assembler:</b> converts mnemonics into the binary bits the processor reads.</li></ul>
+<div class="tip">The slide quotes 08 as an example opcode for MOV. Real 8086 MOV opcodes are 88H–8BH (and others), so treat “08” as illustrative.</div><h3>The 8 types of instruction</h3><p>Tap a family to jump to its module.</p><div class="cat">${CAT.map(c=>`<button onclick="openMod(${c[1]})">${c[0]}</button>`).join("")}</div>`],
+["Data transfer: MOV, PUSH, POP, XCHG",()=>`<p>Data moves from a <b>source</b> to a <b>destination</b>. The source can be a register, a memory location or immediate data; the destination can be a register or a memory operand.</p><div class="tip"><b>Rule:</b> source and destination cannot both be memory locations, and segment registers cannot be used as both at the same time.</div>${tb("word")}
+<h3>MOV</h3><p>Copies the source into the destination. The source is not changed.</p>${exI("MOV BX,AX",{R:{AX:0x2000,BX:0}})}${exI("MOV CL,[5000H]",{R:{CX:0},M:{[0x5000]:0x50}})}
+<h3>PUSH</h3><p>Pushes a register on the stack. SP is decremented by 2; the higher byte goes first (SP−1), then the lower byte (SP−2).</p>${exI("PUSH CX",{R:{CX:0x2070}})}
+<h3>POP</h3><p>Pops the top of the stack into a register. The lower byte comes first, then the higher byte, and SP is incremented by 2.</p>${exI("POP BX",{R:{BX:0},M:{[0x100]:0x40,[0x101]:0x80}})}
+<h3>XCHG</h3>${exI("XCHG AX,BX",{R:{AX:0x2040,BX:0x7080}})}`],
+["Data transfer: I/O, addresses & flags",()=>`<h3>Input and output ports</h3>${tb("io")}${exI("IN AL,90H",{R:{AX:0},P:{[0x90]:0x10}})}${exI("OUT 80H,AL",{R:{AX:0x15}})}
+<h3>Transferring addresses</h3>${tb("addr")}<p>LEA loads an address, not the data stored there. LDS loads a register <i>and</i> DS from memory (the slide shows the register half; DS comes from the next word).</p>${exI("LEA BX,[SI+10H]",{R:{SI:0x200,BX:0}})}${exI("LDS BX,[5000H]",{R:{BX:0},M:{[0x5000]:0x15,[0x5001]:0x35,[0x5002]:0,[0x5003]:0x30}})}
+<h3>Transferring the flags</h3>${tb("flag")}${exI("LAHF",{F:{CF:1,ZF:1},R:{AX:0}})}`],
+["Arithmetic: addition",()=>`${tb("add")}<h3>ADD</h3><p>Adds the source to the destination and stores the sum in the destination.</p>${exI("ADD AX,3030H",{R:{AX:0x1025}})}${exI("ADD AX,BX",{R:{AX:0x1025,BX:0x3030}})}
+<h3>ADC (add with carry)</h3><p>Adds the source <i>and the carry flag</i>. It lets you add numbers wider than 16 bits, one chunk at a time.</p>${exI("ADC AX,0F0E0H",{R:{AX:0x1025}})}<p>The same instruction when CF = 1 comes in:</p>${exI("ADC AX,0F0E0H",{R:{AX:0x1025},F:{CF:1}})}
+<h3>INC</h3><p>Adds 1. INC does not affect the carry flag.</p>${exI("INC AX",{R:{AX:0x1025}})}${exI("INC [5000H]",{M:{[0x5000]:0x11,[0x5001]:0x10}})}`],
+["Arithmetic: subtraction & compare",()=>`${tb("sub")}<div class="tip">The slide prints NEG as “NPG”; the instruction is <b>NEG</b>.</div><h3>SUB</h3>${exI("SUB AX,1010H",{R:{AX:0x1025}})}${exI("SUB AX,BX",{R:{AX:0x1025,BX:0x1010}})}
+<h3>SBB (subtract with borrow)</h3><p>Subtracts the source <i>and</i> the carry flag (the borrow).</p>${exI("SBB AX,5050H",{R:{AX:0x1025},F:{CF:1}})}<div class="tip"><b>Check the slide:</b> it shows 1025H − 5050H = BFD5H. With CF = 1 the borrow is also subtracted, so the true SBB result is <b>BFD4H</b>, which is what runs above.</div>
+<h3>DEC</h3>${exI("DEC AX",{R:{AX:0x1025}})}${exI("DEC [5000H]",{M:{[0x5000]:0x11,[0x5001]:0x10}})}
+<h3>CMP (compare)</h3><p>CMP subtracts but throws the result away, keeping only the flags:</p><div class="fm"><div>D = S<small>CF = 0, ZF = 1</small></div><div>D &gt; S<small>CF = 0, ZF = 0</small></div><div>D &lt; S<small>CF = 1, ZF = 0</small></div></div>${exI("CMP AX,BX",{R:{AX:0x1025,BX:0x1025}})}${exI("CMP AX,BX",{R:{AX:0x1025,BX:0x1000}})}${exI("CMP AX,BX",{R:{AX:0x1000,BX:0x1025}})}`],
+["Arithmetic: multiply & divide",()=>`${tb("mul")}<h3>MUL (unsigned)</h3><p>A byte operand is multiplied by AL and the product goes to AX. A word operand is multiplied by AX and the product goes to DX:AX.</p>${exI("MUL BX",{R:{AX:0x1005,BX:0x33}})}${exI("MUL BL",{R:{AX:0x85,BX:0x35}})}
+<h3>IMUL (signed)</h3><p>The same 85H × 35H, but 85H is now the signed number −123, so the product is negative (E689H in two’s complement).</p>${exI("IMUL BL",{R:{AX:0x85,BX:0x35}})}
+${tb("div")}<h3>DIV (unsigned)</h3><p>A byte divisor divides AX: the quotient goes to AL and the remainder to AH. A word divisor divides DX:AX: quotient to AX, remainder to DX.</p>${exI("DIV BL",{R:{AX:0x85,BX:0x35}})}${exI("DIV BX",{R:{DX:0,AX:0x85,BX:0x35}})}
+<h3>CBW and CWD</h3><p>They sign-extend a value so it can be used as a wider dividend, typically before IDIV.</p>${exI("CBW",{R:{AX:0x85}})}`],
+["Bit manipulation: logic",()=>`${tb("logic")}<p>Logic instructions work on every bit pair at once and clear CF and OF. Watch the highlighted bits change.</p><h3>NOT</h3>${exI("NOT AX",{R:{AX:0}})}<h3>AND</h3><p>Result bit is 1 only if both bits are 1. Used to <i>mask</i> (clear) bits.</p>${exI("AND AX,BX",{R:{AX:0x1D2B,BX:0x083F}})}<h3>OR</h3><p>Result bit is 1 if either bit is 1. Used to <i>set</i> bits.</p>${exI("OR AX,BX",{R:{AX:0x1D2B,BX:0x083F}})}<h3>XOR</h3><p>Result bit is 1 when the bits differ. Used to <i>toggle</i> bits.</p>${exI("XOR AX,BX",{R:{AX:0x1D2B,BX:0x083F}})}<h3>TEST</h3><p>An AND that only updates flags.</p>${exI("TEST AX,BX",{R:{AX:0x1D2B,BX:0x083F}})}`],
+["Bit manipulation: shift & rotate",()=>`<h3>Shifts</h3>${tb("shift")}<div class="tip">The 8086 shifts by 1, or by the count in CL. SHL by 1 doubles an unsigned number; SHR by 1 halves it.</div>${exI("SHL AL,1",{R:{AX:0x0A}})}${exI("SHR AL,1",{R:{AX:0x0A}})}${exI("SAR AL,1",{R:{AX:0x8A}})}
+<h3>Rotates</h3>${tb("rot")}${exI("ROL AL,1",{R:{AX:0x8A}})}${exI("ROR AL,1",{R:{AX:0x0B}})}${exI("RCL AL,1",{R:{AX:0x8A}})}${exI("RCR AL,1",{R:{AX:0x0B}})}<p>Try RCL and RCR with CF = 1 in the Practice lab to see the old carry enter the number.</p>`],
+["String instructions",()=>`<p>String instructions work on blocks of bytes or words, using SI and DI (see the Addressing Modes lab). A <b>REP</b> prefix repeats them.</p>${tb("str")}<div class="tip">The slide prints CMPS as “COMS/COMPSB”; the instruction is <b>CMPS/CMPSB/CMPSW</b>.</div><h3>REP MOVSB in action</h3>${strDemo()}`],
+["Branch & loop",()=>`${tb("br")}<h3>CALL and RET</h3><p>CALL saves the return address on the stack and jumps to a procedure. RET pops that address and returns to the main line.</p>${traceH("call")}<h3>JMP</h3><p>An unconditional jump: execution continues at the target and the “shipped” part is never run.</p>${traceH("jmp")}
+<h3>Conditional jumps (Jcc)</h3><p>A conditional jump tests the flags (usually set by CMP) and jumps only if the condition is true.</p>${traceH("jcc")}<div class="tw" style="margin-top:12px"><table>${T.jcc.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table></div><div class="tip">Signed comparisons (JG, JL, JGE, JLE) really test SF against OF, not SF alone. The Branch lab in Practice uses the real rules.</div>`],
+["Control, iteration & interrupts",()=>`<h3>Processor control</h3>${tb("pc")}${exI("STC",{})}${exI("CMC",{F:{CF:1}})}${exI("STD",{})}<h3>Iteration control</h3>${tb("it")}<h3>Interrupts</h3>${tb("int")}`],
+["Cheat sheet",()=>`<p>All 8 families of the 8086 instruction set from the lecture:</p>${CAT.map(c=>`<div class="card" style="margin:10px 0;box-shadow:none"><h3>${c[0]}</h3><div class="pills">${c[2].split(" ").map(x=>`<span class="pill">${x}</span>`).join("")}</div></div>`).join("")}<div class="tip">Next: try the instructions yourself in the Practice lab, then take the assessment.</div>`]];
+/* router + learn ui */
+function go(p){["learn","practice","assess"].forEach(s=>$("#"+s).hidden=s!==p);$$("[data-go]").forEach(b=>b.dataset.go===p?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));try{history.replaceState(null,"","#"+p)}catch(e){}scrollTo(0,0)}
+$$("nav [data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+let cur=0,done=store.g("done4",[]);const eh=s=>s.replace(/&/g,"&amp;");
+function openMod(i,q){cur=i;UID=0;EX={};$("#mod").innerHTML=`<h2>${i+1}. ${eh(M[i][0])}</h2>${M[i][1]()}<div class="nav2"><button class="btn g" ${i?"":"disabled"} onclick="openMod(${i-1})">Previous</button><button class="btn" onclick="finish(${i})">${i<M.length-1?"Mark done &amp; continue":"Mark done"}</button></div>`;drawMods();if(!q)$("#mod").scrollIntoView({behavior:"smooth",block:"start"})}
+function finish(i){if(!done.includes(i))done.push(i);store.s("done4",done);if(i<M.length-1)openMod(i+1);else{drawMods();go("practice")}}
+function drawMods(){$("#mods").innerHTML=M.map((m,i)=>`<button class="${done.includes(i)?"done":""}" aria-current="${i===cur}" onclick="openMod(${i})">${i+1}. ${eh(m[0])}<span class="dot"></span></button>`).join("");$("#pg").style.width=done.length/M.length*100+"%";$("#pgt").textContent=done.length+" of "+M.length+" modules done"}
+/* ---------- practice ---------- */
+const hx=s=>{const v=parseInt(s,16);return isNaN(v)?0:v&0xFFFF};
+const P=[["Instruction lab",()=>`<div class="card"><h3>Type any instruction and run it</h3><div class="ti"><input id="li" value="ADD AX,BX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Instruction"><button class="btn" id="lr">Run</button></div><div class="cp2" id="lc"></div><div class="row"><label>AX<input data-r="AX" maxlength="4"></label><label>BX<input data-r="BX" maxlength="4"></label><label>CX<input data-r="CX" maxlength="4"></label><label>DX<input data-r="DX" maxlength="4"></label><label>CF (0/1)<input data-f="CF" maxlength="1"></label></div><button class="btn g" id="lk" hidden>Use result as the new starting state</button><div id="lo" aria-live="polite"></div></div>`,()=>{
+ const ch=["ADD AX,BX","SUB AX,1010H","ADC AX,BX","MUL BL","DIV BL","AND AX,BX","XOR AX,AX","NEG AX","SHL AX,1","RCL AL,1","ROR AL,1","PUSH CX","XCHG AX,BX","CMP AX,BX","CBW","LEA BX,[SI+10H]","STC"];
+ let S=mkS(),last=null;const fill=()=>{$$("#pbody [data-r]").forEach(e=>e.value=X(S.R[e.dataset.r]>>8)+X(S.R[e.dataset.r]));$$("#pbody [data-f]").forEach(e=>e.value=S.F[e.dataset.f])};
+ const run=()=>{$$("#pbody [data-r]").forEach(e=>S.R[e.dataset.r]=hx(e.value));$$("#pbody [data-f]").forEach(e=>S.F[e.dataset.f]=+e.value&1);last=exec($("#li").value,S);show($("#lo"),last,S);$("#lk").hidden=!!last.err};
+ $("#lc").innerHTML=ch.map(c=>`<button>${c}</button>`).join("");$$("#lc button").forEach(b=>b.onclick=()=>{$("#li").value=b.textContent;run()});
+ $("#lr").onclick=run;$("#li").onkeydown=e=>{if(e.key==="Enter")run()};$("#lk").onclick=()=>{S=JSON.parse(JSON.stringify(last.S));fill();$("#lo").innerHTML="";$("#lk").hidden=true};fill();run()}],
+["Predict the result",()=>`<div class="card"><div class="m sub" id="ps"></div><div class="out" id="pq" style="font-size:clamp(1.4rem,6vw,2rem)"></div><div class="sub" id="pr"></div><div class="row"><label>Your answer: AX = (hex)<input id="pi" maxlength="5" autocomplete="off" placeholder="e.g. 4055"></label></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pb">Check answer</button><button class="btn g" id="pn">New question</button></div><p id="px" aria-live="polite" style="margin-top:10px"></p><div id="po"></div></div>`,()=>{
+ const O=["ADD AX,BX","SUB AX,BX","AND AX,BX","OR AX,BX","XOR AX,BX","INC AX","DEC AX","NOT AX","NEG AX","SHL AL,1","SHR AL,1","ROL AL,1","ROR AL,1","XCHG AX,BX","MUL BL","MOV AX,BX"];
+ let sc=0,tt=0,S,ins,ans;const nx=()=>{S=mkS({R:{AX:rn(0x10,0xFFF),BX:rn(0x10,0xFFF)}});ins=O[rn(0,O.length-1)];ans=false;$("#pq").textContent=ins;$("#pr").textContent="AX = "+H(S.R.AX)+"   BX = "+H(S.R.BX)+"   CF = 0";$("#pi").value="";$("#px").textContent="";$("#po").innerHTML="";$("#ps").textContent="Score "+sc+" of "+tt};
+ $("#pb").onclick=()=>{if(ans)return;const t=$("#pi").value.replace(/h$/i,"");if(!/^[0-9a-f]+$/i.test(t)){$("#px").textContent="Enter the value in hex digits.";return}ans=true;tt++;const r=exec(ins,S),ok=parseInt(t,16)===r.S.R.AX;if(ok)sc++;$("#px").innerHTML=ok?"<span class='ok-t'><b>Correct.</b></span> AX = "+H(r.S.R.AX):"<span class='bad-t'><b>Not quite.</b></span> The answer is AX = "+H(r.S.R.AX)+". Watch the steps below.";$("#ps").textContent="Score "+sc+" of "+tt;show($("#po"),r,S)};$("#pn").onclick=nx;nx()}],
+["Branch lab",()=>`<div class="card"><h3>Compare two numbers, then see which jumps are taken</h3><div class="row"><label>A (hex)<input id="ba" value="1025" maxlength="4"></label><label>B (hex)<input id="bb" value="1000" maxlength="4"></label></div><div class="cp2" id="bp"></div><div class="fg" id="bf"></div><p id="bt" style="color:var(--mu)"></p><div class="jg" id="bj" aria-live="polite"></div></div>`,()=>{
+ const pr=[["A = B","1025","1025"],["A above B","1025","1000"],["A below B","1000","1025"],["Signed overflow","7FFF","8000"]];
+ $("#bp").innerHTML=pr.map((p,i)=>`<button data-i="${i}">${p[0]}</button>`).join("");$$("#bp button").forEach(b=>b.onclick=()=>{const p=pr[b.dataset.i];$("#ba").value=p[1];$("#bb").value=p[2];run()});
+ const run=()=>{const a=hx($("#ba").value),b=hx($("#bb").value),S=mkS({R:{AX:a,BX:b}}),r=exec("CMP AX,BX",S),F=r.S.F;
+  $("#bf").innerHTML=["CF","ZF","SF","OF","PF"].map(f=>`<span class="fc ${F[f]?"on":""}">${f} ${F[f]}</span>`).join("");
+  $("#bt").innerHTML=`CMP ${H(a)}, ${H(b)}. <b>Unsigned:</b> A is ${a>b?"above":a<b?"below":"equal to"} B. <b>Signed:</b> A (${sx(a,16)}) is ${sx(a,16)>sx(b,16)?"greater than":sx(a,16)<sx(b,16)?"less than":"equal to"} B (${sx(b,16)}).`;
+  $("#bj").innerHTML=JC.map((j,i)=>{const y=!!j[1](F);return`<div class="${y?"y":"n"}" style="animation-delay:${i*40}ms"><b>${j[0]}</b>${y?"jumps":"no jump"}</div>`}).join("")};
+ $("#ba").oninput=$("#bb").oninput=run;run()}],
+["Match the instruction",()=>`<div class="card"><div class="m sub" id="ms"></div><p style="font-size:1.15rem;font-weight:600;min-height:3.4em" id="mq"></p><div class="mg" id="mo"></div><p id="mx" style="color:var(--mu);min-height:2em" aria-live="polite"></p><button class="btn" id="mn" hidden>Next</button></div>`,()=>{
+ const all=Object.entries(T).filter(([k])=>k!="jcc").flatMap(([k,v])=>v.map(x=>[...x,k]));let sc=0,tt=0,q;
+ const nx=()=>{q=all[rn(0,all.length-1)];const pool=all.filter(x=>x[0]!==q[0]);let o=[q];while(o.length<4){const c=pool[rn(0,pool.length-1)];if(!o.includes(c))o.push(c)}o.sort(()=>Math.random()-.5);$("#mq").textContent=q[1];$("#mo").innerHTML=o.map(x=>`<button class="opt" data-m="${x[0]}">${x[0]}</button>`).join("");$$("#mo .opt").forEach(b=>b.onclick=()=>{tt++;const ok=b.dataset.m===q[0];if(ok)sc++;$$("#mo .opt").forEach(x=>{x.disabled=true;if(x.dataset.m===q[0])x.classList.add("ok");else if(x===b)x.classList.add("no")});$("#mx").innerHTML=(ok?"Correct. ":"Not quite. ")+"<b>"+q[0]+"</b>: "+q[1];$("#ms").textContent="Score "+sc+" of "+tt;$("#mn").hidden=false});$("#mx").textContent="";$("#mn").hidden=true;$("#ms").textContent="Score "+sc+" of "+tt};$("#mn").onclick=nx;nx()}]];
+let ptab=store.g("pt4",0);if(ptab>=P.length)ptab=0;
+function drawPractice(){$("#ptabs").innerHTML=P.map((p,i)=>`<button role="tab" aria-selected="${i===ptab}" onclick="ptab=${i};store.s('pt4',ptab);drawPractice()">${p[0]}</button>`).join("");$("#pbody").innerHTML=P[ptab][1]();P[ptab][2]()}
+/* ---------- assessment ---------- */
+const Q=[["Which field of an instruction specifies the type of operation the CPU performs?",["Operand","Opcode","Mnemonic","Assembler"],1,"The opcode (operational code) is the first field of the machine-language instruction."],
+["What converts mnemonics into the binary bits the processor can read?",["Assembler","Opcode","Operand","Stack"],0,"The assembler translates mnemonics such as MOV and ADD into binary."],
+["How many types of instruction does the lecture list?",["4","6","8","10"],2,"Data transfer, arithmetic, bit manipulation, string, program execution transfer, processor control, iteration control and interrupt."],
+["Which is NOT allowed in a data transfer instruction?",["Register to register","Immediate data to register","Memory to memory","Register to memory"],2,"Source and destination cannot both be memory locations."],
+["PUSH CX executes. What happens to SP?",["SP + 2","SP − 2","SP + 1","It does not change"],1,"PUSH decrements SP by 2: the high byte goes to SP−1 and the low byte to SP−2."],
+["AX = 2040H and BX = 7080H. After XCHG AX,BX, what is AX?",["2040H","7080H","90C0H","0000H"],1,"XCHG swaps the two values."],
+["IN AL,90H does what?",["Writes AL to port 90H","Reads a byte from port 90H into AL","Loads memory at 90H into AL","Adds 90H to AL"],1,"IN reads from the port into the accumulator."],
+["AX = 1025H. What is AX after ADD AX,3030H?",["4055H","3035H","4045H","1025H"],0,"1025H + 3030H = 4055H."],
+["AX = 1025H. What is AX after SUB AX,1010H?",["0015H","2035H","0025H","1015H"],0,"1025H − 1010H = 0015H."],
+["After CMP AX,BX where AX is smaller than BX, the flags are:",["CF = 0, ZF = 1","CF = 0, ZF = 0","CF = 1, ZF = 0","CF = 1, ZF = 1"],2,"D < S gives CF = 1 and ZF = 0."],
+["AL = 85H and BL = 35H. What is AX after MUL BL?",["1B89H","0255H","E689H","18FH"],0,"85H × 35H = 133 × 53 = 7049 = 1B89H. (IMUL would give E689H.)"],
+["AX = 0085H and BL = 35H. After DIV BL, what are AL (quotient) and AH (remainder)?",["AL = 1B, AH = 02","AL = 02, AH = 1B","AL = 35, AH = 85","AL = 00, AH = 02"],1,"133 ÷ 53 = 2 remainder 27 (1BH)."],
+["AX = 1D2BH and BX = 083FH. What is AX after AND AX,BX?",["1D3FH","1514H","082BH","0000H"],2,"Only bits that are 1 in both survive: 082BH. (OR gives 1D3FH, XOR gives 1514H.)"],
+["AL = 0AH. What is AL after SHL AL,1?",["05H","14H","0BH","A0H"],1,"Shifting left by 1 doubles the value: 0AH → 14H."],
+["AL = 8AH. What is AL after SAR AL,1?",["45H","C5H","14H","15H"],1,"SAR keeps the sign bit: 1000 1010 → 1100 0101 = C5H."],
+["AL = 8AH. After ROL AL,1, what are AL and CF?",["AL = 15H, CF = 1","AL = 14H, CF = 1","AL = 15H, CF = 0","AL = C5H, CF = 0"],0,"The MSB (1) goes to CF and back into the LSB: 0001 0101 = 15H."],
+["What does REP MOVSB do?",["Moves one byte once","Repeats the byte move while CX ≠ 0","Compares two strings","Loads AL from memory"],1,"REP repeats the string instruction while CX is not zero."],
+["What does the RET instruction do?",["Calls a procedure","Jumps to an interrupt","Pops the return address and goes back to the main program","Clears the carry flag"],2,"CALL saves the return address on the stack; RET restores it."],
+["JNC jumps when:",["CF = 0","CF = 1","ZF = 1","SF = 1"],0,"JNC means jump if no carry."],
+["Which instruction sets the direction flag to 1?",["CLD","STD","STC","STI"],1,"STD sets DF = 1 so string instructions run downward."]];
+let A={i:-1,a:[],fin:false};
+function drawAssess(){const b=$("#abody"),best=store.g("best4",null);
+ if(A.i===-1){b.innerHTML=`<p style="color:var(--mu)">20 multiple-choice questions on the 8086 instruction set. Answers and explanations appear at the end.${best!==null?" Your best score: <b>"+best+"/20</b>.":""}</p><button class="btn" onclick="A={i:0,a:[],fin:false};drawAssess()">Start assessment</button>`;return}
+ if(A.fin){const s=A.a.filter((x,i)=>x===Q[i][2]).length;if(best===null||s>best)store.s("best4",s);const msg=s>=17?"Excellent. You speak 8086.":s>=12?"Good work. Review the modules you missed.":"Keep going. Revisit the Learn section and retry.";
+  b.innerHTML=`<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap"><div class="ring" style="--p:0"><span>0/20</span></div><div><h3>${msg}</h3><button class="btn" onclick="A={i:0,a:[],fin:false};drawAssess()">Retake</button> <button class="btn g" onclick="go('learn')">Review modules</button></div></div><h3 style="margin-top:22px">Review</h3>`+Q.map((q,i)=>{const ok=A.a[i]===q[2];return`<div class="rv"><b>${i+1}. ${q[0]}</b><div class="tag ${ok?"ok-t":"bad-t"}">${ok?"Correct":"Incorrect"}: ${q[1][A.a[i]]}</div>${ok?"":`<div class="tag ok-t">Answer: ${q[1][q[2]]}</div>`}<div style="color:var(--mu);font-size:.92rem">${q[3]}</div></div>`}).join("");
+  const rg2=$(".ring");let k=0;const tk=()=>{k=Math.min(k+1,s);rg2.style.setProperty("--p",k*5);rg2.firstChild.textContent=k+"/20";if(k<s)setTimeout(tk,70)};tk();return}
+ const q=Q[A.i],sel=A.a[A.i];
+ b.innerHTML=`<div class="prog"><i style="width:${A.i/20*100}%"></i></div><small class="m">Question ${A.i+1} of 20</small><h3 style="margin-top:8px;font-size:1.3rem">${q[0]}</h3><div role="radiogroup" aria-label="Answers">${q[1].map((o,j)=>`<button class="opt" role="radio" aria-checked="${sel===j}" onclick="A.a[A.i]=${j};drawAssess()">${o}</button>`).join("")}</div><div class="nav2"><button class="btn g" ${A.i?"":"disabled"} onclick="A.i--;drawAssess()">Previous</button><button class="btn" ${sel===undefined?"disabled":""} onclick="${A.i<19?"A.i++":"A.fin=true"};drawAssess()">${A.i<19?"Next":"Finish"}</button></div>`}
+/* init */
+drawMods();openMod(0,true);drawPractice();drawAssess();
+{const h=location.hash.slice(1);go(["learn","practice","assess"].includes(h)?h:"learn")}
+</script>
+</body>
+</html>
