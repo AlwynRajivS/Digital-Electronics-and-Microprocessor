@@ -1,0 +1,16 @@
+Test ID,Type,Name,FF Type,States,Unused,Self-Starting,Gates,tpd (ns),Status
+TC_NORM_01,NORMAL,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,8,0,YES,2,22,PASS
+TC_NORM_02,NORMAL,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,8,0,YES,4,22,PASS
+TC_NORM_03,NORMAL,4-Bit Mod-10 BCD Decade Counter,T,10,6,YES,5,30,PASS
+TC_NORM_04,NORMAL,3-Bit Mod-6 Up Counter,D,6,2,YES,6,30,PASS
+TC_NORM_05,NORMAL,2-Bit Mod-4 Up Counter,JK,4,0,YES,0,14,PASS
+TC_NORM_06,NORMAL,4-Bit Mod-16 Full Binary Counter,T,16,0,YES,2,22,PASS
+TC_NORM_07,NORMAL,3-Bit Gray Code Counter,D,8,0,YES,9,30,PASS
+TC_NORM_08,NORMAL,3-Bit Ring Counter Sequence,D,3,5,YES,2,22,PASS
+TC_NORM_09,NORMAL,3-Bit Johnson (Twisted Ring) Counter,JK,6,2,NO (Lockout),0,14,PASS
+TC_NORM_10,NORMAL,3-Bit Prime Number Sequence Counter,JK,4,4,YES,2,22,PASS
+TC_EDGE_01,EDGE,Mod-5 Counter with Lockout Trap Analysis,JK,5,3,YES,1,22,PASS
+TC_EDGE_02,EDGE,Single-Bit Strobe / 2-State Oscillating Loop,D,2,2,YES,0,14,PASS
+TC_EDGE_03,EDGE,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,4,4,NO (Lockout),0,14,PASS
+TC_EDGE_04,EDGE,3-Bit Mod-7 Truncated Counter (0 to 6),JK,7,1,YES,3,30,PASS
+TC_EDGE_05,EDGE,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,4,4,YES,3,30,PASS

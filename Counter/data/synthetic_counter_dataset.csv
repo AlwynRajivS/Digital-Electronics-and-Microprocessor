@@ -1,0 +1,129 @@
+test_case_id,counter_name,flip_flop_type,bit_width,sequence_length,state_decimal,present_state_bin,specified_next_state_bin,is_in_valid_cycle,hardware_actual_next_state_dec,hardware_actual_next_state_bin,is_counter_self_starting,combinational_gate_count,propagation_delay_ns,input_JA,input_KA,input_JB,input_KB,input_JC,input_KC,input_SA,input_RA,input_SB,input_RB,input_SC,input_RC,input_TA,input_TB,input_TC,input_TD,input_DA,input_DB,input_DC
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,0,000,001,True,1,001,True,2,22,0,X,0,X,1,X,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,1,001,010,True,2,010,True,2,22,0,X,1,X,X,1,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,2,010,011,True,3,011,True,2,22,0,X,X,0,1,X,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,3,011,100,True,4,100,True,2,22,1,X,X,1,X,1,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,4,100,101,True,5,101,True,2,22,X,0,0,X,1,X,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,5,101,110,True,6,110,True,2,22,X,0,1,X,X,1,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,6,110,111,True,7,111,True,2,22,X,0,X,0,1,X,,,,,,,,,,,,,
+TC_NORM_01,3-Bit Mod-8 Binary Up Counter (Handwritten Case 1),JK,3,8,7,111,000,True,0,000,True,2,22,X,1,X,1,X,1,,,,,,,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,0,000,111,True,7,111,True,4,22,,,,,,,1,0,1,0,1,0,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,1,001,000,True,0,000,True,4,22,,,,,,,0,X,0,X,0,1,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,2,010,001,True,1,001,True,4,22,,,,,,,0,X,0,1,1,0,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,3,011,010,True,2,010,True,4,22,,,,,,,0,X,X,0,0,1,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,4,100,011,True,3,011,True,4,22,,,,,,,0,1,1,0,1,0,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,5,101,100,True,4,100,True,4,22,,,,,,,X,0,0,X,0,1,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,6,110,101,True,5,101,True,4,22,,,,,,,X,0,0,1,1,0,,,,,,,
+TC_NORM_02,3-Bit Mod-8 Down Counter (Handwritten Case 2),SR,3,8,7,111,110,True,6,110,True,4,22,,,,,,,X,0,X,0,0,1,,,,,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,0,0000,0001,True,1,0001,True,5,30,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,1,0001,0010,True,2,0010,True,5,30,,,,,,,,,,,,,0,0,1,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,2,0010,0011,True,3,0011,True,5,30,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,3,0011,0100,True,4,0100,True,5,30,,,,,,,,,,,,,0,1,1,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,4,0100,0101,True,5,0101,True,5,30,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,5,0101,0110,True,6,0110,True,5,30,,,,,,,,,,,,,0,0,1,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,6,0110,0111,True,7,0111,True,5,30,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,7,0111,1000,True,8,1000,True,5,30,,,,,,,,,,,,,1,1,1,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,8,1000,1001,True,9,1001,True,5,30,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,9,1001,0000,True,0,0000,True,5,30,,,,,,,,,,,,,1,0,0,1,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,10,1010,---,False,11,1011,True,5,30,,,,,,,,,,,,,X,X,X,X,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,11,1011,---,False,6,0110,True,5,30,,,,,,,,,,,,,X,X,X,X,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,12,1100,---,False,13,1101,True,5,30,,,,,,,,,,,,,X,X,X,X,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,13,1101,---,False,4,0100,True,5,30,,,,,,,,,,,,,X,X,X,X,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,14,1110,---,False,15,1111,True,5,30,,,,,,,,,,,,,X,X,X,X,,,
+TC_NORM_03,4-Bit Mod-10 BCD Decade Counter,T,4,10,15,1111,---,False,2,0010,True,5,30,,,,,,,,,,,,,X,X,X,X,,,
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,0,000,001,True,1,001,True,6,30,,,,,,,,,,,,,,,,,0,0,1
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,1,001,010,True,2,010,True,6,30,,,,,,,,,,,,,,,,,0,1,0
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,2,010,011,True,3,011,True,6,30,,,,,,,,,,,,,,,,,0,1,1
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,3,011,100,True,4,100,True,6,30,,,,,,,,,,,,,,,,,1,0,0
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,4,100,101,True,5,101,True,6,30,,,,,,,,,,,,,,,,,1,0,1
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,5,101,000,True,0,000,True,6,30,,,,,,,,,,,,,,,,,0,0,0
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,6,110,---,False,7,111,True,6,30,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_04,3-Bit Mod-6 Up Counter,D,3,6,7,111,---,False,4,100,True,6,30,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_05,2-Bit Mod-4 Up Counter,JK,2,4,0,00,01,True,1,01,True,0,14,0,X,1,X,,,,,,,,,,,,,,,
+TC_NORM_05,2-Bit Mod-4 Up Counter,JK,2,4,1,01,10,True,2,10,True,0,14,1,X,X,1,,,,,,,,,,,,,,,
+TC_NORM_05,2-Bit Mod-4 Up Counter,JK,2,4,2,10,11,True,3,11,True,0,14,X,0,1,X,,,,,,,,,,,,,,,
+TC_NORM_05,2-Bit Mod-4 Up Counter,JK,2,4,3,11,00,True,0,00,True,0,14,X,1,X,1,,,,,,,,,,,,,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,0,0000,0001,True,1,0001,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,1,0001,0010,True,2,0010,True,2,22,,,,,,,,,,,,,0,0,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,2,0010,0011,True,3,0011,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,3,0011,0100,True,4,0100,True,2,22,,,,,,,,,,,,,0,1,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,4,0100,0101,True,5,0101,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,5,0101,0110,True,6,0110,True,2,22,,,,,,,,,,,,,0,0,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,6,0110,0111,True,7,0111,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,7,0111,1000,True,8,1000,True,2,22,,,,,,,,,,,,,1,1,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,8,1000,1001,True,9,1001,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,9,1001,1010,True,10,1010,True,2,22,,,,,,,,,,,,,0,0,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,10,1010,1011,True,11,1011,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,11,1011,1100,True,12,1100,True,2,22,,,,,,,,,,,,,0,1,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,12,1100,1101,True,13,1101,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,13,1101,1110,True,14,1110,True,2,22,,,,,,,,,,,,,0,0,1,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,14,1110,1111,True,15,1111,True,2,22,,,,,,,,,,,,,0,0,0,1,,,
+TC_NORM_06,4-Bit Mod-16 Full Binary Counter,T,4,16,15,1111,0000,True,0,0000,True,2,22,,,,,,,,,,,,,1,1,1,1,,,
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,0,000,001,True,1,001,True,9,30,,,,,,,,,,,,,,,,,0,0,1
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,1,001,011,True,3,011,True,9,30,,,,,,,,,,,,,,,,,0,1,1
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,2,010,110,True,6,110,True,9,30,,,,,,,,,,,,,,,,,1,1,0
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,3,011,010,True,2,010,True,9,30,,,,,,,,,,,,,,,,,0,1,0
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,4,100,000,True,0,000,True,9,30,,,,,,,,,,,,,,,,,0,0,0
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,5,101,100,True,4,100,True,9,30,,,,,,,,,,,,,,,,,1,0,0
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,6,110,111,True,7,111,True,9,30,,,,,,,,,,,,,,,,,1,1,1
+TC_NORM_07,3-Bit Gray Code Counter,D,3,8,7,111,101,True,5,101,True,9,30,,,,,,,,,,,,,,,,,1,0,1
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,0,000,---,False,3,011,True,2,22,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,1,001,010,True,2,010,True,2,22,,,,,,,,,,,,,,,,,0,1,0
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,2,010,100,True,4,100,True,2,22,,,,,,,,,,,,,,,,,1,0,0
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,3,011,---,False,4,100,True,2,22,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,4,100,001,True,1,001,True,2,22,,,,,,,,,,,,,,,,,0,0,1
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,5,101,---,False,0,000,True,2,22,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,6,110,---,False,4,100,True,2,22,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_08,3-Bit Ring Counter Sequence,D,3,3,7,111,---,False,4,100,True,2,22,,,,,,,,,,,,,,,,,X,X,X
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,0,000,001,True,1,001,False,0,14,0,X,0,X,1,X,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,1,001,011,True,3,011,False,0,14,0,X,1,X,X,0,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,2,010,---,False,5,101,False,0,14,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,3,011,111,True,7,111,False,0,14,1,X,X,0,X,0,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,4,100,000,True,0,000,False,0,14,X,1,0,X,0,X,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,5,101,---,False,2,010,False,0,14,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,6,110,100,True,4,100,False,0,14,X,0,X,1,0,X,,,,,,,,,,,,,
+TC_NORM_09,3-Bit Johnson (Twisted Ring) Counter,JK,3,6,7,111,110,True,6,110,False,0,14,X,0,X,0,X,1,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,0,000,---,False,3,011,True,2,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,1,001,---,False,7,111,True,2,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,2,010,011,True,3,011,True,2,22,0,X,X,0,1,X,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,3,011,101,True,5,101,True,2,22,1,X,X,1,X,0,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,4,100,---,False,7,111,True,2,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,5,101,111,True,7,111,True,2,22,X,0,1,X,X,0,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,6,110,---,False,3,011,True,2,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_NORM_10,3-Bit Prime Number Sequence Counter,JK,3,4,7,111,010,True,2,010,True,2,22,X,1,X,0,X,1,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,0,000,001,True,1,001,True,1,22,0,X,0,X,1,X,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,1,001,010,True,2,010,True,1,22,0,X,1,X,X,1,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,2,010,011,True,3,011,True,1,22,0,X,X,0,1,X,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,3,011,100,True,4,100,True,1,22,1,X,X,1,X,1,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,4,100,000,True,0,000,True,1,22,X,1,0,X,0,X,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,5,101,---,False,2,010,True,1,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,6,110,---,False,2,010,True,1,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_EDGE_01,Mod-5 Counter with Lockout Trap Analysis,JK,3,5,7,111,---,False,0,000,True,1,22,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_EDGE_02,Single-Bit Strobe / 2-State Oscillating Loop,D,2,2,0,00,11,True,3,11,True,0,14,,,,,,,,,,,,,,,,,1,1,
+TC_EDGE_02,Single-Bit Strobe / 2-State Oscillating Loop,D,2,2,1,01,---,False,3,11,True,0,14,,,,,,,,,,,,,,,,,X,X,
+TC_EDGE_02,Single-Bit Strobe / 2-State Oscillating Loop,D,2,2,2,10,---,False,0,00,True,0,14,,,,,,,,,,,,,,,,,X,X,
+TC_EDGE_02,Single-Bit Strobe / 2-State Oscillating Loop,D,2,2,3,11,00,True,0,00,True,0,14,,,,,,,,,,,,,,,,,0,0,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,0,000,---,False,1,001,False,0,14,,,,,,,,,,,,,X,X,X,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,1,001,---,False,2,010,False,0,14,,,,,,,,,,,,,X,X,X,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,2,010,---,False,7,111,False,0,14,,,,,,,,,,,,,X,X,X,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,3,011,100,True,4,100,False,0,14,,,,,,,,,,,,,1,1,1,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,4,100,101,True,5,101,False,0,14,,,,,,,,,,,,,0,0,1,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,5,101,110,True,6,110,False,0,14,,,,,,,,,,,,,0,1,1,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,6,110,011,True,3,011,False,0,14,,,,,,,,,,,,,1,0,1,,,,
+TC_EDGE_03,Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6),T,3,4,7,111,---,False,0,000,False,0,14,,,,,,,,,,,,,X,X,X,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,0,000,001,True,1,001,True,3,30,0,X,0,X,1,X,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,1,001,010,True,2,010,True,3,30,0,X,1,X,X,1,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,2,010,011,True,3,011,True,3,30,0,X,X,0,1,X,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,3,011,100,True,4,100,True,3,30,1,X,X,1,X,1,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,4,100,101,True,5,101,True,3,30,X,0,0,X,1,X,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,5,101,110,True,6,110,True,3,30,X,0,1,X,X,1,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,6,110,000,True,0,000,True,3,30,X,1,X,1,0,X,,,,,,,,,,,,,
+TC_EDGE_04,3-Bit Mod-7 Truncated Counter (0 to 6),JK,3,7,7,111,---,False,0,000,True,3,30,X,X,X,X,X,X,,,,,,,,,,,,,
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,0,000,100,True,4,100,True,3,30,,,,,,,,,,,,,,,,,1,0,0
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,1,001,---,False,4,100,True,3,30,,,,,,,,,,,,,,,,,X,X,X
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,2,010,110,True,6,110,True,3,30,,,,,,,,,,,,,,,,,1,1,0
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,3,011,---,False,6,110,True,3,30,,,,,,,,,,,,,,,,,X,X,X
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,4,100,010,True,2,010,True,3,30,,,,,,,,,,,,,,,,,0,1,0
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,5,101,---,False,2,010,True,3,30,,,,,,,,,,,,,,,,,X,X,X
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,6,110,000,True,0,000,True,3,30,,,,,,,,,,,,,,,,,0,0,0
+TC_EDGE_05,Arbitrary Leap Counter (0 -> 4 -> 2 -> 6),D,3,4,7,111,---,False,0,000,True,3,30,,,,,,,,,,,,,,,,,X,X,X

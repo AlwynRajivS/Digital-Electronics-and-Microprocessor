@@ -1,0 +1,247 @@
+[
+  {
+    "id": "TC_NORM_01",
+    "type": "normal",
+    "name": "3-Bit Mod-8 Binary Up Counter (Handwritten Case 1)",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "ff_type": "JK",
+    "expected_self_starting": true,
+    "description": "Standard 3-bit binary up counter with JK flip-flops from lecture notes."
+  },
+  {
+    "id": "TC_NORM_02",
+    "type": "normal",
+    "name": "3-Bit Mod-8 Down Counter (Handwritten Case 2)",
+    "sequence": [
+      0,
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+      1
+    ],
+    "ff_type": "SR",
+    "expected_self_starting": true,
+    "description": "Standard 3-bit binary down counter with SR flip-flops from lecture notes."
+  },
+  {
+    "id": "TC_NORM_03",
+    "type": "normal",
+    "name": "4-Bit Mod-10 BCD Decade Counter",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "ff_type": "T",
+    "expected_self_starting": true,
+    "description": "Decade counter (0 to 9) with T flip-flops, 6 unused states (10-15)."
+  },
+  {
+    "id": "TC_NORM_04",
+    "type": "normal",
+    "name": "3-Bit Mod-6 Up Counter",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "ff_type": "D",
+    "expected_self_starting": true,
+    "description": "Modulo-6 counter with D flip-flops, states 6 and 7 unused."
+  },
+  {
+    "id": "TC_NORM_05",
+    "type": "normal",
+    "name": "2-Bit Mod-4 Up Counter",
+    "sequence": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "ff_type": "JK",
+    "expected_self_starting": true,
+    "description": "Minimal 2-bit counter with 4 states, no unused states."
+  },
+  {
+    "id": "TC_NORM_06",
+    "type": "normal",
+    "name": "4-Bit Mod-16 Full Binary Counter",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "ff_type": "T",
+    "expected_self_starting": true,
+    "description": "Full 4-bit synchronous binary counter using toggle flip-flops."
+  },
+  {
+    "id": "TC_NORM_07",
+    "type": "normal",
+    "name": "3-Bit Gray Code Counter",
+    "sequence": [
+      0,
+      1,
+      3,
+      2,
+      6,
+      7,
+      5,
+      4
+    ],
+    "ff_type": "D",
+    "expected_self_starting": true,
+    "description": "Unit-distance code counter where only 1 bit flips per transition."
+  },
+  {
+    "id": "TC_NORM_08",
+    "type": "normal",
+    "name": "3-Bit Ring Counter Sequence",
+    "sequence": [
+      1,
+      2,
+      4
+    ],
+    "ff_type": "D",
+    "expected_self_starting": false,
+    "description": "Circulating single 1 (001 -> 010 -> 100), 5 unused states."
+  },
+  {
+    "id": "TC_NORM_09",
+    "type": "normal",
+    "name": "3-Bit Johnson (Twisted Ring) Counter",
+    "sequence": [
+      0,
+      1,
+      3,
+      7,
+      6,
+      4
+    ],
+    "ff_type": "JK",
+    "expected_self_starting": true,
+    "description": "6-state Johnson counter with 2 unused states (2, 5)."
+  },
+  {
+    "id": "TC_NORM_10",
+    "type": "normal",
+    "name": "3-Bit Prime Number Sequence Counter",
+    "sequence": [
+      2,
+      3,
+      5,
+      7
+    ],
+    "ff_type": "JK",
+    "expected_self_starting": true,
+    "description": "Non-linear arbitrary sequence counter (2 -> 3 -> 5 -> 7)."
+  },
+  {
+    "id": "TC_EDGE_01",
+    "type": "edge",
+    "name": "Mod-5 Counter with Lockout Trap Analysis",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "ff_type": "JK",
+    "expected_self_starting": null,
+    "description": "Truncated non-power-of-2 counter testing unused states (5, 6, 7) for deadlock."
+  },
+  {
+    "id": "TC_EDGE_02",
+    "type": "edge",
+    "name": "Single-Bit Strobe / 2-State Oscillating Loop",
+    "sequence": [
+      0,
+      3
+    ],
+    "ff_type": "D",
+    "expected_self_starting": null,
+    "description": "Alternates between 00 and 11, testing states 01 and 10 behavior."
+  },
+  {
+    "id": "TC_EDGE_03",
+    "type": "edge",
+    "name": "Non-Zero Starting Offset Counter (3 -> 4 -> 5 -> 6)",
+    "sequence": [
+      3,
+      4,
+      5,
+      6
+    ],
+    "ff_type": "T",
+    "expected_self_starting": null,
+    "description": "Counter sequence does not include state 0, testing all-zero initial power-up recovery."
+  },
+  {
+    "id": "TC_EDGE_04",
+    "type": "edge",
+    "name": "3-Bit Mod-7 Truncated Counter (0 to 6)",
+    "sequence": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "ff_type": "JK",
+    "expected_self_starting": null,
+    "description": "Single unused state 7 (111) test for immediate cycle return."
+  },
+  {
+    "id": "TC_EDGE_05",
+    "type": "edge",
+    "name": "Arbitrary Leap Counter (0 -> 4 -> 2 -> 6)",
+    "sequence": [
+      0,
+      4,
+      2,
+      6
+    ],
+    "ff_type": "D",
+    "expected_self_starting": null,
+    "description": "Even-number sub-cycle with 4 odd unused states (1, 3, 5, 7)."
+  }
+]
