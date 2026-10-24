@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synchronous Counter Design Assistant | EC2201</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Header (Modeled from Project Portal in Image 1) -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="portal-badge-logo">
+                    <span class="pp-icon">pp</span>
+                    <span class="pp-text">Project<br>Portal</span>
+                </div>
+                <div>
+                    <h1 class="header-title">Synchronous Counter Design Assistant</h1>
+                    <p class="header-subtitle">Unit III - Synchronous Sequential Circuits | EC2201 Project</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="portal-user-box">
+                    <div class="user-avatar-circle">{{ user.avatar if user else 'S' }}</div>
+                    <div class="user-info-text">
+                        <span class="user-display-name">{{ user.full_name if user else 'SABARIAYYAN P' }}</span>
+                        <span class="user-section-badge">{{ user.section if user else 'Section B' }}</span>
+                    </div>
+                </div>
+                <a href="/api/download/zip" class="btn btn-zip" title="Download VS Code Ready ZIP">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download ZIP
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Quick Presets Bar -->
+        <section class="presets-section">
+            <div class="presets-label">⚡ Quick Presets (From Lecture Notes & Syllabus):</div>
+            <div class="presets-grid">
+                <button class="preset-btn active" data-preset="handwritten1">
+                    <span class="preset-tag">Note 1</span> 3-Bit Mod-8 Up (JK FF)
+                </button>
+                <button class="preset-btn" data-preset="handwritten2">
+                    <span class="preset-tag">Note 2</span> 3-Bit Mod-8 Down (SR FF)
+                </button>
+                <button class="preset-btn" data-preset="bcd10">
+                    <span class="preset-tag">Mod-10</span> 4-Bit BCD Decade (T FF)
+                </button>
+                <button class="preset-btn" data-preset="mod6">
+                    <span class="preset-tag">Mod-6</span> 3-Bit Up Counter (D FF)
+                </button>
+                <button class="preset-btn" data-preset="gray">
+                    <span class="preset-tag">Code</span> 3-Bit Gray Counter (D FF)
+                </button>
+                <button class="preset-btn" data-preset="johnson">
+                    <span class="preset-tag">Lockout</span> 3-Bit Johnson (JK FF)
+                </button>
+                <button class="preset-btn" data-preset="prime">
+                    <span class="preset-tag">Nonlinear</span> 3-Bit Prime (2,3,5,7)
+                </button>
+            </div>
+        </section>
+
+        <!-- Configuration Bar -->
+        <section class="config-card">
+            <div class="config-grid">
+                <div class="input-group">
+                    <label for="seqInput">Desired Count Sequence (comma-separated)</label>
+                    <input type="text" id="seqInput" value="0, 1, 2, 3, 4, 5, 6, 7" placeholder="e.g. 0, 1, 2, 3, 4, 5, 6, 7">
+                    <span class="input-hint">Specify the state progression loop (e.g. up, down, or arbitrary).</span>
+                </div>
+                <div class="input-group ff-group">
+                    <label>Flip-Flop Type</label>
+                    <div class="ff-selector">
+                        <label class="radio-label active"><input type="radio" name="ff_type" value="JK" checked> JK</label>
+                        <label class="radio-label"><input type="radio" name="ff_type" value="SR"> SR</label>
+                        <label class="radio-label"><input type="radio" name="ff_type" value="D"> D</label>
+                        <label class="radio-label"><input type="radio" name="ff_type" value="T"> T</label>
+                    </div>
+                    <span class="input-hint">Select excitation model.</span>
+                </div>
+                <div class="input-group width-group">
+                    <label for="bitWidthSelect">Bit Width (N)</label>
+                    <select id="bitWidthSelect">
+                        <option value="auto">Auto (from Sequence)</option>
+                        <option value="2">2 Bits (0 - 3)</option>
+                        <option value="3" selected>3 Bits (0 - 7)</option>
+                        <option value="4">4 Bits (0 - 15)</option>
+                    </select>
+                    <span class="input-hint">Determines number of flip-flops.</span>
+                </div>
+                <div class="btn-group">
+                    <button id="btnSynthesize" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        Synthesize Circuit
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-link active" data-tab="tab-workflow">📘 8-Step Design Workflow</button>
+            <button class="tab-link" data-tab="tab-simulator">⏱️ Clock Simulator & Waveform</button>
+            <button class="tab-link" data-tab="tab-lockout">🛡️ Unused State & Lockout</button>
+            <button class="tab-link" data-tab="tab-ai">🤖 AI Circuit Metrics</button>
+            <button class="tab-link" data-tab="tab-testbench">🧪 Test Bench (15 Cases)</button>
+            <button class="tab-link" data-tab="tab-deliverables">📑 Deliverables & Export</button>
+        </nav>
+
+        <!-- TAB 1: 8-Step Design Workflow -->
+        <section id="tab-workflow" class="tab-content active">
+            <!-- Step 1 & 2 Row -->
+            <div class="two-col-grid">
+                <!-- Step 1: Problem Definition -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="step-num">Step 1</span>
+                        <h3 class="card-title">Understand Problem Statement</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-block" id="step1Content">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: State Diagram -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="step-num">Step 2</span>
+                        <h3 class="card-title">State Diagram</h3>
+                        <span class="badge-tag" id="stateDiagramTag">Interactive SVG</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="state-diagram-wrapper">
+                            <svg id="stateDiagramSvg" viewBox="0 0 500 360"></svg>
+                        </div>
+                        <div class="diagram-legend">
+                            <span><span class="dot dot-active"></span> Valid States</span>
+                            <span><span class="dot dot-unused"></span> Unused States</span>
+                            <span><span class="dot dot-current"></span> Current State</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 & 4 Row -->
+            <div class="two-col-grid">
+                <!-- Step 3: Present & Next State Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="step-num">Step 3</span>
+                        <h3 class="card-title">Present State & Next State Table</h3>
+                    </div>
+                    <div class="card-body scrollable-table">
+                        <table class="data-table" id="psNsTable">
+                            <thead>
+                                <tr>
+                                    <th>PS (Dec)</th>
+                                    <th>Present State (PS)</th>
+                                    <th>NS (Dec)</th>
+                                    <th>Next State (NS)</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Step 4 & 5: State Assignment & FF Reference -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="step-num">Step 4 & 5</span>
+                        <h3 class="card-title">State Assignment & Flip-Flop Excitation</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="sub-section">
+                            <h4>Step 4: State Assignment</h4>
+                            <p class="text-muted">Bit mapping using binary encoding for synchronous flip-flops:</p>
+                            <div class="var-pills" id="varPills"></div>
+                        </div>
+                        <div class="sub-section">
+                            <h4>Step 5: <span id="ffRefTitle">JK</span> Flip-Flop Excitation Reference</h4>
+                            <table class="data-table small-table" id="ffRefTable">
+                                <thead>
+                                    <tr>
+                                        <th>Qn</th>
+                                        <th>Qn+1</th>
+                                        <th id="refInpHeaders">Inputs</th>
+                                        <th>Transition Nature</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Full Excitation Table -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="step-num">Step 6</span>
+                    <h3 class="card-title">Counter Excitation Table with Minterms & Don't Cares</h3>
+                </div>
+                <div class="card-body">
+                    <div class="scrollable-table">
+                        <table class="data-table" id="counterExcitationTable">
+                            <thead id="counterExcitationThead"></thead>
+                            <tbody id="counterExcitationTbody"></tbody>
+                        </table>
+                    </div>
+                    <div class="minterms-box" id="mintermsBox">
+                        <!-- Minterms lists rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: K-Map Simplification -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="step-num">Step 7</span>
+                    <h3 class="card-title">K-Map Simplification & Derived Boolean Expressions</h3>
+                    <span class="badge-tag">SOP Minimization</span>
+                </div>
+                <div class="card-body">
+                    <div class="kmap-container" id="kmapContainer">
+                        <!-- K-Maps rendered dynamically -->
+                    </div>
+                    <div class="equations-summary-card">
+                        <h4>Derived Minimal Flip-Flop Input Equations:</h4>
+                        <div class="equations-grid" id="equationsGrid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8: Logic Circuit Schematic (Fully Connected Layout) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="step-num">Step 8</span>
+                    <h3 class="card-title">Directly Connected Logic Circuit Schematic (IEEE Standard Gates)</h3>
+                    <span class="badge-tag">Fully Connected Schematic</span>
+                </div>
+                <div class="card-body">
+                    <div class="circuit-legend-bar">
+                        <span><span class="legend-color-line color-and"></span> AND Gate (·)</span>
+                        <span><span class="legend-color-line color-or"></span> OR Gate (+)</span>
+                        <span><span class="legend-color-line color-wire"></span> Signal Net Wire</span>
+                        <span><span class="legend-color-line color-vcc"></span> VCC (+5V / Logic 1)</span>
+                        <span><span class="legend-color-line color-clk"></span> Synchronous Clock (CLK)</span>
+                    </div>
+                    <div class="circuit-schematic-wrapper">
+                        <svg id="circuitSchematicSvg" viewBox="0 0 1000 520"></svg>
+                    </div>
+                    <div class="circuit-notes">
+                        <p><strong>Connected Circuit Architecture:</strong> Logic gates (AND, OR, NOT) are wired directly between the flip-flop outputs and control inputs ($J, K / S, R / D / T$) with explicit junction solder points. All flip-flops trigger synchronously from the common clock bus at the bottom.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: Interactive Clock Simulator & Waveform -->
+        <section id="tab-simulator" class="tab-content">
+            <div class="simulator-layout">
+                <!-- Control Panel -->
+                <div class="sim-panel card">
+                    <div class="card-header">
+                        <h3 class="card-title">Simulation Control Panel</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="sim-readout">
+                            <div class="seven-segment-box">
+                                <div class="readout-label">STATE (DEC)</div>
+                                <div class="seven-segment-val" id="simCurrentState">0</div>
+                            </div>
+                            <div class="binary-led-box">
+                                <div class="readout-label">OUTPUT BUS (QA ..)</div>
+                                <div class="led-strip" id="simLedStrip"></div>
+                                <div class="binary-text" id="simCurrentBinary">000</div>
+                            </div>
+                            <div class="cycle-counter-box">
+                                <div class="readout-label">CLOCK CYCLE</div>
+                                <div class="cycle-val" id="simCycleCount">0</div>
+                            </div>
+                        </div>
+
+                        <div class="sim-controls">
+                            <button id="btnSimStep" class="btn btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                Step Clock Pulse (Rising Edge)
+                            </button>
+                            <button id="btnSimAuto" class="btn btn-success">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/><polygon points="12 3 26 12 12 21 12 3"/></svg>
+                                Auto Run
+                            </button>
+                            <button id="btnSimPause" class="btn btn-warning" disabled>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                                Pause
+                            </button>
+                            <button id="btnSimReset" class="btn btn-secondary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                Reset
+                            </button>
+                        </div>
+
+                        <div class="speed-slider-group">
+                            <label for="simSpeed">Clock Frequency: <span id="speedLabel">1.0 Hz</span></label>
+                            <input type="range" id="simSpeed" min="0.2" max="3" step="0.2" value="1.0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Logic Analyzer / Oscilloscope Waveforms -->
+                <div class="waveform-panel card">
+                    <div class="card-header">
+                        <h3 class="card-title">Digital Logic Analyzer Waveform</h3>
+                        <span class="badge-tag">Real-Time Oscilloscope</span>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="waveformCanvas" width="850" height="260"></canvas>
+                        <div class="waveform-legend" id="waveformLegend"></div>
+                    </div>
+                </div>
+
+                <!-- Transition History Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Transition Trace Log</h3>
+                        <button id="btnClearTrace" class="btn btn-sm btn-secondary">Clear Log</button>
+                    </div>
+                    <div class="card-body scrollable-table">
+                        <table class="data-table" id="simTraceTable">
+                            <thead>
+                                <tr>
+                                    <th>Cycle #</th>
+                                    <th>State (Dec)</th>
+                                    <th>Binary (QA..QC)</th>
+                                    <th>Valid In-Cycle</th>
+                                    <th>Next State (Dec)</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Unused State & Lockout Analysis -->
+        <section id="tab-lockout" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Unused States & Lockout Hazard Verification</h3>
+                    <div id="lockoutVerdictBadge" class="badge-status">Analyzing...</div>
+                </div>
+                <div class="card-body">
+                    <div class="callout" id="lockoutCallout">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <h4>Detailed Unused State Next-State Transitions Under Synthesized Circuit:</h4>
+                    <div class="scrollable-table">
+                        <table class="data-table" id="unusedStatesTable">
+                            <thead>
+                                <tr>
+                                    <th>Unused State (Dec)</th>
+                                    <th>Binary Code</th>
+                                    <th>Hardware Next State</th>
+                                    <th>Recovery Path Trajectory</th>
+                                    <th>Recovers to Cycle?</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: AI Circuit Metrics -->
+        <section id="tab-ai" class="tab-content">
+            <div class="two-col-grid">
+                <!-- Metrics Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Circuit Synthesis & Complexity Metrics</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="metrics-grid" id="metricsGrid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">AI Design Assistant & Syllabus Insights</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="ai-recommendations" id="aiRecommendations">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="viva-box">
+                            <h4>EC2201 Viva-Voce Key Questions & Concepts:</h4>
+                            <ul>
+                                <li><strong>Why Synchronous?</strong> In synchronous counters, all flip-flops clock simultaneously, eliminating cumulative ripple delay and high-frequency glitches.</li>
+                                <li><strong>Lockout Prevention:</strong> If a counter enters an unused state upon power-up, it must self-recover into the desired counting loop within finite clock pulses.</li>
+                                <li><strong>Flip-Flop Comparison:</strong> JK flip-flops minimize gating logic because 'X' (don't cares) exist in 2 of the 4 excitation rows; D flip-flops require no decoding for next state but may need more gates for complex loops.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: Test Bench (15 Cases) -->
+        <section id="tab-testbench" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">EC2201 Automated Verification Test Bench</h3>
+                        <p class="text-muted">10 Normal Test Cases + 5 Edge/Fault Cases as per Portal Specification</p>
+                    </div>
+                    <button id="btnRunTestBench" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        Execute All 15 Test Cases
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="testbench-stats" id="tbStats">
+                        <div class="stat-pill">Total Tests: <strong>15</strong></div>
+                        <div class="stat-pill pill-success">Normal Cases: <strong>10</strong></div>
+                        <div class="stat-pill pill-warning">Edge / Fault Cases: <strong>5</strong></div>
+                        <div class="stat-pill pill-pass" id="tbPassCount">Passed: <strong>15 / 15</strong></div>
+                    </div>
+                    <div class="scrollable-table">
+                        <table class="data-table" id="testbenchTable">
+                            <thead>
+                                <tr>
+                                    <th>Test ID</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>FF</th>
+                                    <th>States</th>
+                                    <th>Unused</th>
+                                    <th>Self-Starting</th>
+                                    <th>Gates</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: Deliverables & Export -->
+        <section id="tab-deliverables" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Student Deliverables & Documentation Packages</h3>
+                    <span class="badge-tag">Academic Submission Ready</span>
+                </div>
+                <div class="card-body">
+                    <div class="deliverables-grid">
+                        <div class="deliverable-card">
+                            <div class="deliv-icon">📦</div>
+                            <h4>VS Code Project ZIP</h4>
+                            <p>Complete project with login system, connected schematic, backend, UI, test runner, datasets, batch scripts, and markdown reports.</p>
+                            <a href="/api/download/zip" class="btn btn-primary">Download Complete ZIP</a>
+                        </div>
+                        <div class="deliverable-card">
+                            <div class="deliv-icon">📊</div>
+                            <h4>Synthetic Test Dataset (CSV)</h4>
+                            <p>128-row reproducible dataset containing truth tables, excitation vectors, and gate counts.</p>
+                            <a href="/api/dataset/csv" class="btn btn-secondary">Download CSV Dataset</a>
+                        </div>
+                        <div class="deliverable-card">
+                            <div class="deliv-icon">📄</div>
+                            <h4>Comprehensive Academic Report</h4>
+                            <p>Complete markdown engineering report (EC2201 Unit III) ready for printing or submission.</p>
+                            <button id="btnViewReport" class="btn btn-secondary">View Project Report</button>
+                        </div>
+                    </div>
+
+                    <div class="report-modal" id="reportModal" style="display:none;">
+                        <div class="report-modal-content">
+                            <div class="report-modal-header">
+                                <h3>EC2201 Academic Project Report</h3>
+                                <button id="btnCloseReport" class="btn btn-sm btn-secondary">Close</button>
+                            </div>
+                            <div class="report-modal-body" id="reportModalBody"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p><strong>Synchronous Counter Design Assistant</strong> | EC2201 Unit III: Synchronous Sequential Circuits</p>
+            <p>Registered Project: 09 Sept 2026 | Student: <strong>{{ user.full_name if user else 'SABARIAYYAN P' }} ({{ user.section if user else 'Section B' }})</strong></p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
