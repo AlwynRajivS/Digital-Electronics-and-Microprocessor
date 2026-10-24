@@ -235,18 +235,18 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const BASE = '8086%20Microprocessor/';
+const BASE = '8086Microprocessor/';
 
 const coreTopics = [
-  { icon:'🧠', title:'Microprocessor Architecture', desc:'Inside the 8086 — the BIU and EU, registers, flags, segmentation and the pipelined fetch–execute flow.', link:BASE+'Microprocessor%20Architecture.html', available:true },
-  { icon:'🎯', title:'Addressing Modes', desc:'Register, immediate, direct, indirect and indexed modes — the different ways an instruction locates its operands.', link:BASE+'Addressing%20Modes.html', available:true },
-  { icon:'📖', title:'Instruction Set', desc:'Data transfer, arithmetic, logic, shift, branch and string instructions that make up the 8086 repertoire.', link:BASE+'Instruction%20Set.html', available:true },
-  { icon:'💻', title:'Assembly Language Programming', desc:'Write, assemble and trace 8086 programs using directives, procedures, loops and memory operations.', link:BASE+'Assembly%20Language%20Programming.html', available:true }
+  { icon:'🧠', title:'Microprocessor Architecture', desc:'Inside the 8086 — the BIU and EU, registers, flags, segmentation and the pipelined fetch–execute flow.', link:BASE+'Microprocessor Architecture.html', available:true },
+  { icon:'🎯', title:'Addressing Modes', desc:'Register, immediate, direct, indirect and indexed modes — the different ways an instruction locates its operands.', link:BASE+'Addressing Modes.html', available:true },
+  { icon:'📖', title:'Instruction Set', desc:'Data transfer, arithmetic, logic, shift, branch and string instructions that make up the 8086 repertoire.', link:BASE+'Instruction Set.html', available:true },
+  { icon:'💻', title:'Assembly Language Programming', desc:'Write, assemble and trace 8086 programs using directives, procedures, loops and memory operations.', link:BASE+'Assembly Language Programming.html', available:true }
 ];
 
 const ioTopics = [
-  { icon:'🔌', title:'I/O Interfacing', desc:'Memory-mapped and isolated I/O, address decoding, and the handshake between the CPU and peripheral devices.', link:BASE+'IO%20Interfacing.html', available:true },
-  { icon:'🔀', title:'Parallel Communication Interface', desc:'The 8255 PPI — ports A, B and C, control word, and its operating modes for parallel data transfer.', link:BASE+'Parallel%20Communication%20Interface.html', available:true }
+  { icon:'🔌', title:'I/O Interfacing', desc:'Memory-mapped and isolated I/O, address decoding, and the handshake between the CPU and peripheral devices.', link:BASE+'IO Interfacing.html', available:true },
+  { icon:'🔀', title:'Parallel Communication Interface', desc:'The 8255 PPI — ports A, B and C, control word, and its operating modes for parallel data transfer.', link:BASE+'Parallel Communication%20Interface.html', available:true }
 ];
 
 function renderGrid(elId, topics, startIndex){
