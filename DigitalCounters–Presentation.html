@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Counters – Presentation</title>
+<style>
+:root{--bg:#0A0612;--card:#150D2B;--card2:#241A44;--tx:#F8F5FF;--mu:#B8ABDA;--ac:#A855F7;--ac2:#E0C7FF;--ok:#34D399;--clk:#FBBF24;--rst:#F43F5E;--wire:#C4B5FD;--bd:#3B2A6B;--glow:rgba(168,85,247,.5);--grad:linear-gradient(135deg,#7C3AED,#C026D3)}
+:root[data-theme=light]{--bg:#F3ECFF;--card:#FFFFFF;--card2:#EADFFB;--tx:#1E0F40;--mu:#5B4A82;--ac:#7C3AED;--ac2:#5B21B6;--ok:#047857;--clk:#B45309;--rst:#DC2626;--wire:#6D28D9;--bd:#CDB8F3;--glow:rgba(124,58,237,.3)}
+*{box-sizing:border-box}html{font-size:24px}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:Inter,Poppins,system-ui,sans-serif;line-height:1.4;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+header,#wrap,footer,#bar{position:relative;z-index:1}
+.orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:.4;pointer-events:none;z-index:0;animation:float 14s ease-in-out infinite}.o1{width:520px;height:520px;background:#7C3AED;top:-160px;left:-120px}.o2{width:460px;height:460px;background:#C026D3;bottom:-160px;right:-100px;animation-delay:-6s}
+:root[data-theme=light] .orb{opacity:.2}
+@keyframes float{50%{transform:translate(60px,-40px) scale(1.15)}}
+@keyframes enter{from{opacity:0;transform:translateY(30px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@keyframes rowin{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes popin{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes flash{from{background:var(--ac);color:#fff}}
+@keyframes pulse{50%{box-shadow:0 0 34px var(--glow)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes flow{to{stroke-dashoffset:-32}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes shine{to{background-position:200% center}}
+@keyframes sweep{from{transform:scaleX(0)}}
+@keyframes fall{from{transform:translateY(-110%)}to{transform:translateY(1000px)}}
+@keyframes bob{50%{transform:translateY(-8px)}}
+header,footer{display:flex;gap:10px;align-items:center;padding:7px 16px;font-size:16px;background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(10px);flex-wrap:wrap}header{border-bottom:1px solid var(--bd)}footer{border-top:1px solid var(--bd)}
+header b{flex:1;font-size:17px}.mu{color:var(--mu)}#bar{height:6px;background:var(--card2)}#fill{height:100%;background:var(--grad);width:0;transition:.4s;box-shadow:0 0 14px var(--glow)}
+button,select,input{font:inherit;color:var(--tx);background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:4px 14px;transition:.2s}button{cursor:pointer}button:hover:not(:disabled){border-color:var(--ac);box-shadow:0 0 14px var(--glow)}
+button.on{background:var(--grad);color:#fff;border-color:transparent;font-weight:700;box-shadow:0 0 16px var(--glow)}
+#nx{background:var(--grad);color:#fff;border:none;font-weight:800;font-size:20px;padding:8px 34px;box-shadow:0 0 20px var(--glow);animation:pulse 2.4s infinite}
+body.clean header,body.clean #bar{display:none}body.clean footer{position:fixed;left:10px;bottom:8px;background:transparent;border:none;backdrop-filter:none;opacity:.35;z-index:5}body.clean footer:hover{opacity:1}body.clean footer>*:not(#nx):not(#pv){display:none}
+#wrap{flex:1;overflow:hidden}
+#slide{position:absolute;width:1600px;height:900px;transform-origin:0 0;border-radius:24px;border:2px solid var(--bd);overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--card) 94%,transparent),color-mix(in srgb,var(--bg) 60%,var(--card)));box-shadow:0 0 70px var(--glow),inset 0 0 90px rgba(168,85,247,.07)}
+#slide::before{content:'';position:absolute;left:0;right:0;top:0;height:8px;background:var(--grad);z-index:2}
+#stage{position:absolute;inset:0 0 46px 0;padding:36px 56px 0;overflow:hidden}
+.sf{position:absolute;left:0;right:0;bottom:0;height:46px;display:flex;justify-content:space-between;align-items:center;padding:0 56px;font-size:17px;color:var(--mu);border-top:1px solid var(--bd);background:color-mix(in srgb,var(--card2) 60%,transparent)}
+#stage.enter #sc>*{animation:enter .65s cubic-bezier(.2,.8,.2,1) both}#stage.enter #sc>*:nth-child(2){animation-delay:.08s}#stage.enter #sc>*:nth-child(3){animation-delay:.16s}#stage.enter #sc>*:nth-child(4){animation-delay:.24s}
+#stage.enter tr{animation:rowin .5s both}#stage.enter tr:nth-child(2){animation-delay:.1s}#stage.enter tr:nth-child(3){animation-delay:.18s}#stage.enter tr:nth-child(4){animation-delay:.26s}#stage.enter tr:nth-child(5){animation-delay:.34s}#stage.enter tr:nth-child(6){animation-delay:.42s}
+#stage.enter .sv circle{animation:popin .6s both;transform-box:fill-box;transform-origin:center}#stage.enter .sv rect{animation:fadein .8s both}#stage.enter .eq,#stage.enter .opt{animation:pop .55s both}.opt{animation-delay:calc(var(--i,0)*70ms)}
+h1{position:relative;display:inline-block;font-size:2.5rem;margin:2px 0 22px;background:linear-gradient(90deg,var(--ac2),var(--ac),#F0ABFC);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1::after{content:'';position:absolute;left:0;bottom:-6px;height:5px;width:100%;background:var(--grad);border-radius:5px;transform-origin:left;animation:sweep .9s .2s both}
+h2{margin:2px 0 12px;color:var(--ac2);font-size:2rem}h3{margin:16px 0 8px;color:var(--mu);font-size:1.05rem;text-transform:uppercase;letter-spacing:.1em}
+.stp{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.stc{font-size:17px;padding:3px 14px;border-radius:999px;color:var(--mu);background:transparent}.stc.done{color:var(--ok);border-color:var(--ok)}.stc.now{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 0 18px var(--glow);font-weight:700;animation:pulse 2s infinite}
+.bl{list-style:none;padding:0;margin:0;max-width:1350px}.bl li{font-size:1.85rem;margin:18px 0;padding:8px 20px;border-left:6px solid var(--bd);opacity:.7;border-radius:0 12px 12px 0}.bl li.cur{opacity:1;border-color:var(--ac);background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 22%,transparent),transparent);animation:pop .55s both}
+.two{display:grid;grid-template-columns:minmax(300px,1fr) 2.3fr;gap:36px}.lst div{font-size:1.35rem;padding:6px 16px;border-radius:12px;margin:4px 0;transition:.3s}.lst .cur{background:var(--grad);color:#fff;font-weight:700;box-shadow:0 0 18px var(--glow)}.dim2{opacity:.3}
+.det{animation:pop .5s both;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px 28px}.det p{font-size:1.4rem;margin:10px 0}.cols{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+table{border-collapse:collapse;font:1.35rem ui-monospace,monospace;margin:8px 0}th,td{border:1px solid var(--bd);padding:.22em .7em;text-align:center}th{background:var(--card2)}tr.cur td{background:color-mix(in srgb,var(--ok) 38%,transparent);font-weight:700;animation:flash 1s}
+.eq{font:700 1.65rem ui-monospace,monospace;color:var(--ac2);margin:8px 0}.sv{width:100%;height:auto;background:var(--card);border-radius:16px;border:1px solid var(--bd)}.sv path.ne{stroke-dasharray:600;stroke-dashoffset:600;animation:draw .9s ease forwards}
+.sv path[stroke="var(--clk)"]{stroke-dasharray:12 6;animation:flow 1.1s linear infinite}.sv rect[stroke="var(--clk)"]{animation:pulse 1.2s infinite}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.chip2{font-size:1.3rem;padding:8px 22px}.chip{border:4px solid;border-radius:10px;padding:2px 14px;font:700 1.55rem ui-monospace,monospace}
+.leds{display:flex;gap:26px;justify-content:center;margin:12px 0}.led{text-align:center;font:1.3rem ui-monospace,monospace}.led i{display:block;width:62px;height:62px;border-radius:50%;margin:0 auto 6px;background:var(--card2);border:3px solid var(--bd);transition:.25s}.led.hi i{background:var(--ok);box-shadow:0 0 26px var(--ok)}.led.tg i{outline:5px solid var(--clk)}
+.big{font:800 3rem ui-monospace,monospace;color:var(--ac2)}
+.km{margin:8px 20px 8px 0}.km td,.km th{width:3.4em;height:2.3em;font-size:1.4rem;padding:0}.km th:first-child{width:5em;font-size:1.1rem}.km td{background:var(--card)}
+.optg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.opt{display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 18px;border-radius:16px;background:var(--card);border:1px solid var(--bd)}.opt b{font-size:1.35rem}.opt span{font:1rem ui-monospace,monospace;color:var(--mu)}.opt:hover{transform:translateY(-3px)}.opt.sel{border-color:var(--ac);background:linear-gradient(135deg,color-mix(in srgb,var(--ac) 38%,var(--card)),var(--card));box-shadow:0 0 24px var(--glow)}
+.go{background:var(--grad);color:#fff;font-size:1.6rem;padding:10px 44px;border:none;box-shadow:0 0 26px var(--glow);animation:pulse 2s infinite}.go:disabled{opacity:.35;animation:none;box-shadow:none;cursor:not-allowed}.hint{color:var(--mu);font-size:1.2rem}.hint.okk{color:var(--ok)}.hint.warn{color:var(--rst);animation:shake .4s}
+.proc{max-width:1300px}.pi{display:flex;gap:22px;align-items:center;margin:11px 0;transition:.4s}.pn{width:60px;height:60px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.4rem;background:var(--card2);border:3px solid var(--bd)}.pi.done .pn{background:var(--ok);color:#04121f;border-color:var(--ok)}.pi.now .pn{background:var(--grad);color:#fff;border-color:transparent;animation:pulse 1.6s infinite}.pi.now{animation:pop .5s both}.pi b{font-size:1.65rem}.pi .mu{font-size:1.2rem}
+input[type=number],input#cust{font-size:1.3rem}input#cust{width:700px;max-width:100%}
+/* hero (front page) */
+.hero{position:relative;height:810px;text-align:center;padding-top:34px}.rain{position:absolute;inset:-36px -56px 0;overflow:hidden;opacity:.2;pointer-events:none}.rain span{position:absolute;top:0;font:700 30px ui-monospace,monospace;color:var(--ac2);writing-mode:vertical-rl;animation:fall linear infinite}
+.kick{position:relative;display:inline-block;letter-spacing:.35em;font-size:1.25rem;color:var(--mu);border:1px solid var(--bd);padding:6px 26px;border-radius:999px;background:var(--card)}
+.big2{position:relative;font-size:6.4rem;font-weight:800;line-height:1.1;margin:18px 0 4px;background:linear-gradient(90deg,#C084FC,#F0ABFC,#7C3AED,#C084FC);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite}
+.sub{position:relative;font-size:1.8rem;margin:0 0 6px}.hero .leds{position:relative;margin:10px 0 0}.hero .led i{width:70px;height:70px}.hero .nm2{position:relative;font:800 2.2rem ui-monospace,monospace;color:var(--ac2);margin-bottom:12px}
+.pres{position:relative;display:inline-flex;gap:26px;align-items:center;text-align:left;margin-top:22px;padding:20px 44px 20px 26px;border-radius:26px;background:color-mix(in srgb,var(--card) 88%,transparent);border:2px solid var(--ac);box-shadow:0 0 40px var(--glow);animation:bob 4s ease-in-out infinite}
+.av{width:110px;height:110px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:2.6rem;font-weight:800;color:#fff;box-shadow:0 0 26px var(--glow)}.by{font-size:1.1rem;color:var(--mu);letter-spacing:.2em;text-transform:uppercase}.pnm{font-size:2.3rem;font-weight:800}.prole{font-size:1.45rem}.pcol{font-size:1.45rem;color:var(--ac2);font-weight:700}
+</style></head><body><div class="orb o1"></div><div class="orb o2"></div>
+<header><b>⚙ Digital Counters · Design Presentation</b><select id="jump"></select></header>
+<main id="wrap"><div id="slide"><div id="stage"></div><div class="sf"><span>Kamaraj College of Engineering and Technology · Department of ECE</span><span id="sn"></span></div></div></main><div id="bar"><div id="fill"></div></div>
+<footer><button id="nx">Next ▶</button><button id="pv">◀ Previous</button><button id="all">Reveal all</button><button id="auto">▶ Auto</button><span class="mu" id="prog"></span><span style="flex:1"></span><span class="mu">→ / Space next · ← back · F full · T theme · H clean view</span><button id="th">Theme</button><button id="fs">Fullscreen</button></footer>
+<script>
+const $=s=>document.querySelector(s), bin=(v,n)=>v.toString(2).padStart(n,'0');
+const TYPES={up:'Synchronous Up',down:'Synchronous Down',updown:'Up-Down',ripple:'Asynchronous (Ripple)',modn:'MOD-N',ring:'Ring',johnson:'Johnson',custom:'Custom / Random / LFSR'};
+const S={type:'up',n:3,ff:'T',N:6,dir:1,rst:'sync',hist:[],k:0,timer:null,guide:0,all:false,custom:true,lfsr:false};
+
+/* ---- Flip-flop data ---- */
+const FF={
+ T:{pins:['T'],eq:"Q+ = T ⊕ Q",note:"T=1 toggles, T=0 holds. No invalid inputs.",exc:{'00':['0'],'01':['1'],'10':['1'],'11':['0']}},
+ D:{pins:['D'],eq:"Q+ = D",note:"Output follows D at the clock edge.",exc:{'00':['0'],'01':['1'],'10':['0'],'11':['1']}},
+ JK:{pins:['J','K'],eq:"Q+ = JQ' + K'Q",note:"J=K=1 toggles. All combinations valid.",exc:{'00':['0','x'],'01':['1','x'],'10':['x','1'],'11':['x','0']}},
+ SR:{pins:['S','R'],eq:"Q+ = S + R'Q",note:"S=R=1 is INVALID (forbidden), so SR must never be driven that way.",exc:{'00':['0','x'],'01':['1','0'],'10':['0','1'],'11':['x','0']}}};
+
+/* ---- Counter model: start state + next-state function f(s,m) ---- */
+function model(){
+ const t=S.type; let n=S.n, M=2**n, f, start=0, hasM=false, err='';
+ if(t==='up'||t==='ripple') f=s=>(s+1)%M;
+ else if(t==='down') f=s=>(s+M-1)%M;
+ else if(t==='updown'){hasM=true;f=(s,m)=>m?(s+1)%M:(s+M-1)%M;}
+ else if(t==='modn'){n=Math.max(1,Math.ceil(Math.log2(S.N)));M=2**n;f=s=>s<S.N?(s+1)%S.N:null;}
+ else if(t==='ring'){start=1<<(n-1);f=s=>(s>>1)|((s&1)<<(n-1));}
+ else if(t==='johnson'){f=s=>(s>>1)|(((~s)&1)<<(n-1));}
+ else {
+  if(S.lfsr){start=1;f=s=>((s<<1)&(M-1))|(((s>>(n-1))^(s>>(n-2)))&1);}
+  else{
+   const q=S.cust.split(/[,\s>→-]+/).filter(Boolean).map(x=>/^[01]+$/.test(x)&&x.length>1?parseInt(x,2):parseInt(x,10));
+   const need=Math.max(...q.map(v=>Math.ceil(Math.log2(v+1))||1),1); if(need>n){n=need;M=2**n}
+   const map={};start=q[0];
+   q.forEach((v,i)=>{const nx=q[(i+1)%q.length]; if(v in map&&map[v]!==nx)err='State '+v+' has two different successors.'; map[v]=nx;});
+   f=s=>(s in map)?map[s]:null;}
+ }
+ const used=new Set();let c=start;
+ for(const m of hasM?[0,1]:[0]){c=start;for(let i=0;i<300&&!used.has(c*2+m+1000*0);i++){used.add(c*2+m);if(f(c,m)==null)break;c=f(c,m);}}
+ const states=new Set([...used].map(x=>x>>1)); // used states
+ return{n,M,f,start,hasM,states,err};
+}
+
+/* ---- Quine-McCluskey minimiser (don't-cares supported) ---- */
+function qm(v,ones,dcs){
+ if(!ones.length)return['0'];
+ let terms=[...new Set([...ones,...dcs])].map(x=>bin(x,v)),primes=new Set();
+ const comb=(a,b)=>{let d=-1;for(let i=0;i<a.length;i++){if(a[i]!==b[i]){if(a[i]==='-'||b[i]==='-'||d>=0)return -1;d=i;}}return d};
+ while(terms.length){const used=new Set(),nx=new Set();
+  for(let a=0;a<terms.length;a++)for(let b=a+1;b<terms.length;b++){const d=comb(terms[a],terms[b]);if(d>=0){nx.add(terms[a].slice(0,d)+'-'+terms[a].slice(d+1));used.add(a);used.add(b);}}
+  terms.forEach((t,i)=>{if(!used.has(i))primes.add(t)});terms=[...nx];}
+ const cov=(p,m)=>[...p].every((c,i)=>c==='-'||c===m[i]),lit=p=>[...p].filter(c=>c!=='-').length;
+ let rem=ones.map(x=>bin(x,v)),res=[];
+ while(rem.length){let best=null,bc=-1;
+  for(const p of primes){const c=rem.filter(m=>cov(p,m)).length;if(c>bc||(c===bc&&lit(p)<lit(best))){best=p;bc=c}}
+  res.push(best);rem=rem.filter(m=>!cov(best,m));}
+ const nm=p=>v-1-p; // string index -> variable position
+ return res.map(p=>{const parts=[];[...p].forEach((c,i)=>{if(c!=='-')parts.push(VN(nm(i))+(c==='0'?"'":''))});return parts.join('·')||'1'});
+}
+let CUR_N=3;const VN=p=>p<CUR_N?'Q'+p:'M';
+
+/* ---- Synthesis: excitation table + Boolean equations ---- */
+function synth(){
+ const md=model(),n=md.n;CUR_N=n;const v=n+(md.hasM?1:0),size=1<<v,pins=FF[S.ff].pins,rows=[];
+ const val={};pins.forEach(p=>{for(let i=0;i<n;i++)val[p+i]=Array(size).fill('x')});
+ for(let m=0;m<(md.hasM?2:1);m++)for(let s=0;s<2**n;s++){
+  if(!md.states.has(s))continue;const nx=md.f(s,m);if(nx==null)continue;
+  const idx=(m<<n)|s,row={s,m,nx,ex:{}};
+  for(let i=0;i<n;i++){const key=((s>>i)&1)+''+((nx>>i)&1),e=FF[S.ff].exc[key];
+   pins.forEach((p,j)=>{val[p+i][idx]=e[j];row.ex[p+i]=e[j]});}
+  rows.push(row);}
+ const eqs={};
+ for(const k in val){const ones=[],dcs=[];val[k].forEach((x,i)=>{if(x==='1')ones.push(i);else if(x==='x')dcs.push(i)});eqs[k]=qm(v,ones,dcs).join(' + ');}
+ if(S.type==='ripple'){for(let i=0;i<n;i++){pins.forEach(p=>eqs[p+i]=S.ff==='D'?`Q${i}'`:S.ff==='SR'?(p==='S'?`Q${i}'`:`Q${i}`):'1');}}
+ return{md,n,rows,eqs,pins,val,unused:[...Array(2**n).keys()].filter(s=>!md.states.has(s))};
+}
+
+/* ---- Gate-level circuit renderer (textbook style: FFs left to right, LSB first) ---- */
+function circuit(upto=D.n,id='svg',compact=false){
+ const n=D.n,P=D.pins,cur=S.hist[S.k],prev=S.hist[S.k-1],tg=prev?cur.s^prev.s:0,FW=96,GAP=64,RS=16,LS=7,AW=34,OW=40,rip=S.type==='ripple',two=P.length>1;
+ const pr=l=>l.replace(/'/g,'\u2032'),Dn=(l)=>`<text x="0" y="0">${l}</text>`;
+ const val=l=>{if(l==='HIGH')return 1;const c=l.endsWith("'"),b=l.replace("'",'');const v=b==='M'?(S.dir?1:0):(cur.s>>+b.slice(1))&1;return c?1-v:v};
+ const terms=k=>{const e=D.eqs[k];return e==='0'?[]:e==='1'?[['HIGH']]:e.split(' + ').map(t=>t.split('\u00b7'))};
+ const lits=new Set();for(let i=0;i<n;i++)P.forEach(p=>terms(p+i).forEach(t=>t.forEach(l=>lits.add(l))));
+ const usedRev=new Set();for(let i=0;i<Math.min(upto,n);i++)P.forEach(p=>terms(p+i).forEach(t=>t.forEach(l=>usedRev.add(l))));
+ const ord=l=>l==='HIGH'?-1:l[0]==='M'?1000+l.length:(+l[1])*2+(l.endsWith("'")?1:0);
+ const rails=[...lits].sort((a,b)=>ord(a)-ord(b)),ry={};rails.forEach((l,r)=>ry[l]=28+r*RS);
+ const railBot=28+Math.max(rails.length,1)*RS,slot=t=>t.length>1?t.length*14+16:24;
+ const bh=ts=>Math.max(24,ts.reduce((a,t)=>a+slot(t),0));
+ let maxH0=0;for(let i=0;i<n;i++)maxH0=Math.max(maxH0,bh(terms(P[0]+i)));
+ const pin0Y=railBot+26+maxH0,y0=pin0Y-26,h=two?112:96,cy=pin0Y+(two?25:40),cpY=y0+h+40;
+ let o='',x=84;const cols=[];
+ for(let i=0;i<n;i++){
+  const tl=P.map(p=>terms(p+i)),nl=tl.flat().reduce((a,t)=>a+t.length,0),anyAnd=tl.flat().some(t=>t.length>1),anyOr=tl.some(t=>t.length>1);
+  const gaW=30+nl*LS+10+(anyAnd?AW:0)+(anyOr?16+OW:0)+P.length*7+20,laneX0=x+26,andX=laneX0+nl*LS+10,txOut=andX+(anyAnd?AW:0),orX=txOut+16,FFx=x+gaW;
+  const q=(cur.s>>i)&1,hot=(tg>>i)&1,qy=y0+26,qby=y0+h-22,xr=FFx+FW;let L=0;
+  // gate networks per input pin
+  P.forEach((p,j)=>{if(i>=upto)return;const ts=tl[j],pinY=pin0Y+(j?50:0),top=j?pinY:pin0Y-bh(ts),act=evalEq(D.eqs[p+i],cur.s,S.dir);let cyc=top;const outs=[];
+   ts.forEach(t=>{let ty,gy,gh;
+    if(t.length>1){gh=t.length*14;gy=cyc+8;ty=gy+gh/2;o+=`<path d="M${andX} ${gy} h${AW/2} a${AW/2} ${gh/2} 0 0 1 0 ${gh} h-${AW/2} z" fill="var(--card2)" stroke="var(--tx)" stroke-width="1.6"/>`;}
+    else ty=cyc+12;
+    t.forEach((l,m)=>{const yin=t.length>1?gy+(m+1)*gh/(t.length+1):ty,lx=laneX0+(L++)*LS,c=val(l)?'var(--ok)':'var(--wire)';
+     o+=`<path d="M${lx} ${ry[l]} V${yin} H${t.length>1?andX:txOut}" fill="none" stroke="${c}" stroke-width="1.8"/><circle cx="${lx}" cy="${ry[l]}" r="2.8" fill="${c}"/>`;});
+    outs.push(ty);cyc+=slot(t);});
+   let fx=txOut,fy=outs[0],base=txOut;
+   if(ts.length>1){const oh=ts.length*14+8,oy=(outs[0]+outs[outs.length-1])/2-oh/2;
+    o+=`<path d="M${orX} ${oy} Q${orX+12} ${oy+oh/2} ${orX} ${oy+oh} Q${orX+28} ${oy+oh} ${orX+OW} ${oy+oh/2} Q${orX+28} ${oy} ${orX} ${oy} Z" fill="var(--card2)" stroke="var(--tx)" stroke-width="1.6"/>`;
+    outs.forEach((yt,m)=>{const yin=oy+(m+1)*oh/(ts.length+1),ex=txOut+3+m*3;o+=`<path d="M${txOut} ${yt} H${ex} V${yin} H${orX+4}" fill="none" stroke="var(--wire)" stroke-width="1.8"/>`});
+    fx=orX+OW;fy=oy+oh/2;}
+   if(!ts.length){o+=`<path d="M${FFx-22} ${pinY} H${FFx}" stroke="var(--wire)" stroke-width="1.8"/><text x="${FFx-34}" y="${pinY+4}" font-size="12">0</text>`;}
+   else{const ex=(anyOr?orX+OW:txOut)+8+j*7;o+=`<path d="M${fx} ${fy} H${ex} V${pinY} H${FFx}" fill="none" stroke="${act?'var(--ok)':'var(--wire)'}" stroke-width="2.2"/>`;}
+  });
+  // flip-flop body
+  o+=`<rect x="${FFx}" y="${y0}" width="${FW}" height="${h}" rx="4" fill="var(--card2)" stroke="${hot?'var(--clk)':'var(--tx)'}" stroke-width="${hot?4:2}"/>`;
+  P.forEach((p,j)=>{o+=`<text x="${FFx+8}" y="${pin0Y+(j?50:0)+5}" font-size="14" font-weight="700">${p}</text>`});
+  o+=`<circle cx="${FFx+FW/2}" cy="${y0+h/2}" r="15" fill="${q?'var(--ok)':'none'}" stroke="var(--tx)" stroke-width="1.8"/><text x="${FFx+FW/2}" y="${y0+h/2+5}" text-anchor="middle" font-size="14" font-weight="700" style="fill:${q?'#04121f':'var(--tx)'}">${String.fromCharCode(65+i)}</text>`;
+  o+=`<path d="M${FFx} ${cy-8} L${FFx+12} ${cy} L${FFx} ${cy+8}" fill="none" stroke="var(--tx)" stroke-width="1.8"/><circle cx="${FFx-4.5}" cy="${cy}" r="4.5" fill="var(--card2)" stroke="var(--tx)" stroke-width="1.6"/>`;
+  o+=`<text x="${xr-8}" y="${qy+5}" text-anchor="end" font-size="13" style="fill:${q?'var(--ok)':'var(--tx)'}">Q${i}</text><text x="${xr-8}" y="${qby+5}" text-anchor="end" font-size="13">Q${i}\u2032</text>`;
+  // outputs: Q and Q' stubs, risers to rails
+  [['Q'+i,qy,14],["Q"+i+"'",qby,28]].forEach(([l,yy,dx])=>{const used=usedRev.has(l),c=val(l)?'var(--ok)':'var(--wire)';
+   o+=`<path d="M${xr} ${yy} H${xr+(used?dx:10)}${used?` V${ry[l]}`:''}" fill="none" stroke="${c}" stroke-width="1.8"/>`;if(used)o+=`<circle cx="${xr+dx}" cy="${ry[l]}" r="2.8" fill="${c}"/>`;});
+  // clock
+  const cx=x+8;
+  if(!rip||i===0)o+=`<path d="M${cx} ${cpY} V${cy} H${FFx-9}" fill="none" stroke="var(--clk)" stroke-width="2.2"/><circle cx="${cx}" cy="${cpY}" r="3.2" fill="var(--clk)"/>`;
+  else{const pxr=cols[i-1].xr,pq=cols[i-1].qby;o+=`<path d="M${pxr} ${pq} H${cx} V${cy} H${FFx-9}" fill="none" stroke="var(--clk)" stroke-width="2.2"/>`;}
+  cols.push({xr,qby});x=xr+GAP;}
+ const W=x+10,H=cpY+22;
+ // rails (drawn first so wires sit on top)
+ let r='';rails.filter(l=>usedRev.has(l)).forEach(l=>{r+=`<path d="M62 ${ry[l]} H${W-14}" stroke="${val(l)?'var(--ok)':'var(--wire)'}" stroke-width="1.4" opacity=".55"/><text x="4" y="${ry[l]+4}" font-size="11">${l==='HIGH'?'HIGH (1)':pr(l)}</text>`});
+ r+=`<path d="M40 ${cpY} H${W-14}" stroke="var(--clk)" stroke-width="2.6"/><text x="4" y="${cpY+4}" font-size="13" font-weight="700" style="fill:var(--clk)">CP</text>`;
+ return `<div style="overflow-x:auto"><svg class="sv" id="${id}" viewBox="0 0 ${W} ${H}" style="${compact?'':'min-width:'+Math.min(W,1500)+'px'}" xmlns="http://www.w3.org/2000/svg"><style>text{font-family:monospace;fill:var(--tx)}</style>${r}${o}</svg></div>`;
+}
+
+/* ---- Timing diagram ---- */
+function wave(){
+ const n=D.n,h=S.hist,sw=38,lab=60,win=16,st=Math.max(0,S.k-win+1),cnt=Math.min(win,h.length-st),rowH=44;
+ const sigs=['CLK',...Array.from({length:n},(_,c)=>'Q'+(n-1-c)),...(D.md.hasM?['M']:[])],Wd=lab+win*sw+10,H=sigs.length*rowH+30;
+ let o=`<svg class="sv" viewBox="0 0 ${Wd} ${H}"><style>text{font-family:monospace;fill:var(--tx);font-size:12px}</style>`;
+ const cx=lab+(S.k-st)*sw;o+=`<rect x="${cx}" y="0" width="${sw}" height="${H-20}" fill="var(--ok)" opacity=".18"/>`;
+ sigs.forEach((s,r)=>{const y0=r*rowH+8,hi=y0+4,lo=y0+30;o+=`<text x="4" y="${y0+22}">${s}</text>`;
+  let d='',col=s==='CLK'?'var(--clk)':s==='M'?'var(--ac2)':'var(--ok)',last=null;
+  if(s==='CLK'){for(let j=0;j<win;j++){const x=lab+j*sw;d+=(j?`L${x} ${lo}`:`M${x} ${lo}`)+`L${x} ${hi}L${x+sw/2} ${hi}L${x+sw/2} ${lo}`;} d+=`L${lab+win*sw} ${lo}`;}
+  else{for(let j=0;j<cnt;j++){const e=h[st+j],b=s==='M'?e.m:(e.s>>+s.slice(1))&1,y=b?hi:lo,x=lab+j*sw;d+=(j===0?`M${x} ${y}`:(last!==y?`L${x} ${last}L${x} ${y}`:''))+`L${x+sw} ${y}`;last=y;}}
+  o+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2.5"/>`;});
+ for(let j=0;j<cnt;j++)o+=`<text x="${lab+j*sw+sw/2}" y="${H-6}" text-anchor="middle" ${st+j===S.k?'font-weight="700"':''}>${bin(h[st+j].s,n).slice(-n)}</text>`;
+ return o+`<text x="4" y="${H-6}">state</text></svg>`;
+}
+
+function tbl(head,rows,cur){return `<table><tr>${head.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map((r,i)=>`<tr class="${i===cur?'cur':''}">${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table>`}
+const CARDS=[
+['ripple','Asynchronous (Ripple) Counter','Flip-flops are not clocked together: the clock drives only FF0, and each later stage is clocked by the previous stage output.','Each stage toggles (T=1) and divides the incoming frequency by 2. Changes ripple through the chain.','000→001→010→…→111→000','Frequency division, simple event counters.','+ Simplest, fewest gates. − Cumulative propagation delay, glitches in decoding, slow at high frequency.'],
+['up','Synchronous (Up) Counter','All flip-flops share one clock and change at the same instant. Combinational logic decides which ones toggle.','Qk toggles only when all lower bits are 1 (T0=1, T1=Q0, T2=Q1·Q0).','000→001→…→111→000','Digital clocks, address generation, timers.','+ Fast, no ripple delay, glitch-free. − More gates; clock load is higher.'],
+['down','Down Counter','Counts backwards, decrementing on every clock pulse.','Qk toggles only when all lower bits are 0 (T1=Q0′, T2=Q1′·Q0′).','111→110→…→000→111','Countdown timers, delay generators.','+ Same speed as up counter. − Needs complemented outputs in the logic.'],
+['updown','Up-Down Counter','Counts up or down depending on a mode input M (M=1 up, M=0 down).','Toggle conditions of up and down logic are combined: T1 = M·Q0 + M′·Q0′.','Up and down sequences, switchable while running','Position tracking (encoders), bidirectional counters.','+ Flexible. − Extra gates and one more input variable.'],
+['modn','MOD-N Counter','Counts through exactly N states (0 to N−1), then returns to 0 although 2ⁿ states exist.','n = ⌈log₂N⌉ flip-flops. Unused states are don’t-cares, or a terminal-count detector resets the counter.','e.g. MOD-6: 000→001→010→011→100→101→000','Decade counters (MOD-10), clock dividers by N, BCD displays.','+ Any modulus. − Unused states must be checked for lock-out.'],
+['ring','Ring Counter','A shift register whose last output feeds back to the first input, circulating a single 1.','One-hot code: n flip-flops give n states.','1000→0100→0010→0001→1000','Sequencers, traffic-light control, stepper motors.','+ No decoder needed, glitch-free. − Inefficient (n states from n FFs); needs initial preset.'],
+['johnson','Johnson (Twisted-Ring) Counter','A shift register whose inverted last output feeds back to the first input.','n flip-flops give 2n states; each adjacent state differs by one bit.','000→100→110→111→011→001→000','Decoders with no glitches, phase generators.','+ 2n states, easy decoding. − Uses only 2n of 2ⁿ states; can lock out.'],
+['custom','Random / Custom Sequence Counter','Counts through any designer-chosen sequence, e.g. 000→001→011→111→110→100→000.','Next-state table is written directly from the sequence; unused states are don’t-cares. An LFSR is a pseudo-random special case: deterministic and periodic, not a true random source.','User defined, or LFSR with 2ⁿ−1 states','Test patterns, encryption/CRC, special control sequences.','+ Total freedom. − Logic can be larger; verify unused states.']];
+const APPS=[['Digital clocks','MOD-60 and MOD-24 counters in cascade count seconds, minutes and hours.'],['Frequency division','An n-bit counter divides the clock by 2ⁿ at its MSB.'],['Event counting','Counts objects on a conveyor, pulses from sensors, button presses.'],['Digital timers','A known clock plus a count gives a precise time interval.'],['Traffic light controller','A ring or MOD-N counter steps through red, green and yellow states.'],['Frequency counter','Counts input pulses during a fixed gate time.'],['Measuring instruments','Digital voltmeters and tachometers count pulses proportional to the quantity.'],['Sequence generation','Johnson, LFSR and custom counters generate patterns.'],['Industrial automation','Step sequencers and production counters.'],['Microprocessors','Program counter fetches the next instruction address.'],['Digital communications','Frame and bit synchronisation, PN-sequence generators.'],['Address generation / memory sequencing','Counters step through memory addresses.']];
+function seqList(){const md=D.md;let c=md.start,o=[c];for(let i=0;i<40;i++){const nx=md.f(c,S.dir);if(nx==null||nx===md.start)break;o.push(nx);c=nx;if(o.length>2**md.n)break}return o}
+function evalEq(e,s,m){if(e==='0')return 0;if(e==='1')return 1;return e.split(' + ').some(t=>t.split('·').every(l=>{const cp=l.endsWith("'"),v=l.replace("'",'');const b=v==='M'?m:(s>>+v.slice(1))&1;return cp?!b:!!b}))?1:0}
+function nextOf(s,m){let r=0;for(let i=0;i<D.n;i++){const q=(s>>i)&1,g=p=>evalEq(D.eqs[p+i],s,m);let b;if(S.ff==='T')b=q^g('T');else if(S.ff==='D')b=g('D');else if(S.ff==='JK')b=((g('J')&&!q)||(!g('K')&&q))?1:0;else b=(g('S')||(!g('R')&&q))?1:0;r|=b<<i}return r}
+const KC=['#C084FC','#22D3EE','#FBBF24','#F472B6','#4ADE80','#FB923C'];
+function kmapHTML(name){
+ const n=D.n,hm=D.md.hasM,v=n+(hm?1:0),eq=D.eqs[name],val=D.val[name],tm=eq==='0'?[]:eq==='1'?[['1']]:eq.split(' + ').map(t=>t.split('\u00b7'));
+ const inT=(idx,t)=>t[0]==='1'||t.every(l=>{const c=l.endsWith("'"),b=l.replace("'",''),p=b==='M'?n:+b.slice(1),bit=(idx>>p)&1;return c?!bit:!!bit});
+ const vn=p=>hm&&p===n?'M':'Q'+p,vm=Math.min(v,4),rb=Math.floor(vm/2),cb=vm-rb,gr=b=>b===0?[0]:b===1?[0,1]:[0,1,3,2],ci=(hm?S.dir:0)*(1<<n)+S.hist[S.k].s;
+ let h='';
+ (v===5?[0,1]:[null]).forEach(sm=>{
+  const rl=Array.from({length:rb},(_,i)=>vn(vm-1-i)).join(''),cl=Array.from({length:cb},(_,i)=>vn(cb-1-i)).join('');
+  h+=`<table class="km"><tr><th>${sm===null?'':'M='+sm+' '}${rl}\\${cl}</th>${gr(cb).map(c=>`<th>${bin(c,cb)}</th>`).join('')}</tr>`;
+  gr(rb).forEach(r=>{h+=`<tr><th>${rb?bin(r,rb):''}</th>`;gr(cb).forEach(c=>{const idx=((sm||0)<<n)|(r<<cb)|c,x=val[idx],cov=[];
+   tm.forEach((t,ti)=>{if((S.kmTerm<0||S.kmTerm===ti)&&inT(idx,t))cov.push(ti)});
+   const sh=x!=='0'?cov.map((ti,k)=>`inset 0 0 0 ${2+k*2}px ${KC[ti%6]}`).join(','):'';
+   h+=`<td style="${sh?'box-shadow:'+sh+';':''}">${String(x).toUpperCase()}</td>`});h+='</tr>'});h+='</table>';});
+ return h;
+}
+/* ===== Presentation layer ===== */
+let D,SL=[],pos={s:0,u:0},autoT=null,selIdx=0;
+S.cust='000,001,011,111,110,100';S.hist=[];S.k=0;S.pt=false;S.pf=false;
+const STEPS=['Sequence','State diagram','FF tables','Excitation','K-map','Logic','Operation','Summary'];let lastS=-1;
+const bul=(a,u)=>`<ul class="bl">${a.slice(0,u+1).map((x,i)=>`<li class="${i===u?'cur':''}">${x}</li>`).join('')}</ul>`;
+const LED=(s,n,tg)=>`<div class="leds">${Array.from({length:n},(_,k)=>{const i=n-1-k;return`<div class="led ${(s>>i)&1?'hi':''} ${(tg>>i)&1?'tg':''}"><i></i>Q${i}</div>`}).join('')}</div>`;
+const names=n=>Array.from({length:n},(_,i)=>'Q'+(n-1-i)).join(' ');
+const pr=l=>l.replace(/'/g,'\u2032');
+function simTo(u){if(u===0||!S.hist.length)S.hist=[{s:D.md.start,m:S.dir}];while(S.hist.length<=u){const c=S.hist[S.hist.length-1];S.hist.push({s:D.md.f(c.s,S.dir),m:S.dir})}S.k=u}
+
+/* ---- State diagram, transitions revealed one by one ---- */
+function stateDiagram(ED,r,showUn){
+ const n=D.n,hm=D.md.hasM,sq=seqList(),un=D.unused,cx=200,cy=165,R=128,Ri=58,nr=sq.length+un.length>10?17:23,pos={};
+ sq.forEach((s,i)=>{const a=-Math.PI/2+2*Math.PI*i/sq.length;pos[s]=[cx+R*Math.cos(a),cy+R*Math.sin(a)]});
+ un.forEach((s,i)=>{const a=-Math.PI/2+2*Math.PI*i/un.length;pos[s]=[cx+Ri*Math.cos(a),cy+Ri*Math.sin(a)]});
+ const edge=(a,b,col,mk,dash,w)=>{if(a===b||!pos[a]||!pos[b])return'';const[x1,y1]=pos[a],[x2,y2]=pos[b],dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy),ux=dx/d,uy=dy/d,k=.2*d,mx=(x1+x2)/2-uy*k,my=(y1+y2)/2+ux*k;
+  return`<path d="M${x1+ux*nr} ${y1+uy*nr} Q${mx} ${my} ${x2-ux*(nr+6)} ${y2-uy*(nr+6)}" fill="none" style="stroke:${col}" stroke-width="${w}" ${w>3?'class="ne"':''} ${dash?'stroke-dasharray="5 4"':''} marker-end="url(#${mk})"/>`};
+ let o=`<svg class="sv" viewBox="0 0 400 330"><defs>${[['mA','--ok'],['mB','--ac2'],['mC','--ac'],['mG','--mu'],['mK','--clk']].map(([i,c])=>`<marker id="${i}" viewBox="0 0 8 8" refX="7" refY="4" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M0 0L8 4L0 8z" style="fill:var(${c})"/></marker>`).join('')}</defs>`;
+ ED.slice(0,r).forEach((e,i)=>{const last=i===r-1,col=last?'var(--clk)':hm?(e.m?'var(--ok)':'var(--ac2)'):'var(--ac)',mk=last?'mK':hm?(e.m?'mA':'mB'):'mC';o+=edge(e.s,e.nx,col,mk,0,last?3.6:2.2)});
+ if(showUn)un.forEach(s=>{o+=edge(s,nextOf(s,hm?S.dir:0),'var(--mu)','mG',1,2)});
+ const curS=r?ED[r-1].nx:D.md.start,srcS=r?ED[r-1].s:-1;
+ [...sq,...(showUn?un:[])].forEach(s=>{const[x,y]=pos[s],u=un.includes(s),c=s===curS;o+=`<circle cx="${x}" cy="${y}" r="${nr}" style="fill:${c?'var(--ok)':'var(--card2)'};stroke:${s===srcS?'var(--clk)':u?'var(--mu)':'var(--ac)'}" stroke-width="${s===srcS?4:2.5}" ${u?'stroke-dasharray="3 2"':''}/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="${n>3?12:14}" font-family="monospace" style="fill:${c?'#04121f':'var(--tx)'}">${bin(s,n)}</text>`});
+ return o+'</svg>';
+}
+/* ---- Flip-flop tables ---- */
+function ffChar(){const f=FF[S.ff],p=f.pins,rows=[],ch=(q,a)=>S.ff==='T'?q^a[0]:S.ff==='D'?a[0]:S.ff==='JK'?(((a[0]&&!q)||(!a[1]&&q))?1:0):(a[0]&&a[1]?'X':((a[0]||(!a[1]&&q))?1:0));
+ for(let c=0;c<2**p.length;c++){const a=p.map((_,i)=>(c>>(p.length-1-i))&1);for(const q of[0,1])rows.push([...a,q,ch(q,a)])}
+ return`<div class="eq">${f.eq}</div><p>${f.note}</p>${tbl([...p,'Q','Q+'],rows)}`}
+function ffExc(){const f=FF[S.ff];return`<p>What must the inputs be to move Q to Q+ ? (X = don\u2019t-care)</p>${tbl(['Q \u2192 Q+',...f.pins],['00','01','10','11'].map(k=>[k[0]+' \u2192 '+k[1],...f.exc[k].map(x=>String(x).toUpperCase())]))}`}
+
+/* ---- Slide definitions ---- */
+const rt=(head,rows,u)=>tbl(head,rows.slice(0,u+1),u);
+const chips=(arr,cur,attr,lab)=>arr.map(k=>`<button class="chip2 ${String(k)===String(cur)?'on':''}" ${attr}="${k}">${lab?lab(k):k}</button>`).join('');
+function baseSlides(){return[
+ {t:'',n:1,f:()=>{const bits=Array.from({length:22},(_,i)=>`<span style="left:${i*4.6}%;animation-duration:${7+(i*37%9)}s;animation-delay:-${(i*53%11)}s">${Array.from({length:14},(_,j)=>(i*7+j*3)%5<2?1:0).join('')}</span>`).join('');
+ return`<div class="hero" id="hero"><div class="rain">${bits}</div><div class="kick">DIGITAL SYSTEM DESIGN</div><div class="big2">Digital Counters</div><p class="sub">Design and Analysis of Synchronous &amp; Asynchronous Counters</p>${LED(0,3,0)}<div class="nm2" id="heroN">000 = 0</div>
+ <div class="pres"><div class="av">SA</div><div><div class="by">Presented by</div><div class="pnm">Mr. S. Alwyn Rajiv</div><div class="prole">Assistant Professor, Department of ECE</div><div class="pcol">Kamaraj College of Engineering and Technology</div></div></div></div>`}},
+ {t:'What is a counter?',n:4,f:u=>bul(['A <b>digital counter</b> is a <b>sequential circuit</b> made of flip-flops that steps through a fixed sequence of states, one step for every clock pulse.','Counters are used to <b>count events, measure time, divide frequency, generate addresses</b> and sequence operations.','Each <b>clock pulse</b> causes a <b>state transition</b>: present state \u2192 next state. After the last state the counter returns to the first.','<b>n</b> flip-flops give up to <b>2\u207f</b> states: 3 flip-flops count 0 to 7 (MOD-8).'],u)},
+ {t:'Sequential vs combinational circuits',n:3,f:u=>rt(['','Combinational','Sequential (counter)'],[['Output depends on','Present inputs only','Inputs and stored state'],['Memory','None','Flip-flops store the state'],['Clock','Not needed','Clock controls state changes']],u)},
+ {t:'Synchronous vs asynchronous counters',n:3,f:u=>rt(['','Synchronous','Asynchronous (ripple)'],[['Clock','Common clock to every flip-flop','Clock drives FF0 only; each stage clocks the next'],['Speed','Fast: all bits change together','Slower: delays add up (ripple)'],['Logic','Extra gates decide which bits toggle','No extra gates']],u)},
+ {t:'Binary counting sequence (3-bit)',n:9,f:u=>{const s=u%8,p=u?(u-1)%8:0,rows=Array.from({length:u+1},(_,i)=>[i,...[2,1,0].map(b=>((i%8)>>b)&1),i%8]);return`<div class="cols"><div>${LED(s,3,u?s^p:0)}<div class="leds"><div class="led"><div class="big">${bin(s,3)}</div>binary</div><div class="led"><div class="big">${s}</div>decimal</div></div><p class="mu" style="text-align:center">Clock pulse ${u}${u===8?' \u2192 back to 000':''}</p></div><div>${tbl(['Clock pulse','Q2','Q1','Q0','Decimal'],rows.slice(-9),rows.length-1)}</div></div>`}},
+ {t:'Types of counters',n:CARDS.length,f:u=>{const c=CARDS[u];return`<div class="two"><div class="lst">${CARDS.map((x,i)=>`<div class="${i===u?'cur':i>u?'dim2':''}">${i<=u?x[1]:'\u2022\u2022\u2022'}</div>`).join('')}</div><div class="det"><h2>${c[1]}</h2><p><b>Definition:</b> ${c[2]}</p><p><b>Working:</b> ${c[3]}</p><p><b>Sequence:</b> <code>${c[4]}</code></p><p><b>Applications:</b> ${c[5]}</p><p class="mu">${c[6]}</p></div></div>`}},
+ {t:'Applications of counters',n:4,f:u=>`<div class="cols">${APPS.slice(0,(u+1)*3).map((a,i)=>`<div style="margin:.5rem 0;opacity:${i>=u*3?1:.7}"><h2 style="font-size:1.4rem;margin:0">${a[0]}</h2><div style="font-size:1.15rem">${a[1]}</div></div>`).join('')}</div>`},
+ {t:'Counter design procedure',n:8,f:u=>{const P8=[['Counting sequence','List the states and find n = \u2308log\u2082 N\u2309 flip-flops'],['State diagram','Draw the transitions and the present \u2192 next state table'],['Flip-flop tables','Characteristic and excitation table of the chosen flip-flop'],['Counter excitation table','Find every flip-flop input for every transition'],['K-map simplification','Minimise each input; unused states are don\u2019t-cares'],['Logic diagram','Draw the gates and flip-flops from the expressions'],['Operation','Clock the circuit; check the timing diagram and unused states'],['Summary','Final expressions and counting sequence']];return`<div class="proc">${P8.map((p,i)=>`<div class="pi ${i<u?'done':i===u?'now':''}" style="${i>u?'opacity:.25':''}"><div class="pn">${i<u?'\u2713':i+1}</div><div><b>${p[0]}</b><div class="mu">${p[1]}</div></div></div>`).join('')}</div>`}},
+ {t:'Select the counter to design',n:1,key:'select',f:()=>{const ty=S.type,ok=S.pt&&S.pf;
+ const card=(k,i)=>{const c=CARDS.find(x=>x[0]===k);return`<button style="--i:${i}" class="opt ${S.pt&&ty===k?'sel':''}" data-ty="${k}"><b>${TYPES[k]}</b><span>${c[4]}</span></button>`};
+ const par=!S.pt?'':ty==='modn'?`<h3>MOD-N (2 to 16)</h3><input id="modN" type="number" min="2" max="16" value="${S.N}" style="width:6rem">`:`<h3>Number of bits</h3><div class="row">${chips([2,3,4],S.n,'data-nb')}</div>`;
+ const dr=S.pt&&ty==='updown'?`<h3>Starting direction</h3><div class="row">${chips([1,0],S.dir,'data-dir',k=>k?'UP':'DOWN')}</div>`:'';
+ const cu=S.pt&&ty==='custom'?`<h3>Custom sequence (binary or decimal, comma separated)</h3><input id="cust" value="${S.cust}"><div class="row" style="margin-top:.5rem"><button id="rnd">Random sequence</button><button id="lf" class="${S.lfsr?'on':''}">LFSR (pseudo-random)</button></div><p class="mu">${S.lfsr?'LFSR: deterministic and periodic, not a true random generator.':'A custom sequence is chosen by the designer.'}</p>`:'';
+ return`<h3>1 \u00b7 Choose the counter type</h3><div class="optg">${Object.keys(TYPES).map(card).join('')}</div><h3>2 \u00b7 Choose the flip-flop</h3><div class="row">${Object.keys(FF).map(k=>`<button class="chip2 ${S.pf&&S.ff===k?'on':''}" data-ff="${k}">${k} flip-flop</button>`).join('')}</div>${par}${dr}${cu}<div class="row" style="margin-top:1.3rem"><button id="go" class="go" ${ok?'':'disabled'}>Start design \u25b6</button><span id="hint" class="hint ${ok?'okk':''}">${ok?'Ready \u2013 press Start design.':'Select a counter type and a flip-flop to continue.'}</span></div>`}}]}
+
+function designSlides(){
+ const n=D.n,hm=D.md.hasM,sq=seqList(),U=D.md.states.size,P=D.pins,qs=names(n),rip=S.type==='ripple';
+ const ED=[];for(const m of hm?[1,0]:[0])sq.forEach(s=>ED.push({s,m,nx:D.md.f(s,m)}));
+ const keys=[];for(let i=n-1;i>=0;i--)P.forEach(p=>keys.push(p+i));
+ const exp=k=>`${k} = ${pr(D.eqs[k])}`,mh=hm?['M']:[];
+ const rows=D.rows,ib=(r,i)=>P.map(p=>String(r.ex[p+i]).toUpperCase());
+ const out=[
+ {t:'Step 1 \u00b7 Counting sequence and number of flip-flops',n:3,f:u=>bul([`Required sequence:<div class="eq">${sq.map(s=>bin(s,n)).join(' \u2192 ')} \u2192 ${bin(sq[0],n)}</div>${hm?'M = 1 counts up, M = 0 counts down.':''}`,`Number of states = ${U}.<br>n = \u2308log\u2082 ${U}\u2309 = <b>${n}</b> flip-flops.`,`Outputs: <b>${qs}</b> using <b>${S.ff}</b> flip-flops.${D.unused.length?`<br>Unused states (don\u2019t-cares): <b>${D.unused.map(s=>bin(s,n)).join(', ')}</b>`:'<br>All states are used.'}`],u)},
+ {t:'Step 2 \u00b7 State diagram and present state \u2192 next state table',n:ED.length+1+(D.unused.length?1:0),f:u=>{const r=Math.min(u,ED.length);return`<div class="cols"><div>${stateDiagram(ED,r,u>ED.length)}<p class="mu">Each Next adds one transition. Amber arrow = latest.${hm?' Green = UP, purple = DOWN.':''}${u>ED.length?' Dashed grey = unused states.':''}</p></div><div>${r?tbl([...mh,'Present '+qs,'Next '+qs],ED.slice(0,r).map(e=>[...(hm?[e.m?'UP':'DN']:[]),bin(e.s,n),bin(e.nx,n)]),r-1):'<p class="mu">Table is empty: press Next.</p>'}${u>ED.length?`<p>Unused states move to: ${D.unused.map(s=>bin(s,n)+'\u2192'+bin(nextOf(s,hm?S.dir:0),n)).join(', ')}</p>`:''}</div></div>`}},
+ {t:`Step 3 \u00b7 ${S.ff} flip-flop tables`,n:2,f:u=>u?`<h3>Excitation table</h3>${ffExc()}`:`<h3>Characteristic equation and table</h3>${ffChar()}`},
+ {t:'Step 4 \u00b7 Counter excitation table',n:rows.length,f:u=>{const r=rows[u];return`<div class="cols"><div>${tbl([...mh,'Present state','Next state',...Array.from({length:n},(_,i)=>P.map(p=>p+(n-1-i))).flat()],rows.slice(0,u+1).map(r=>[...(hm?[r.m?'UP':'DN']:[]),bin(r.s,n),bin(r.nx,n),...Array.from({length:n},(_,i)=>ib(r,n-1-i)).flat()]),u)}</div><div><h3>Row ${u+1}: ${bin(r.s,n)} \u2192 ${bin(r.nx,n)}</h3>${Array.from({length:n},(_,i)=>{const b=n-1-i;return`<div class="eq">Q${b}: ${(r.s>>b)&1} \u2192 ${(r.nx>>b)&1} \u21d2 ${P.map((p,j)=>p+b+' = '+ib(r,b)[j]).join(', ')}</div>`}).join('')}<p class="mu">Inputs are read from the ${S.ff} excitation table.</p></div></div>`}},
+ rip?{t:'Step 5 \u00b7 Expressions (ripple counter)',n:1,f:()=>`<p style="font-size:1.5rem">A ripple counter needs no K-map: every stage toggles.</p>${keys.map(k=>`<div class="eq">${exp(k)}</div>`).join('')}<p style="font-size:1.3rem">FF0 is clocked by CP; each next flip-flop is clocked by the previous Q\u2032.</p>`}
+ :{t:'Step 5 \u00b7 K-map simplification',n:keys.length+1,f:u=>{if(u===keys.length)return`<h3>Simplified expressions from the K-maps</h3>${keys.map(k=>`<div class="eq">${exp(k)}</div>`).join('')}<p class="mu">These expressions alone are used to draw the logic diagram.</p>`;
+   const k=keys[u],eq=D.eqs[k],tm=eq==='0'?[]:eq.split(' + ');S.kmTerm=-1;
+   return`<div class="cols"><div><h3>K-map for ${k}</h3><div class="row">${kmapHTML(k)}</div><p class="mu">Each coloured loop (adjacent 1s / X, size 1, 2, 4, 8) becomes one product term; variables that change inside a loop drop out.</p><div class="row">${k} = ${tm.map((t,i)=>`<span class="chip" style="border-color:${KC[i%6]}">${pr(t)}</span>`).join(' + ')||'0'}</div></div><div><h3>Expressions so far</h3>${keys.slice(0,u+1).map(x=>`<div class="eq">${exp(x)}</div>`).join('')}</div></div>`}},
+ {t:'Step 6 \u00b7 Logic diagram from the expressions',n:n+1,f:u=>{S.k=Math.min(S.k,S.hist.length-1);return`${circuit(u,'svgL',true)}<div style="margin-top:.6rem">${u===0?'<p style="font-size:1.3rem">Place the flip-flops and connect the common clock CP'+(rip?' (ripple: FF0 only, others use the previous Q\u2032)':'')+'. Next wires each flip-flop from its expression.</p>':`<h3>FF${u-1} \u2013 wired from</h3>${P.map(p=>`<div class="eq">${exp(p+(u-1))}</div>`).join('')}<p class="mu">Each product term \u2192 AND gate (Q from the Q output, Q\u2032 from Q\u2032); several terms \u2192 OR gate; HIGH = logic 1.</p>`}</div>`}},
+ {t:'Step 7 \u00b7 Counter operation',n:sq.length+1,f:u=>{simTo(u);const c=S.hist[u],pv=S.hist[u-1],tg=pv?c.s^pv.s:0;return`${hm?`<div class="row" style="margin-bottom:.5rem">Direction: ${chips([1,0],S.dir,'data-od',k=>k?'UP':'DOWN')}</div>`:''}<div class="cols"><div>${circuit(n,'svgO',true)}</div><div>${LED(c.s,n,tg)}<div class="leds"><div class="led"><div class="big">${bin(c.s,n)}</div>binary</div><div class="led"><div class="big">${c.s}</div>decimal</div></div><p class="mu" style="text-align:center">Clock pulse ${u}. Amber outline = flip-flop that toggled.</p></div></div>${wave()}`}},
+ {t:'Summary',n:1,f:()=>`<p style="font-size:1.4rem">${n}-bit ${TYPES[S.type]}${S.type==='modn'?' (MOD-'+S.N+')':''} counter with ${S.ff} flip-flops.</p>${keys.map(k=>`<div class="eq">${exp(k)}</div>`).join('')}<p style="font-size:1.3rem">Sequence: ${sq.map(s=>bin(s,n)).join(' \u2192 ')} \u2192 ${bin(sq[0],n)}</p>`}];
+ out.forEach((s,i)=>s.st=i+1);return out;}
+
+/* ---- Navigation ---- */
+function startDesign(){D=synth();if(D.md.err){alert(D.md.err);return false}S.hist=[{s:D.md.start,m:S.dir}];S.k=0;SL=SL.slice(0,selIdx+1).concat(designSlides());fillJump();return true}
+function fillJump(){$('#jump').innerHTML=SL.map((s,i)=>s.t?`<option value="${i}">${i}. ${s.t}</option>`:'').join('')}
+function stepper(k){return`<div class="stp">${STEPS.map((x,i)=>`<button data-st="${i+1}" class="stc ${i+1<k?'done':i+1===k?'now':''}">${i+1<k?'\u2713 ':(i+1)+' '}${x}</button>`).join('')}</div>`}
+let heroT=null;
+function heroStart(){clearInterval(heroT);let c=0;heroT=setInterval(()=>{c=(c+1)&7;document.querySelectorAll('#hero .led').forEach((l,k)=>l.classList.toggle('hi',!!((c>>(2-k))&1)));const t=document.getElementById('heroN');if(t)t.textContent=bin(c,3)+' = '+c},800)}
+function fit(){const sc=$('#sc');if(!sc)return;sc.style.transform='';sc.style.width='';const k=Math.min(1,822/sc.scrollHeight,1488/Math.max(sc.scrollWidth,1488));if(k<1){sc.style.transform=`scale(${k})`;sc.style.transformOrigin='top left';sc.style.width=(100/k)+'%'}}
+function scaleSlide(){const w=$('#wrap').clientWidth,h=$('#wrap').clientHeight,k=Math.min(w/1600,h/900),s=$('#slide');s.style.transform=`scale(${k})`;s.style.left=(w-1600*k)/2+'px';s.style.top=(h-900*k)/2+'px'}
+function render(){const sl=SL[pos.s],st=$('#stage'),ch=pos.s!==lastS;st.classList.toggle('enter',ch);lastS=pos.s;
+ st.innerHTML=`<div id="sc">${sl.st?stepper(sl.st):''}${sl.t?`<h1>${sl.t}</h1>`:''}${sl.f(pos.u)}</div>`;$('#jump').value=pos.s;
+ $('#prog').textContent=`Slide ${pos.s+1}/${SL.length} \u00b7 step ${pos.u+1}/${sl.n}`;$('#fill').style.width=((pos.s+(pos.u+1)/sl.n)/SL.length*100)+'%';$('#sn').textContent=`${pos.s+1} / ${SL.length}`;
+ clearInterval(heroT);if(pos.s===0)heroStart();try{fit()}catch(e){}}
+function tryStart(){if(!(S.pt&&S.pf)){stopAuto();render();const h=$('#hint');if(h)h.classList.add('warn');return false}if(!startDesign())return false;pos={s:selIdx+1,u:0};render();return true}
+function next(){const sl=SL[pos.s];if(sl.key==='select'){if(autoT)stopAuto();else tryStart();return}if(pos.u<sl.n-1)pos.u++;else if(pos.s<SL.length-1){pos.s++;pos.u=0}else stopAuto();render()}
+function prev(){if(pos.u>0)pos.u--;else if(pos.s>0){pos.s--;pos.u=SL[pos.s].n-1}render()}
+function stopAuto(){clearInterval(autoT);autoT=null;$('#auto').textContent='\u25b6 Auto'}
+$('#nx').onclick=next;$('#pv').onclick=prev;$('#all').onclick=()=>{pos.u=SL[pos.s].n-1;render()};
+$('#auto').onclick=()=>{if(autoT)stopAuto();else{$('#auto').textContent='\u23f8 Pause';autoT=setInterval(next,1500)}};
+$('#jump').onchange=e=>{pos={s:+e.target.value,u:0};render()};
+const theme=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light'},full=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+$('#th').onclick=theme;$('#fs').onclick=full;
+document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();
+ if(e.key==='ArrowRight'||k===' '||e.key==='PageDown'){e.preventDefault();next()}else if(e.key==='ArrowLeft'||e.key==='PageUp')prev();else if(k==='f')full();else if(k==='t')theme();else if(k==='h')document.body.classList.toggle('clean')});
+$('#stage').addEventListener('click',e=>{const bt=e.target.closest('button'),d=bt?bt.dataset:{},id=bt?bt.id:'';if(!bt)return;
+ if(d.st){const i=SL.findIndex(s=>s.st===+d.st);if(i>=0){pos={s:i,u:0};render()}return}
+ if(id==='go'){tryStart();return}
+ let sel=true;
+ if(d.ty){S.type=d.ty;S.pt=true}else if(d.ff){S.ff=d.ff;S.pf=true}else if(d.nb)S.n=+d.nb;else if(d.dir!==undefined)S.dir=+d.dir;
+ else if(id==='lf')S.lfsr=!S.lfsr;else if(id==='rnd'){S.lfsr=false;const M=2**S.n;S.cust=shuf0([...Array(M).keys()]).slice(0,Math.max(3,Math.floor(M*.75))).map(x=>bin(x,S.n)).join(',')}
+ else if(d.od!==undefined){S.dir=+d.od;S.hist=S.hist.slice(0,S.k+1);sel=false}else return;
+ if(sel){SL=SL.slice(0,selIdx+1);fillJump()}render()});
+const shuf0=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
+$('#stage').addEventListener('change',e=>{if(e.target.id==='modN')S.N=Math.min(16,Math.max(2,+e.target.value||6));if(e.target.id==='cust'){S.cust=e.target.value;S.lfsr=false}});
+scaleSlide();addEventListener('resize',()=>{scaleSlide();try{fit()}catch(e){}});
+SL=baseSlides();selIdx=SL.findIndex(s=>s.key==='select');fillJump();render();
+</script></body></html>
