@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Digital Counters – Presentation</title>
 <style>
 :root{--bg:#0A0612;--card:#150D2B;--card2:#241A44;--tx:#F8F5FF;--mu:#B8ABDA;--ac:#A855F7;--ac2:#E0C7FF;--ok:#34D399;--clk:#FBBF24;--rst:#F43F5E;--wire:#C4B5FD;--bd:#3B2A6B;--glow:rgba(168,85,247,.5);--grad:linear-gradient(135deg,#7C3AED,#C026D3)}
@@ -25,7 +27,7 @@ header,#wrap,footer,#bar{position:relative;z-index:1}
 @keyframes sweep{from{transform:scaleX(0)}}
 @keyframes fall{from{transform:translateY(-110%)}to{transform:translateY(1000px)}}
 @keyframes bob{50%{transform:translateY(-8px)}}
-header,footer{display:flex;gap:10px;align-items:center;padding:7px 16px;font-size:16px;background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(10px);flex-wrap:wrap}header{border-bottom:1px solid var(--bd)}footer{border-top:1px solid var(--bd)}
+header,footer{display:flex;gap:10px;align-items:center;padding:7px 16px;font-size:16px;background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(10px);flex-wrap:wrap}header{border-bottom:1px solid var(--bd);padding-left:64px}footer{border-top:1px solid var(--bd)}
 header b{flex:1;font-size:17px}.mu{color:var(--mu)}#bar{height:6px;background:var(--card2)}#fill{height:100%;background:var(--grad);width:0;transition:.4s;box-shadow:0 0 14px var(--glow)}
 button,select,input{font:inherit;color:var(--tx);background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:4px 14px;transition:.2s}button{cursor:pointer}button:hover:not(:disabled){border-color:var(--ac);box-shadow:0 0 14px var(--glow)}
 button.on{background:var(--grad);color:#fff;border-color:transparent;font-weight:700;box-shadow:0 0 16px var(--glow)}
@@ -64,7 +66,15 @@ input[type=number],input#cust{font-size:1.3rem}input#cust{width:700px;max-width:
 .sub{position:relative;font-size:1.8rem;margin:0 0 6px}.hero .leds{position:relative;margin:10px 0 0}.hero .led i{width:70px;height:70px}.hero .nm2{position:relative;font:800 2.2rem ui-monospace,monospace;color:var(--ac2);margin-bottom:12px}
 .pres{position:relative;display:inline-flex;gap:26px;align-items:center;text-align:left;margin-top:22px;padding:20px 44px 20px 26px;border-radius:26px;background:color-mix(in srgb,var(--card) 88%,transparent);border:2px solid var(--ac);box-shadow:0 0 40px var(--glow);animation:bob 4s ease-in-out infinite}
 .av{width:110px;height:110px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:2.6rem;font-weight:800;color:#fff;box-shadow:0 0 26px var(--glow)}.by{font-size:1.1rem;color:var(--mu);letter-spacing:.2em;text-transform:uppercase}.pnm{font-size:2.3rem;font-weight:800}.prole{font-size:1.45rem}.pcol{font-size:1.45rem;color:var(--ac2);font-weight:700}
-</style></head><body><div class="orb o1"></div><div class="orb o2"></div>
+
+/* ===== Full-screen button (top-left corner) ===== */
+#fsTop{position:fixed;top:6px;left:12px;z-index:50;width:42px;height:42px;padding:0;display:grid;place-items:center;font-size:22px;line-height:1;border-radius:12px;background:color-mix(in srgb,var(--card2) 88%,transparent);backdrop-filter:blur(8px);border:1px solid var(--bd);box-shadow:0 0 14px var(--glow)}
+#fsTop:hover{border-color:var(--ac);box-shadow:0 0 22px var(--glow);transform:scale(1.06)}
+body.clean #fsTop{opacity:.35}body.clean #fsTop:hover{opacity:1}
+
+</style></head><body>
+<button id="fsTop" title="Full screen (F)" aria-label="Toggle full screen">⛶</button>
+<div class="orb o1"></div><div class="orb o2"></div>
 <header><b>⚙ Digital Counters · Design Presentation</b><select id="jump"></select></header>
 <main id="wrap"><div id="slide"><div id="stage"></div><div class="sf"><span>Kamaraj College of Engineering and Technology · Department of ECE</span><span id="sn"></span></div></div></main><div id="bar"><div id="fill"></div></div>
 <footer><button id="nx">Next ▶</button><button id="pv">◀ Previous</button><button id="all">Reveal all</button><button id="auto">▶ Auto</button><span class="mu" id="prog"></span><span style="flex:1"></span><span class="mu">→ / Space next · ← back · F full · T theme · H clean view</span><button id="th">Theme</button><button id="fs">Fullscreen</button></footer>
@@ -328,8 +338,30 @@ function stopAuto(){clearInterval(autoT);autoT=null;$('#auto').textContent='\u25
 $('#nx').onclick=next;$('#pv').onclick=prev;$('#all').onclick=()=>{pos.u=SL[pos.s].n-1;render()};
 $('#auto').onclick=()=>{if(autoT)stopAuto();else{$('#auto').textContent='\u23f8 Pause';autoT=setInterval(next,1500)}};
 $('#jump').onchange=e=>{pos={s:+e.target.value,u:0};render()};
-const theme=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light'},full=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+
+/* ---- Theme ---- */
+const theme=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light'};
+
+/* ---- Forced full screen (cross-browser) + top-left button ---- */
+const FSE=()=>document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement;
+const fsSupported=()=>{const el=document.documentElement;return !!(el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen)};
+function enterFS(){
+  const el=document.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
+  if(!rq)return Promise.resolve(false);
+  try{return Promise.resolve(rq.call(el,{navigationUI:'hide'})).then(()=>true).catch(()=>false)}catch(e){return Promise.resolve(false)}
+}
+function exitFS(){const d=document,ex=d.exitFullscreen||d.webkitExitFullscreen||d.msExitFullscreen;if(ex)ex.call(d)}
+const full=()=>FSE()?exitFS():enterFS();
+const fsTop=document.getElementById('fsTop');
+function syncFsBtn(){const on=!!FSE();fsTop.textContent=on?'\u2715':'\u26F6';fsTop.title=on?'Exit full screen (F)':'Full screen (F)';$('#fs').textContent=on?'Exit full screen':'Fullscreen'}
+['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(ev=>document.addEventListener(ev,()=>{
+  syncFsBtn();scaleSlide();try{fit()}catch(e){}
+}));
+fsTop.onclick=e=>{e.stopPropagation();full()};
 $('#th').onclick=theme;$('#fs').onclick=full;
+syncFsBtn();
+enterFS();  // works automatically in kiosk mode / installed app
+
 document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();
  if(e.key==='ArrowRight'||k===' '||e.key==='PageDown'){e.preventDefault();next()}else if(e.key==='ArrowLeft'||e.key==='PageUp')prev();else if(k==='f')full();else if(k==='t')theme();else if(k==='h')document.body.classList.toggle('clean')});
 $('#stage').addEventListener('click',e=>{const bt=e.target.closest('button'),d=bt?bt.dataset:{},id=bt?bt.id:'';if(!bt)return;
